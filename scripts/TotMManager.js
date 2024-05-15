@@ -27,7 +27,54 @@ Hooks.once("init", async () => {  // Declare the function as async
     } catch (error) {
         console.error('Error loading templates:', error);
     }
+
+    // Register keybinding
+    game.keybindings.register('totmmanager', 'openManager', {
+        name: 'Open TotM Manager',
+        hint: 'Opens the Theatre of the Mind Manager window.',
+        editable: [{key: 'KeyT', modifiers: [KeyboardManager.MODIFIER_KEYS.CONTROL]}],  // Ctrl + T
+        onDown: () => {
+            // Check if the TotMManager is already opened; if not, create and render
+            if (!window.TotMManagerInstance || window.TotMManagerInstance.rendered === false) {
+                const tiles = getFilteredTiles(); // Make sure you define how to retrieve the tiles
+                window.TotMManagerInstance = new TotMManager(tiles);
+                window.TotMManagerInstance.render(true);
+            } else {
+                window.TotMManagerInstance.bringToTop(); // If already open, bring to front
+            }
+            return true; // Indicates the keybinding was handled
+        },
+        restricted: true // Restrict this keybinding to GM or make false for all players
+    });
 });
+
+Hooks.once('ready', async () => {
+    if (game.modules.get('tagger')?.active) {  // Check if 'Tagger' module is active
+        await setupTotMManager();
+        console.log("TotM Manager Script loaded and setup completed successfully.");
+    } else {
+        console.warn("Required module 'Tagger' is not active.");
+    }
+});
+
+// Filter and return tiles
+function getFilteredTiles() {
+    const tiles = canvas.tiles.placeables.filter(tile => {
+        try {
+            const tags = Tagger.getTags(tile);
+            return tags.includes('scene') || tags.some(tag => /^speaker\d+$/.test(tag));
+        } catch (error) {
+            console.error("Error getting tags for tile:", tile, error);
+            return false;
+        }
+    });
+
+    if (tiles.length === 0) {
+        console.warn("No tiles found with specified tags.");
+        return [];
+    }
+    return tiles;
+}
 
 // Render button
 Hooks.on('getSceneControlButtons', function(controls) {
@@ -38,8 +85,13 @@ Hooks.on('getSceneControlButtons', function(controls) {
             title: "Theatre of the Mind Manager",
             icon: "fas fa-mask",
             onClick: () => {
-                const totmManager = new TotMManager();
-                totmManager.render(true);
+                const tiles = getFilteredTiles(); // Get the filtered tiles right when the button is clicked
+                if (tiles.length > 0) {
+                    const totmManager = new TotMManager(tiles);
+                    totmManager.render(true);
+                } else {
+                    ui.notifications.warn("No valid tiles found for TotM Manager.");
+                }
             },
             button: true
         });
@@ -65,14 +117,21 @@ class TotMManager extends Application {
             'speaker2': 'speakerFrame2',
             'scene'   : 'sceneFrame'
         };
-        // this.currentTileIndex = this.findFirstTileWithImages(); // Find the first tile with image
         this.currentTileIndex = this.findFirstSceneTileIndex();
         this.currentImageIndex = 0; // Initialize with the first image index
 
         if (this.currentTileIndex !== -1) {
-            this.activateTile(this.tiles[this.currentTileIndex]); // Activate the tile with 'scene' tag
-            this.loadTileImages(this.tiles[this.currentTileIndex]);  // Load images for the first tile with images
+            this.currentTile = this.tiles[this.currentTileIndex];
+            this.activateTile(this.currentTile);  // Make sure activateTile is called
+            this.loadTileImages(this.currentTile);
+        } else {
+            console.error("No scene tile found or incorrect tiles data.");
         }
+
+        // if (this.currentTileIndex !== -1) {
+        //     this.activateTile(this.tiles[this.currentTileIndex]); // Activate the tile with 'scene' tag
+        //     this.loadTileImages(this.tiles[this.currentTileIndex]);  // Load images for the first tile with images
+        // }
     }
 
     findFirstSceneTileIndex() {
@@ -94,17 +153,6 @@ class TotMManager extends Application {
         // Check if the tile has the 'scene' tag
         const tags = Tagger.getTags(tile);
         return tags.includes('scene');
-    }
-
-    findFirstTileWithImages() {
-        // Loop through the tiles to find the first one with images
-        for (let i = 0; i < this.tiles.length; i++) {
-            let tile = this.tiles[i];
-            if (tile.document && tile.document.getFlag('core', 'imagePaths') && tile.document.getFlag('core', 'imagePaths').length > 0) {
-                return i; // Return the index of the first tile with images
-            }
-        }
-        return -1; // Return -1 if no tile with images is found
     }
 
     //// Lifecycle Methods
@@ -996,9 +1044,11 @@ class TotMManager extends Application {
     }
 }
 
+// Make TotM Manager available globally
+window.TotMManager = TotMManager;
+
 // Setup function that encapsulates instantiation and event listener configuration
 async function setupTotMManager() {
-    canvas.tiles.activate();
 
     const matchesTags = tile => {
         try {
@@ -1025,12 +1075,6 @@ async function setupTotMManager() {
         console.warn("No tiles found with specified tags.");
         return;  // Exit if no matching tiles are found
     }
-
-    console.log("Creating TotMManager with tiles:", tiles);
-    const imagePathEditor = new TotMManager(tiles, {});
-    imagePathEditor.initialize();  // Explicit initialization call
 }
 
-// Call setup function on appropriate event or system initialization
-setupTotMManager();
 console.log("TotM Manager Script loaded successfully.");
