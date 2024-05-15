@@ -10,13 +10,11 @@
         "requires": [
             {
                 "id": "tagger",
-                "type": "module",
-                "compatibility": {}
+                "type": "module"
             },
             {
                 "id": "tokenmagic",
-                "type": "module",
-                "compatibility": {}
+                "type": "module"
             }
         ]
     },
@@ -26,7 +24,7 @@
     "download": "https://github.com/LichFactory-Games/TotM-Manager/releases/download/v0.5-beta/TotM-Manager-v05-beta.zip",
     "authors": [
         {
-            "name": "Colin McLear"
+            "name": "LichLife"
         }
     ],
     "esmodules": [
@@ -36,8 +34,11 @@
         {
             "name": "totmm-scene-template",
             "label": "TotM Manager Scene Template",
-            "path": "packs/totmm-scene-template",
-            "type": "Scene"
+            "path": "packs/totmm-scene-template.db",
+            "type": "Scene",
+            "ownership": {
+                "default": "OBSERVER"
+            }
         }
     ]
 }
