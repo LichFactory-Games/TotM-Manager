@@ -1,0 +1,44 @@
+{
+    "id": "totmmanager",
+    "title": "TotmManager",
+    "version": "0.5.0",
+    "compatibility": {
+        "minimum": "10",
+        "verified": "11"
+    },
+    "relationships": {
+        "requires": [
+            {
+                "id": "tagger",
+                "type": "module",
+                "compatibility": {}
+            },
+            {
+                "id": "tokenmagic",
+                "type": "module",
+                "compatibility": {}
+            }
+        ]
+    },
+    "description": "A module to manage visual and thematic elements for theatre of the mind style play in Foundry VTT.",
+    "authors": [
+        {
+            "name": "Colin McLear"
+        }
+    ],
+    "esmodules": [
+        "scripts/TotMManager.js"
+    ],
+    "packs": [
+        {
+            "name": "totmm-scene-template",
+            "label": "TotM Manager Scene Template",
+            "path": "packs/totmm-scene-template",
+            "type": "Scene",
+            "ownership": {
+                "PLAYER": "OBSERVER",
+                "ASSISTANT": "OWNER"
+            }
+        }
+    ]
+}
