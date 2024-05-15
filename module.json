@@ -21,6 +21,8 @@
         ]
     },
     "description": "A module to manage visual and thematic elements for theatre of the mind style play in Foundry VTT.",
+    "manifest": "https://github.com/LichFactory-Games/TotM-Manager/blob/main/module.json",
+
     "authors": [
         {
             "name": "Colin McLear"
