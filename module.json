@@ -1,0 +1,32 @@
+{
+    "name": "theatre-of-the-mind-manager",
+    "title": "Theatre of the Mind Manager",
+    "description": "A module to manage visual and thematic elements for theatre of the mind style play in Foundry VTT.",
+    "version": "1.0",
+    "author": "Your Name",
+    "compatibleCoreVersion": "11.x",
+    "minimumCoreVersion": "11.0",
+    "scripts": ["scripts/TotMManager.js"],
+    "styles": ["styles/totmm.css"],
+    "manifest": "https://yourwebsite.com/TotMM/module.json",
+    "download": "https://yourwebsite.com/TotMM/TotMM.zip",
+    "url": "https://yourwebsite.com",
+    "readme": "https://yourwebsite.com/TotMM/README.md",
+    "changelog": "https://yourwebsite.com/TotMM/CHANGELOG.md",
+    "license": "https://yourwebsite.com/TotMM/LICENSE.txt",
+    "languages": [
+        {
+            "lang": "en",
+            "name": "English",
+            "path": "lang/en.json"
+        }
+    ],
+    "packs": [
+        {
+            "name": "totmm-packs",
+            "label": "TotMM Packs",
+            "path": "./packs/totmm-packs.db",
+            "entity": "Item"
+        }
+    ]
+}
