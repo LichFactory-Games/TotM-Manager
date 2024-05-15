@@ -564,43 +564,39 @@ class TotMManager extends Application {
 
     // Method to apply glow effects
     async applyGlowEffect(tile, imageIndex) {
-        // Retrieve the tag from the tile using Tagger or similar method
+        const imagePath = this.imagePaths[imageIndex];
+        if (!imagePath.color) {
+            console.warn("No color set for image at index", imageIndex, "; skipping glow effects.");
+            return;
+        }
+
         const tags = Tagger.getTags(tile);
         if (!tags.length) {
             console.error("No tags found for the provided tile");
             return;
         }
 
-        // Assuming the first tag is what relates to the mapping
         const activeTileTag = tags[0];
         const frameTag = this.tagMapping[activeTileTag];
         if (!frameTag) {
             console.error(`No frame tag found for tag ${activeTileTag}`);
-            ui.notifications.error(`No frame associated with tag: ${activeTileTag}`);
             return;
         }
-        console.warn(`Active tile Glow Tag ${activeTileTag}`);
+
         const frameTile = this.findTileByTag(frameTag);
         if (!frameTile) {
             console.error(`No tile found with the tag ${frameTag}`);
-            ui.notifications.error(`No tile found with tag: ${frameTag}`);
             return;
         }
-        console.warn(`Active tile Glow Tag ${frameTag}`);
 
-        // Now apply the glow effect to the frame tile
-        let baseColorHex = this.imagePaths[imageIndex].color;
+        let baseColorHex = imagePath.color; // Use the color defined in imagePath
         let baseColor = this.hexToDecimal(baseColorHex); // Convert base color to decimal
         let lighterColor = this.adjustColor(baseColorHex, 40); // Increase RGB values by 40
         let darkerColor = this.adjustColor(baseColorHex, -40); // Decrease RGB values by 40
 
-        console.log(`Color value is`, baseColor);
-        console.log(`Color value is`, lighterColor);
-        console.log(`Color value is`, darkerColor);
-
         let params = [{
             filterType: "glow",
-            filterId: "totmGlow", // Ensure unique ID for each type of glow
+            filterId: "totmGlow",
             outerStrength: 5,
             innerStrength: 0,
             color: baseColor,
@@ -617,14 +613,12 @@ class TotMManager extends Application {
             }
         }];
 
-        // Apply the glow using Token Magic FX
-        if (TokenMagic) {
+        if (game.modules.get('tokenmagic')?.active) {
             await TokenMagic.deleteFilters(frameTile);
-            console.log("Applying filters with parameters:", JSON.stringify(params));
-            await TokenMagic.addFilters(frameTile, params); // Apply new glow
-            console.warn("Filter Added !!!");
-            console.log("Filters applied to tile", frameTile.id);
-
+            await TokenMagic.addFilters(frameTile, params);
+            console.log("Glow effect applied to tile", frameTile.id);
+        } else {
+            console.warn("TokenMagic module is not active; skipping glow effects.");
         }
     }
 
