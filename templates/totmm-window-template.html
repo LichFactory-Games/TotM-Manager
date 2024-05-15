@@ -1,0 +1,86 @@
+ <style>
+ .active-button {
+     background-color: #4CAF50; /* Green background for active state */
+     color: white; /* White text for better visibility */
+ }
+
+ .color-picker {
+     -webkit-appearance: none;
+     -moz-appearance: none;
+     appearance: none;
+     background: transparent;
+     border: none;
+     width: 25px;
+     height: 25px;
+     border-radius: 3px;
+     cursor: pointer;
+ }
+
+ .color-picker::-webkit-color-swatch-wrapper {
+     padding: 0;
+ }
+ .color-picker::-webkit-color-swatch {
+     border: none;
+ }
+
+</style>
+
+
+<form>
+
+    <!-- File management controls with active state indication -->
+    <div class="form-group" style="margin-top: 10px;">
+        <button type="button" class="btnSpeaker1 {{ifThen (eq currentActiveTag 'speaker1') 'btnSpeaker1 active-button' 'btnSpeaker1'}}">Speaker 1</button>
+        <button type="button" class="btnSpeaker2 {{ifThen (eq currentActiveTag 'speaker2') 'btnSpeaker2 active-button' 'btnSpeaker2'}}">Speaker 2</button>
+        <button type="button" class="btnScene {{ifThen (eq currentActiveTag 'scene') 'btnScene active-button' 'btnScene'}}">Scene</button>
+    </div>
+
+    <hr style="margin: 10px 0; border-top: 1px solid var(--color-border-light-primary);
+               border-bottom: 1px solid var(--color-border-light-primary);">
+
+    <!-- Image navigation controls -->
+    <div class="form-group" style="margin-top: 10px;">
+        <button type="button" class="prev-image" style="margin-right: 5px;">Prev Image</button>
+        <button type="button" class="next-image">Next Image</button>
+    </div>
+
+    <!-- Image list and editing controls -->
+    <div class="form-group" style="overflow-y: auto;">
+        {{#unless isEmpty}}
+        <ul id="image-path-list" class="path-list" style="list-style: none; padding: 0;">
+            {{#each paths as |path index|}}
+            <li class="form-field" draggable="true" data-index="{{index}}" style="display: flex; align-items: center; cursor: grab; margin-bottom: 10px;">
+                <span class="handle" style="cursor: move; margin-right: 5px;">&#9776;</span>
+                <span class="path-field" data-index="{{index}}" data-img="{{path.img}}" style="flex-grow: 1; margin-right: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; display: inline-block; line-height: 25px; height: 25px; align-items: center;">
+                    {{path.displayImg}}
+                </span>
+                <img id="preview-img-{{index}}" src="{{path.img}}" style="display: none; position: absolute; right: 100%; width: auto; max-width: 300px; height: auto;" alt="Image preview">
+                <input type="text" id="tags-input-{{index}}" name="tags{{index}}" value="{{path.tags}}" placeholder="Enter tags, comma-separated" class="tag-field" style="max-width: 150px; flex-grow: 1; margin-right: 10px; padding: 0 10px; height: 25px; line-height: 25px; display: inline-block; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">
+                <button type="button" class="delete-path" data-index="{{index}}" style="display: flex; align-items: center; justify-content: center; width: 25px; height: 25px; font-size: 18px; padding: 5; margin-right: 5px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">−</button>
+                <button type="button" class="set-image-button" data-index="{{index}}" style="display: flex; align-items: center; justify-content: center; width: 25px; height: 25px; font-size: 18px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; padding: 3; padding-top: 3px; margin-right: 5px;">*</button>
+                <input type="color" class="color-picker" value="{{this.color}}" data-index="{{@index}}" style="display: flex; background: {{this.color}}; align-items: center; justify-content: center; width: 25px; height: 25px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; padding: 3; padding-top: 3px;">
+            </li>
+            {{/each}}
+        </ul>
+        {{else}}
+        <p>No tile or image paths set.</p>
+        {{/unless}}
+    </div>
+
+    <hr style="margin-top: -10px; border-top: 1px solid var(--color-border-light-primary);
+               border-bottom: 1px solid var(--color-border-light-primary);">
+
+    <div class="form-group" style="margin-top: 10px;">
+        <button type="button" class="add-path">Add Image</button>
+        <button type="button" class="new-directory">Select Image Directory</button>
+    </div>
+
+    <div class="form-group" style="margin-top: 10px;">
+        <button type="button" class="save-paths" style="color: green">Save Changes</button>
+        <button type="button" class="delete-all-paths" style="color: red">Delete All Images</button>
+    </div>
+    <div class="form-group" style="margin-top: 10px;">
+                <button type="button" class="delete-filter" style="color: #8a6700">Delete Glow Filter</button>
+                <button type="button" class="delete-all-filters" style="color: maroon">Delete All Filters</button>
+    </div>
+</form>
