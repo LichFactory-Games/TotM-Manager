@@ -39,8 +39,7 @@
             "path": "packs/totmm-scene-template",
             "type": "Scene",
             "ownership": {
-                "PLAYER": "OBSERVER",
-                "ASSISTANT": "OWNER"
+                "default": "observer"
             }
         }
     ]
