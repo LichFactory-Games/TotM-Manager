@@ -1,4 +1,3 @@
-// v. 0.5
 // This module allows the manipulation of images
 // lights and other attachments to a particular tile (when clicked)
 // Import necessary Foundry modules if required
