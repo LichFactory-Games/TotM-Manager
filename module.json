@@ -29,13 +29,5 @@
     ],
     "esmodules": [
         "scripts/TotMManager.js"
-    ],
-    "packs": [
-        {
-            "name": "totmm-scene-template",
-            "label": "TotM Manager Scene Template",
-            "path": "packs/totmm-scene-template.db",
-            "type": "Scene"
-        }
     ]
 }
