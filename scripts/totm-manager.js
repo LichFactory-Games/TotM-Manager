@@ -8,39 +8,39 @@
 
 console.log("Testing script load for TotM Manager");
 
-const moduleId = 'totmmanager';
+const moduleId = 'totm-manager';
 
 Hooks.once("init", async () => {  // Declare the function as async
     console.log("Foundry modules initialized.");
 
     if (!game.modules.get(moduleId)?.active) {
-        console.error("TOTM Manager module is not activated!");
+        console.error("TotM Manager module is not activated!");
         return;
     }
 
-    console.log(`Initializing TOTM Manager.`);
+    console.log(`Initializing TotM Manager.`);
 
     try {
         // Load templates
-        await loadTemplates(["modules/totmmanager/templates/totmm-window-template.hbs"]);
+        await loadTemplates(["modules/totm-manager/templates/totmm-window-template.hbs"]);
         console.log('Templates loaded successfully.');
     } catch (error) {
         console.error('Error loading templates:', error);
     }
 
     // Register keybinding
-    game.keybindings.register('totmmanager', 'openManager', {
+    game.keybindings.register('totm-manager', 'openManager', {
         name: 'Open TotM Manager',
         hint: 'Opens the Theatre of the Mind Manager window.',
         editable: [{key: 'KeyT', modifiers: [KeyboardManager.MODIFIER_KEYS.CONTROL]}],  // Ctrl + T
         onDown: () => {
-            // Check if the TotMManager is already opened; if not, create and render
-            if (!window.TotMManagerInstance || window.TotMManagerInstance.rendered === false) {
+            // Check if the totmManager is already opened; if not, create and render
+            if (!window.totmManagerInstance || window.totmManagerInstance.rendered === false) {
                 const tiles = getFilteredTiles(); // Make sure you define how to retrieve the tiles
-                window.TotMManagerInstance = new TotMManager(tiles);
-                window.TotMManagerInstance.render(true);
+                window.totmManagerInstance = new totmManager(tiles);
+                window.totmManagerInstance.render(true);
             } else {
-                window.TotMManagerInstance.bringToTop(); // If already open, bring to front
+                window.totmManagerInstance.bringToTop(); // If already open, bring to front
             }
             return true; // Indicates the keybinding was handled
         },
@@ -50,7 +50,7 @@ Hooks.once("init", async () => {  // Declare the function as async
 
 Hooks.once('ready', async () => {
     if (game.modules.get('tagger')?.active) {  // Check if 'Tagger' module is active
-        await setupTotMManager();
+        await setuptotmManager();
         console.log("TotM Manager Script loaded and setup completed successfully.");
     } else {
         console.warn("Required module 'Tagger' is not active.");
@@ -87,7 +87,7 @@ Hooks.on('getSceneControlButtons', function(controls) {
             onClick: () => {
                 const tiles = getFilteredTiles(); // Get the filtered tiles right when the button is clicked
                 if (tiles.length > 0) {
-                    const totmManager = new TotMManager(tiles);
+                    const totmManager = new totmManager(tiles);
                     totmManager.render(true);
                 } else {
                     ui.notifications.warn("No valid tiles found for TotM Manager.");
@@ -99,13 +99,13 @@ Hooks.on('getSceneControlButtons', function(controls) {
 });
 
 
-class TotMManager extends Application {
+class totmManager extends Application {
     constructor(tiles, options = {}) {
         super(options);
-        console.log("Initializing TotMManager with tiles:", tiles);
+        console.log("Initializing totmManager with tiles:", tiles);
         this.imagePaths = [];
         this.tiles = tiles;   // Ensure this.tiles is always an array
-        console.log("TotMManager initialized with tiles:", this.tiles);
+        console.log("totmManager initialized with tiles:", this.tiles);
         this.currentActiveTag = ''; // Initialize with an empty string
 
         // Bind the method to ensure 'this' refers to the class instance
@@ -158,7 +158,7 @@ class TotMManager extends Application {
     //// Lifecycle Methods
 
     async initialize() {
-        console.log("Initializing TotMManager with tiles:", this.tiles.length);
+        console.log("Initializing totmManager with tiles:", this.tiles.length);
         if (!this.tiles.length || this.currentTileIndex === -1) {
             ui.notifications.warn("No tiles found with specified tags.");
             return;
@@ -1034,9 +1034,9 @@ class TotMManager extends Application {
 
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            title: "TotM Dashboard",
+            title: "TotM Manager",
             id: moduleId,
-            template: "modules/totmmanager/templates/totmm-window-template.hbs", // Ensure this path is correct
+            template: "modules/totm-manager/templates/totmm-window-template.hbs", // Ensure this path is correct
             resizable: true,
             width: 500,
             closeOnSubmit: false
@@ -1045,10 +1045,10 @@ class TotMManager extends Application {
 }
 
 // Make TotM Manager available globally
-window.TotMManager = TotMManager;
+window.totmManager = totmManager;
 
 // Setup function that encapsulates instantiation and event listener configuration
-async function setupTotMManager() {
+async function setuptotmManager() {
 
     const matchesTags = tile => {
         try {

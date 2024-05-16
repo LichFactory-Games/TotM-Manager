@@ -1,6 +1,6 @@
 {
-    "id": "totmmanager",
-    "title": "TotmManager",
+    "id": "totm-manager",
+    "title": "TotM Manager",
     "version": "0.5.0",
     "compatibility": {
         "minimum": "10",
@@ -28,6 +28,6 @@
         }
     ],
     "esmodules": [
-        "scripts/TotMManager.js"
+        "scripts/totm-manager.js"
     ]
 }
