@@ -1,33 +1,47 @@
 {
-    "id": "totm-manager",
-    "title": "TotM Manager",
-    "version": "0.5.0",
-    "compatibility": {
-        "minimum": "10",
-        "verified": "11"
-    },
-    "relationships": {
-        "requires": [
-            {
-                "id": "tagger",
-                "type": "module"
-            },
-            {
-                "id": "tokenmagic",
-                "type": "module"
-            }
-        ]
-    },
-    "description": "A module to manage visual and thematic elements for theatre of the mind style play in Foundry VTT.",
-    "url": "https://github.com/LichFactory-Games/TotM-Manager",
-    "manifest": "https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/main/module.json",
-    "download": "https://github.com/LichFactory-Games/TotM-Manager/releases/download/v0.5-beta/totm-manager.zip",
-    "authors": [
-        {
-            "name": "LichLife"
-        }
-    ],
-    "esmodules": [
-        "scripts/totm-manager.js"
+  "id": "totm-manager",
+  "title": "TotM Manager",
+  "version": "0.5.0",
+  "compatibility": {
+    "minimum": "10",
+    "verified": "11"
+  },
+  "relationships": {
+    "requires": [
+      {
+        "id": "tagger",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "tokenmagic",
+        "type": "module",
+        "compatibility": {}
+      }
     ]
+  },
+  "description": "A module to manage visual and thematic elements for theatre of the mind style play in Foundry VTT.",
+  "url": "https://github.com/LichFactory-Games/TotM-Manager",
+  "manifest": "https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/main/module.json",
+  "download": "https://github.com/LichFactory-Games/TotM-Manager/releases/download/v0.5-beta/TotM-Manager-v05-beta.zip",
+  "authors": [
+    {
+      "name": "LichLife"
+    }
+  ],
+  "esmodules": [
+    "scripts/totm-manager.js"
+  ],
+  "packs": [
+    {
+      "name": "totm-tile-template",
+      "label": "TotM Tile Template",
+      "path": "packs/totm-tile-template",
+      "type": "Scene",
+      "ownership": {
+        "PLAYER": "OBSERVER",
+        "ASSISTANT": "OWNER"
+      }
+    }
+  ]
 }
