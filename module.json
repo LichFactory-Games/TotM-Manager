@@ -35,10 +35,7 @@
             "name": "totmm-scene-template",
             "label": "TotM Manager Scene Template",
             "path": "packs/totmm-scene-template.db",
-            "type": "Scene",
-            "ownership": {
-                "default": "OBSERVER"
-            }
+            "type": "Scene"
         }
     ]
 }
