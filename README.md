@@ -11,7 +11,9 @@ A sample template for use with the TotM Manager is included in a compendium. But
 
 Using the Tagger module, you can tag lights and sounds to run with particular images, so that when you switch to those images the lighting changes, or sounds are played (or both). This can effectively allow you to change the scenery without changing the Foundry scene.
 
-All tags and image data are stored in the metadata of the scene tiles, so nothing is altered in your actual files. Here you can see an example of a scene set using three tiles and the TotM Manager.
+All tags and image data are stored in the metadata of the scene tiles, so nothing is altered in your actual files. To add the module in Foundry just go to the [releases](https://github.com/LichFactory-Games/TotM-Manager/releases) tab and copy the link for the `module.json` into the Foundry "Manifest URL" field in the "Install Module" window.
+
+Here you can see an example of a scene set using three tiles and the TotM Manager.
 
 ![](./screenshots/totmm-screenshot.png)
 
