@@ -8,7 +8,7 @@ RELEASE_DIR="../release"
 MAIN_BRANCH="main"
 REPO_URL="https://github.com/LichFactory-Games/TotM-Manager"
 DOWNLOAD_BASE_URL="$REPO_URL/releases/download"
-EXCLUDE_FILES=("screenshots" "totmm-release.sh" ".git" ".gitignore")
+EXCLUDE_FILES=("screenshots" "totmm-release.sh" ".git" ".gitignore" "totmm-release.sh")
 CURRENT_DIR=$(pwd)
 
 
