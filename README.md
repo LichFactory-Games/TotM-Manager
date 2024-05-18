@@ -43,11 +43,16 @@ You may also delete the image by pressing the `-` button, activate the image by 
 
 ## Feature Roadmap
 
-The following features are ones I would like to add at some point. 
+The following features are ones I would consider adding at some point. 
 
 - [ ] Allow fine-grained control over color filter settings 
 - [ ] Allow setting of base name tags for frames, speakers, and scenery
 - [ ] Allow for other tile setups and more than two speakers or one scene
+- [ ] Search function for images by name or tag. Helpful in cases where many images are connected with a tile. 
+- [ ] Video file support.
+- [ ] Support for more TokenMagic FX filters than glow (and possibly adding FXMaster support in addition to Token Magic). 
+- [ ] Ability to target and edit a text drawing for labeling of the scene/NPCs.
+- [ ] Finer controls for mass adding or deleting images (e.g. ability to select "Avatar" images from a Tokenizer folder and exclude all "Token" images).
 
 ## Thanks
 
