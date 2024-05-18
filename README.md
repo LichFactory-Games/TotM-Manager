@@ -25,8 +25,7 @@ Here you can see an example of a scene set using three tiles and the TotM Manage
 
 ## How To Use TotM Manager
 
-The manager is designed to work with tiles that have been tagged with either "scene" or "speaker1" or "speaker2". In the case of the template provided, speaker1 and speaker2 are on the left and scene is to their right, taking up most of the rest of the canvas. As the tags indicate, the speaker tiles are intended to have images of NPCs, and the 
-scene tile to host various images of scenery. The images on each tile may be controlled individually from the TotM Manager window.
+The manager is designed to work with tiles that have been tagged with either "scene" or "speaker1" or "speaker2". In the case of the template provided, speaker1 and speaker2 are on the left and scene is to their right, taking up most of the rest of the canvas. There are also "frame" tiles (the images are included in the module). You can change these frames to other images or remove them altogether. As the tags names indicate, the speaker tiles are intended to have images of NPCs, and the scene tile to host various images of scenery. The images on each tile may be controlled individually from the TotM Manager window. The frame tiles are for framing the images and should be set to be on top of the image tiles (make sure their Z axis is higher than the z-axis of the image tiles). 
 
 ![](./screenshots/totmm-screenshot-buttons.png)
 
