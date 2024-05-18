@@ -13,6 +13,8 @@ Using the Tagger module, you can tag lights and sounds to run with particular im
 
 All tags and image data are stored in the metadata of the scene tiles, so nothing is altered in your actual files. To add the module in Foundry just go to the [releases](https://github.com/LichFactory-Games/TotM-Manager/releases) tab and copy the link for the `module.json` into the Foundry "Manifest URL" field in the "Install Module" window.
 
+Also be sure to import the TotM Template from the compendium. It comes with three tiles, and "frames" for those image tiles, pretagged and ready for images. 
+
 As mentioned above, the module has two dependencies for proper functioning -- Tagger and Token Magic. 
 
 While manipulating images on tiles is something that can be done effectively with a package like [Monk's Active Tile Triggers](https://github.com/ironmonk88/monks-active-tiles), this module is specifically intended for theatre of the mind use. It also allows more flexibility to quickly add images or effects than is allowed with Monk's module. 
