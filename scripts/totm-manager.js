@@ -6,97 +6,9 @@
 // Define moduleId globally if not already defined
 
 console.log("Testing script load for TotM Manager");
-
+// Global variable to keep track of the totmManager instance
+let totmManagerInstance = null;
 const moduleId = 'totm-manager';
-
-Hooks.once("init", async () => {  // Declare the function as async
-    console.log("Foundry modules initialized.");
-
-    if (!game.modules.get(moduleId)?.active) {
-        console.error("TotM Manager module is not activated!");
-        return;
-    }
-
-    console.log(`Initializing TotM Manager.`);
-
-    try {
-        // Load templates
-        await loadTemplates(["modules/totm-manager/templates/totmm-window-template.hbs"]);
-        console.log('Templates loaded successfully.');
-    } catch (error) {
-        console.error('Error loading templates:', error);
-    }
-
-    // Register keybinding
-    game.keybindings.register('totm-manager', 'openManager', {
-        name: 'Open TotM Manager',
-        hint: 'Opens the Theatre of the Mind Manager window.',
-        editable: [{key: 'KeyT', modifiers: [KeyboardManager.MODIFIER_KEYS.CONTROL]}],  // Ctrl + T
-        onDown: () => {
-            // Check if the totmManager is already opened; if not, create and render
-            if (!window.totmManagerInstance || window.totmManagerInstance.rendered === false) {
-                const tiles = getFilteredTiles(); // Make sure you define how to retrieve the tiles
-                window.totmManagerInstance = new totmManager(tiles);
-                window.totmManagerInstance.render(true);
-            } else {
-                window.totmManagerInstance.bringToTop(); // If already open, bring to front
-            }
-            return true; // Indicates the keybinding was handled
-        },
-        restricted: true // Restrict this keybinding to GM or make false for all players
-    });
-});
-
-Hooks.once('ready', async () => {
-    if (game.modules.get('tagger')?.active) {  // Check if 'Tagger' module is active
-        await setuptotmManager();
-        console.log("TotM Manager Script loaded and setup completed successfully.");
-    } else {
-        console.warn("Required module 'Tagger' is not active.");
-    }
-});
-
-// Filter and return tiles
-function getFilteredTiles() {
-    const tiles = canvas.tiles.placeables.filter(tile => {
-        try {
-            const tags = Tagger.getTags(tile);
-            return tags.includes('scene') || tags.some(tag => /^speaker\d+$/.test(tag));
-        } catch (error) {
-            console.error("Error getting tags for tile:", tile, error);
-            return false;
-        }
-    });
-
-    if (tiles.length === 0) {
-        console.warn("No tiles found with specified tags.");
-        return [];
-    }
-    return tiles;
-}
-
-// Render button
-Hooks.on('getSceneControlButtons', function(controls) {
-    let tileControl = controls.find(c => c.name === "tiles");
-    if (tileControl) {
-        tileControl.tools.push({
-            name: "totmManager",
-            title: "Theatre of the Mind Manager",
-            icon: "fas fa-mask",
-            onClick: () => {
-                const tiles = getFilteredTiles(); // Get the filtered tiles right when the button is clicked
-                if (tiles.length > 0) {
-                    const totmManager = new totmManager(tiles);
-                    totmManager.render(true);
-                } else {
-                    ui.notifications.warn("No valid tiles found for TotM Manager.");
-                }
-            },
-            button: true
-        });
-    }
-});
-
 
 class totmManager extends Application {
     constructor(tiles, options = {}) {
@@ -126,11 +38,6 @@ class totmManager extends Application {
         } else {
             console.error("No scene tile found or incorrect tiles data.");
         }
-
-        // if (this.currentTileIndex !== -1) {
-        //     this.activateTile(this.tiles[this.currentTileIndex]); // Activate the tile with 'scene' tag
-        //     this.loadTileImages(this.tiles[this.currentTileIndex]);  // Load images for the first tile with images
-        // }
     }
 
     findFirstSceneTileIndex() {
@@ -1043,8 +950,7 @@ class totmManager extends Application {
     }
 }
 
-// Make TotM Manager available globally
-window.totmManager = totmManager;
+//// Setup & Initialization
 
 // Setup function that encapsulates instantiation and event listener configuration
 async function setuptotmManager() {
@@ -1076,4 +982,98 @@ async function setuptotmManager() {
     }
 }
 
+// Make TotM Manager available globally
+window.totmManager = totmManager;
+
 console.log("TotM Manager Script loaded successfully.");
+
+
+Hooks.once("init", async () => {  // Declare the function as async
+    console.log("Foundry modules initialized.");
+
+    if (!game.modules.get(moduleId)?.active) {
+        console.error("TotM Manager module is not activated!");
+        return;
+    }
+
+    console.log(`Initializing TotM Manager.`);
+
+    try {
+        // Load templates
+        await loadTemplates(["modules/totm-manager/templates/totmm-window-template.hbs"]);
+        console.log('Templates loaded successfully.');
+    } catch (error) {
+        console.error('Error loading templates:', error);
+    }
+
+    // Register keybinding
+    game.keybindings.register('totm-manager', 'openManager', {
+        name: 'Open TotM Manager',
+        hint: 'Opens the Theatre of the Mind Manager window.',
+        editable: [{key: 'KeyT', modifiers: [KeyboardManager.MODIFIER_KEYS.CONTROL]}],  // Ctrl + T
+        onDown: () => {
+            // Check if the totmManager instance already exists
+            if (!totmManagerInstance || totmManagerInstance.rendered === false) {
+                const tiles = getFilteredTiles(); // Make sure you define how to retrieve the tiles
+                totmManagerInstance = new totmManager(tiles);
+                totmManagerInstance.render(true);
+            } else {
+                totmManagerInstance.bringToTop(); // If already open, bring to front
+            }
+            return true; // Indicates the keybinding was handled
+        },
+        restricted: true // Restrict this keybinding to GM or make false for all players
+    });
+
+});
+
+Hooks.once('ready', async () => {
+    if (game.modules.get('tagger')?.active) {  // Check if 'Tagger' module is active
+        await setuptotmManager();
+        console.log("TotM Manager Script loaded and setup completed successfully.");
+    } else {
+        console.warn("Required module 'Tagger' is not active.");
+    }
+});
+
+// Filter and return tiles
+function getFilteredTiles() {
+    const tiles = canvas.tiles.placeables.filter(tile => {
+        try {
+            const tags = Tagger.getTags(tile);
+            return tags.includes('scene') || tags.some(tag => /^speaker\d+$/.test(tag));
+        } catch (error) {
+            console.error("Error getting tags for tile:", tile, error);
+            return false;
+        }
+    });
+
+    if (tiles.length === 0) {
+        console.warn("No tiles found with specified tags.");
+        return [];
+    }
+    return tiles;
+}
+
+// Render button
+Hooks.on('getSceneControlButtons', function(controls) {
+    let tileControl = controls.find(c => c.name === "tiles");
+    if (tileControl) {
+        tileControl.tools.push({
+            name: "totmManager",
+            title: "Theatre of the Mind Manager",
+            icon: "fas fa-mask",
+            onClick: () => {
+                // Check if the totmManager instance already exists
+                if (!totmManagerInstance || totmManagerInstance.rendered === false) {
+                    const tiles = getFilteredTiles(); // Get the filtered tiles right when the button is clicked
+                    totmManagerInstance = new totmManager(tiles);
+                    totmManagerInstance.render(true);
+                } else {
+                    totmManagerInstance.bringToTop(); // If already open, bring to front
+                }
+            },
+            button: true
+        });
+    }
+});
