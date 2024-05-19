@@ -2,9 +2,12 @@
 import { hexToDecimal, adjustColor, findTileByTag} from './utilities.js'
 
 export async function applyGlowEffect(tile, imageIndex, imagePaths, tagMapping) {
+    console.log("applyGlowEffect called with imageIndex:", imageIndex);
+    console.log("imagePaths:", imagePaths);
+
     const imagePath = imagePaths[imageIndex];
-    if (!imagePath.color) {
-        console.warn("No color set for image at index", imageIndex, "; skipping glow effects.");
+    if (!imagePath) {
+        console.error("No image path found for index", imageIndex);
         return;
     }
 
@@ -27,12 +30,22 @@ export async function applyGlowEffect(tile, imageIndex, imagePaths, tagMapping) 
         return;
     }
 
-    let baseColorHex = imagePath.color; // Use the color defined in imagePath
-    let baseColor = hexToDecimal(baseColorHex); // Convert base color to decimal
-    let lighterColor = adjustColor(baseColorHex, 40); // Increase RGB values by 40
-    let darkerColor = adjustColor(baseColorHex, -40); // Decrease RGB values by 40
+    if (!imagePath.color) {
+        console.warn("No color set for image at index", imageIndex, "; skipping glow effects.");
+        if (game.modules.get('tokenmagic')?.active) {
+            await TokenMagic.deleteFilters(frameTile);
+        } else {
+            console.warn("TokenMagic module is not active; skipping glow effects.");
+        }
+        return;
+    }
 
-    let params = [{
+    const baseColorHex = imagePath.color;
+    const baseColor = hexToDecimal(baseColorHex);
+    const lighterColor = adjustColor(baseColorHex, 40);
+    const darkerColor = adjustColor(baseColorHex, -40);
+
+    const params = [{
         filterType: "glow",
         filterId: "totmGlow",
         outerStrength: 5,
