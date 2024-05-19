@@ -5,6 +5,12 @@
 
 // Define moduleId globally if not already defined
 console.log("Load totmManager.js");
+const moduleId = 'totm-manager';
+
+// Import functions
+import { hexToDecimal, adjustColor, findTileByTag} from './utilities.js'
+import { applyGlowEffect, removeGlowEffect, removeAllGlowEffects } from './glowEffects.js';
+
 
 export class totmManager extends Application {
     constructor(tiles, options = {}) {
@@ -47,6 +53,20 @@ export class totmManager extends Application {
             closeOnSubmit: false
         });
     }
+
+    // Methods using applyGlowEffect, removeGlowEffect, removeAllGlowEffects
+    async applyGlowEffect(tile, imageIndex) {
+        await applyGlowEffect(tile, imageIndex, this.imagePaths, this.tagMapping);
+    }
+
+    async removeGlowEffect(tile) {
+        await removeGlowEffect(tile, this.tagMapping);
+    }
+
+    async removeAllGlowEffects() {
+        await removeAllGlowEffects(this.tagMapping);
+    }
+
 
     // Tile Initialization
     findFirstSceneTileIndex() {
@@ -521,129 +541,6 @@ export class totmManager extends Application {
             console.error("Error updating tile image:", error);
             throw error; // Rethrow or handle error as needed
         }
-    }
-
-
-    // Method to apply glow effects
-    async applyGlowEffect(tile, imageIndex) {
-        const imagePath = this.imagePaths[imageIndex];
-        if (!imagePath.color) {
-            console.warn("No color set for image at index", imageIndex, "; skipping glow effects.");
-            return;
-        }
-
-        const tags = Tagger.getTags(tile);
-        if (!tags.length) {
-            console.error("No tags found for the provided tile");
-            return;
-        }
-
-        const activeTileTag = tags[0];
-        const frameTag = this.tagMapping[activeTileTag];
-        if (!frameTag) {
-            console.error(`No frame tag found for tag ${activeTileTag}`);
-            return;
-        }
-
-        const frameTile = this.findTileByTag(frameTag);
-        if (!frameTile) {
-            console.error(`No tile found with the tag ${frameTag}`);
-            return;
-        }
-
-        let baseColorHex = imagePath.color; // Use the color defined in imagePath
-        let baseColor = this.hexToDecimal(baseColorHex); // Convert base color to decimal
-        let lighterColor = this.adjustColor(baseColorHex, 40); // Increase RGB values by 40
-        let darkerColor = this.adjustColor(baseColorHex, -40); // Decrease RGB values by 40
-
-        let params = [{
-            filterType: "glow",
-            filterId: "totmGlow",
-            outerStrength: 5,
-            innerStrength: 0,
-            color: baseColor,
-            quality: 0.5,
-            padding: 1,
-            animated: {
-                color: {
-                    active: true,
-                    loopDuration: 4000,
-                    animType: "colorOscillation",
-                    val1: lighterColor,
-                    val2: darkerColor
-                }
-            }
-        }];
-
-        if (game.modules.get('tokenmagic')?.active) {
-            await TokenMagic.deleteFilters(frameTile);
-            await TokenMagic.addFilters(frameTile, params);
-            console.log("Glow effect applied to tile", frameTile.id);
-        } else {
-            console.warn("TokenMagic module is not active; skipping glow effects.");
-        }
-    }
-
-    // Remove filter from tile
-    async removeGlowEffect(tile) {
-        // Simplify tag retrieval and direct access to frame tile
-        const frameTag = this.tagMapping[Tagger.getTags(tile)[0]];
-        if (!frameTag) {
-            console.error("No frame tag found or no tags present on the tile");
-            ui.notifications.error("No corresponding frame tile found.");
-            return;
-        }
-
-        const frameTile = this.findTileByTag(frameTag);
-        if (!frameTile) {
-            console.error("No tile found with the frame tag:", frameTag);
-            ui.notifications.error(`No tile found with tag: ${frameTag}`);
-            return;
-        }
-
-        try {
-            await TokenMagic.deleteFilters(frameTile, "totmGlow");
-            console.log(`Glow effect removed from tile ${frameTile.id}`);
-        } catch (error) {
-            console.error("Failed to delete glow effect:", error);
-        }
-    }
-
-    // Remove filter from all tiles
-    async removeAllGlowEffects() {
-        const tags = ['speakerFrame1', 'speakerFrame2', 'sceneFrame'];
-        await Promise.all(tags.map(async (tag) => {
-            const tile = this.findTileByTag(tag);
-            if (tile) {
-                if (TokenMagic) {
-                    try {
-                        await TokenMagic.deleteFilters(tile, "totmGlow");
-                    } catch (error) {
-                        console.error("Failed to delete filter from tile:", error);
-                    }
-                }
-            } else {
-                console.log(`No tile found with the tag: ${tag}`);
-            }
-        }));
-    }
-
-    //// Utility Methods
-
-    // Color glow methods
-    hexToDecimal(hex) {
-        if (hex.indexOf('#') === 0) {
-            hex = hex.slice(1); // Remove the '#' character
-        }
-        return parseInt(hex, 16);
-    }
-
-    adjustColor(hex, amount) {
-        let color = parseInt(hex.slice(1), 16); // Remove '#' and convert to decimal
-        let r = Math.max(0, Math.min(255, ((color >> 16) & 0xFF) + amount));
-        let g = Math.max(0, Math.min(255, ((color >> 8) & 0xFF) + amount));
-        let b = Math.max(0, Math.min(255, (color & 0xFF) + amount));
-        return (r << 16) | (g << 8) | b; // Combine back to a single integer
     }
 
 

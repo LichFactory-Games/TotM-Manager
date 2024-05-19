@@ -36,8 +36,12 @@
         }
     ],
     "esmodules": [
-        "scripts/main.js",
-        "scripts/totmManager.js"
+        "scripts/utilities.js",
+        "scripts/glowEffects.js",
+        "scripts/totmManager.js",
+        "scripts/setup.js",
+        "scripts/hooks.js",
+        "scripts/main.js"
     ],
     "packs": [
         {
