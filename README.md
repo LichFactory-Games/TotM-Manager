@@ -41,6 +41,8 @@ For example, let's say you have two images, A and B. You want image A to have pu
 
 TotM Manger can also attach specific playlists or macros to images so long as you have their respective IDs. In the image tags field you can add playlists by using the tag 'play-ID' and call a macro using the tag 'macro-ID'. This allows you to, for example, have images where the lights do a flicker effect while a thunder playlist plays. 
 
+**Note that the scene must be active for lights and related effects to trigger by image.**
+
 You may also delete the image by pressing the `-` button, activate the image by pressing the `*` button, or add a glow filter to the image frame by picking a color from the color picker and activating the image. These filters apply only to the specific image and each filter can be removed by deleting it using the 'delete filter' button at the bottom of the window. 
 
 Be sure to **save any changes** you make to an image by pressing the 'Save Changes' button!
