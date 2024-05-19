@@ -169,15 +169,15 @@ export class totmManager extends Application {
             const listItem = `
                 <li class="form-field" draggable="true" data-index="${index}" style="display: flex; align-items: center; cursor: grab; margin-bottom: 10px;">
                 <span class="handle" style="cursor: move; margin-right: 5px;">&#9776;</span>
-                <span class="path-field" style="flex-grow: 1; margin-right: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; display: inline-block; line-height: 25px; height: 25px; align-items: center;"
+                <span class="path-field" style="flex-grow: 1; min-width: 175px; max-width: 350px; margin-right: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; display: inline-block; line-height: 25px; height: 25px; align-items: center;"
             onmouseover="showPreview(this, '${path.img}')" onmouseout="hidePreview()">
                 ${displayImg}
             </span>
         <img id="preview-${index}" src="${path.img}" style="display: none; position: absolute; right: 100%; width: auto; max-width: 300px; height: auto;" class="preview-image">
-            <input type="text" id="tags-input-${index}" name="tags${index}" value="${tagsString}" placeholder="Enter tags, comma-separated" class="tag-field" style="max-width: 150px; flex-grow: 1; margin-right: 10px; padding: 0 10px; height: 25px; line-height: 25px; display: inline-block; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">
+            <input type="text" id="tags-input-${index}" name="tags${index}" value="${tagsString}" placeholder="Enter tags, comma-separated" class="tag-field" style="flex-grow: 1; min-width: 100px; max-width: none; margin-right: 10px; padding: 0 10px; height: 25px; line-height: 25px; display: inline-block; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">
             <button type="button" class="delete-path" data-index="${index}" style="display: flex; align-items: center; justify-content: center; width: 25px; height: 25px; font-size: 18px; padding: 5; margin-right: 5px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">−</button>
             <button type="button" class="set-image-button" data-index="${index}" style="display: flex; align-items: center; justify-content: center; width: 25px; height: 25px; font-size: 18px; padding: 5; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; margin-right: 5px;">*</button>
-            <input type="color" class="color-picker" id="color-picker-${index}" value="${path.color || '#000000'}" style="display: flex; width: 25px; height: 25px; padding: 5; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">
+            <input type="color" class="color-picker" id="color-picker-${index}" value="${path.color || '#000000'}" style="display: flex; min-width: 25px; height: 25px; padding: 5; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">
         </li>`;
 
             list.append(listItem);
@@ -635,7 +635,7 @@ export class totmManager extends Application {
             }
         }
 
-        // Handle Sounds in Playlists
+        // Handle Sounds in Playlists TODO: fix sounds playing on other images
         for (let playlist of playlists) {
             for (let tag of imageTags) {
                 if (tag.startsWith("play-")) {
