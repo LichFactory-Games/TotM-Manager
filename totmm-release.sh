@@ -10,6 +10,8 @@ REPO_URL="https://github.com/LichFactory-Games/TotM-Manager"
 DOWNLOAD_BASE_URL="$REPO_URL/releases/download"
 EXCLUDE_FILES=("screenshots" "totmm-release.sh" ".git" ".gitignore" "totmm-release.sh")
 CURRENT_DIR=$(pwd)
+DEV_DIR="/Volumes/airserver/fvtt-dir/Data/modules"
+
 
 # Check if jq is installed
 if ! command -v jq &> /dev/null; then
@@ -129,4 +131,13 @@ if [ "$DEVELOPMENT" = false ]; then
   gh release create "v$new_version" "../$RELEASE_ZIP" --title "TotM-Manager-v$new_version" --notes "Release $new_version" "$MODULE_JSON"
 else
   echo "Unzipped release directory created at $RELEASE_DIR/totm-manager for development purposes."
+
+   # Check if the DEV_DIR exists
+  if [ -d "$DEV_DIR" ]; then
+    echo "Development directory exists. Moving unzipped release to $DEV_DIR."
+    rsync -av --progress "$RELEASE_DIR/totm-manager/" "$DEV_DIR/totm-manager/"
+    echo "Files moved to $DEV_DIR/totm-manager."
+  else
+    echo "Development directory $DEV_DIR does not exist."
+  fi
 fi
