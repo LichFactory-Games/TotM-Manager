@@ -11,7 +11,6 @@ DOWNLOAD_BASE_URL="$REPO_URL/releases/download"
 EXCLUDE_FILES=("screenshots" "totmm-release.sh" ".git" ".gitignore" "totmm-release.sh")
 CURRENT_DIR=$(pwd)
 
-
 # Check if jq is installed
 if ! command -v jq &> /dev/null; then
   echo "jq could not be found, please install it."
@@ -29,19 +28,15 @@ get_version() {
   jq -r '.version' "$MODULE_JSON"
 }
 
-# Function to set a new version in module.json
-set_version() {
-  local new_version=$1
-  jq --arg version "$new_version" '.version = $version' "$MODULE_JSON" > temp.json && mv temp.json "$MODULE_JSON"
-}
+# Check for development flag
+DEVELOPMENT=false
+if [ "$1" == "--dev" ]; then
+  DEVELOPMENT=true
+  echo "Development flag detected. Creating unzipped release directory without changing version, committing, or uploading."
+fi
 
-# Function to update the download URL in module.json
-update_download_url() {
-  local new_version=$1
-  local new_download_url="$DOWNLOAD_BASE_URL/v$new_version/TotM-Manager-v$new_version.zip"
-  jq --arg download "$new_download_url" '.download = $download' "$MODULE_JSON" > temp.json && mv temp.json "$MODULE_JSON"
-}
 
+if [ "$DEVELOPMENT" = false ]; then
 # Check if on the main branch
 current_branch=$(git branch --show-current)
 if [ "$current_branch" != "$MAIN_BRANCH" ]; then
@@ -51,32 +46,49 @@ fi
 
 # Pull the latest changes
 git pull origin "$MAIN_BRANCH"
+fi
 
-# Get the current version
-current_version=$(get_version)
-echo "Current version: $current_version"
 
-# Ask for the new version
-read -p "Enter the new version: " new_version
+if [ "$DEVELOPMENT" = false ]; then
+  # Get the current version
+  current_version=$(get_version)
+  echo "Current version: $current_version"
 
-# Update the version in module.json
-set_version "$new_version"
-echo "Updated version in $MODULE_JSON to $new_version"
+  # Ask for the new version
+  read -p "Enter the new version: " new_version
 
-# Update the download URL in module.json
-update_download_url "$new_version"
-echo "Updated download URL in $MODULE_JSON to $DOWNLOAD_BASE_URL/v$new_version/TotM-Manager-v$new_version.zip"
+  # Function to set a new version in module.json
+  set_version() {
+    local new_version=$1
+    jq --arg version "$new_version" '.version = $version' "$MODULE_JSON" > temp.json && mv temp.json "$MODULE_JSON"
+  }
 
-# Commit the changes
-git add "$MODULE_JSON"
-git commit -m "Bump version to $new_version"
+  # Function to update the download URL in module.json
+  update_download_url() {
+    local new_version=$1
+    local new_download_url="$DOWNLOAD_BASE_URL/v$new_version/TotM-Manager-v$new_version.zip"
+    jq --arg download "$new_download_url" '.download = $download' "$MODULE_JSON" > temp.json && mv temp.json "$MODULE_JSON"
+  }
 
-# Tag the new version
-git tag "v$new_version"
+  # Update the version in module.json
+  set_version "$new_version"
+  echo "Updated version in $MODULE_JSON to $new_version"
 
-# Push changes and tags
-git push origin "$MAIN_BRANCH"
-git push origin "v$new_version"
+  # Update the download URL in module.json
+  update_download_url "$new_version"
+  echo "Updated download URL in $MODULE_JSON to $DOWNLOAD_BASE_URL/v$new_version/TotM-Manager-v$new_version.zip"
+
+  # Commit the changes
+  git add "$MODULE_JSON"
+  git commit -m "Bump version to $new_version"
+
+  # Tag the new version
+  git tag "v$new_version"
+
+  # Push changes and tags
+  git push origin "$MAIN_BRANCH"
+  git push origin "v$new_version"
+fi
 
 # Create a temporary directory for the release
 mkdir -p "$RELEASE_DIR/totm-manager"
@@ -96,21 +108,25 @@ for exclude in "${EXCLUDE_FILES[@]}"; do
   rm -rf "$RELEASE_DIR/totm-manager/$exclude"
 done
 
-# Create a ZIP file of the release named after the new version
-RELEASE_ZIP="TotM-Manager-v$new_version.zip"
-cd "$RELEASE_DIR"
-zip -r "../$RELEASE_ZIP" .
-echo "$new_version archive created successfully as $RELEASE_ZIP."
+if [ "$DEVELOPMENT" = false ]; then
+  # Create a ZIP file of the release named after the new version
+  RELEASE_ZIP="TotM-Manager-v$new_version.zip"
+  cd "$RELEASE_DIR"
+  zip -r "../$RELEASE_ZIP" .
+  echo "$new_version archive created successfully as $RELEASE_ZIP."
 
-# Navigate back to the original directory
-cd "$CURRENT_DIR"
+  # Navigate back to the original directory
+  cd "$CURRENT_DIR"
 
-# Clean up
-echo "Cleaning up."
-rm -rf "$RELEASE_DIR"
+  # Clean up
+  echo "Cleaning up."
+  rm -rf "$RELEASE_DIR"
 
-echo "Release $new_version created successfully as $RELEASE_ZIP."
+  echo "Release $new_version created successfully as $RELEASE_ZIP."
 
-# Create a GitHub release and upload assets
-echo "Creating Github release."
-gh release create "v$new_version" "../$RELEASE_ZIP" --title "TotM-Manager-v$new_version" --notes "Release $new_version" "$MODULE_JSON"
+  # Create a GitHub release and upload assets
+  echo "Creating Github release."
+  gh release create "v$new_version" "../$RELEASE_ZIP" --title "TotM-Manager-v$new_version" --notes "Release $new_version" "$MODULE_JSON"
+else
+  echo "Unzipped release directory created at $RELEASE_DIR/totm-manager for development purposes."
+fi
