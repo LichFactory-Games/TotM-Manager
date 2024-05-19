@@ -35,6 +35,20 @@
             "name": "LichLife"
         }
     ],
+    "settings": [
+        {
+            "key": "keybindingOpenManager",
+            "name": "Open TotM Manager",
+            "hint": "Set the keybinding to open the TotM Manager.",
+            "scope": "client",
+            "config": true,
+            "type": "Object",
+            "default": {
+                "key": "KeyT",
+                "modifiers": ["CONTROL"]
+            }
+        }
+    ],
     "esmodules": [
         "scripts/utilities.js",
         "scripts/glowEffects.js",

@@ -23,11 +23,25 @@ export function registerHooks() {
             console.error('Error loading templates:', error);
         }
 
-        // Register keybinding
-        game.keybindings.register('totm-manager', 'openManager', {
+        // Register the keybinding setting
+        game.settings.register(moduleId, 'keybindingOpenManager', {
+            name: 'Open TotM Manager',
+            hint: 'Set the keybinding to open the TotM Manager.',
+            scope: 'client',
+            config: false,
+            type: Object,
+            default: {
+                key: 'KeyT',
+                modifiers: ['CONTROL']
+            }
+        });
+
+        // Register keybinding from settings
+        const keybinding = game.settings.get(moduleId, 'keybindingOpenManager');
+        game.keybindings.register(moduleId, 'openManager', {
             name: 'Open TotM Manager',
             hint: 'Opens the Theatre of the Mind Manager window.',
-            editable: [{ key: 'KeyT', modifiers: [KeyboardManager.MODIFIER_KEYS.CONTROL] }],
+            editable: [keybinding],
             onDown: () => {
                 console.log("TotM Manager: Keybinding triggered");
                 if (!window.totmManagerInstance || window.totmManagerInstance.rendered === false) {
