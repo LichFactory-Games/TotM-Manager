@@ -39,20 +39,27 @@ In the center of the window is the image list itself. Images may be reordered by
 
 For example, let's say you have two images, A and B. You want image A to have pulsing red lighting, while image B should be placid with normal white light. You can accomplish this by setting up the pulsing red lighting for A and the normal white lighting for B (positioned however you want). You then tag all the lights with the tag "sceneLighting" and use a specific tag, such as "pulse" for A's lights, and another tag, such as "normal", for B's lights. In the tag fields for the images in the TotM Manager window you would put "sceneLighting" and the respective tags for A and B. Then, when activating each image only lights matching the tags in that image's tag field will light. You can do something similar for sounds or anything else that takes a tag. 
 
+TotM Manger can also attach specific playlists or macros to images so long as you have their respective IDs. In the image tags field you can add playlists by using the tag 'play-ID' and call a macro using the tag 'macro-ID'. This allows you to, for example, have images where the lights do a flicker effect while a thunder playlist plays. 
+
 You may also delete the image by pressing the `-` button, activate the image by pressing the `*` button, or add a glow filter to the image frame by picking a color from the color picker and activating the image. These filters apply only to the specific image and each filter can be removed by deleting it using the 'delete filter' button at the bottom of the window. 
+
+Be sure to **save any changes** you make to an image by pressing the 'Save Changes' button!
 
 ## Feature Roadmap
 
 The following features are ones I would consider adding at some point. 
 
 - [ ] Allow fine-grained control over color filter settings 
-- [ ] Allow setting of base name tags for frames, speakers, and scenery
 - [ ] Allow for other tile setups and more than two speakers or one scene
 - [ ] Search function for images by name or tag. Helpful in cases where many images are connected with a tile. 
 - [ ] Video file support.
 - [ ] Support for more TokenMagic FX filters than glow (and possibly adding FXMaster support in addition to Token Magic). 
 - [ ] Ability to target and edit a text drawing for labeling of the scene/NPCs.
 - [ ] Finer controls for mass adding or deleting images (e.g. ability to select "Avatar" images from a Tokenizer folder and exclude all "Token" images).
+- [ ] Remove as many hard-coded variable names as possible & make them user definable
+  - [X] Make keybinding for opening manager configurable.
+  - [ ] Allow different tags than 'scene', 'speaker1', 'speaker2', etc. 
+  
 
 ## Thanks
 
