@@ -49,7 +49,7 @@ export function registerHooks() {
                     window.totmManagerInstance = new totmManager(tiles);
                     window.totmManagerInstance.render(true);
                 } else {
-                    window.totmManagerInstance.bringToTop();
+                    window.totmManagerInstance.close();
                 }
                 return true;
             },
@@ -79,14 +79,17 @@ export function registerHooks() {
                 icon: "fas fa-mask",
                 onClick: () => {
                     console.log("TotM Manager: Button clicked");
-                    if (!window.totmManagerInstance || window.totmManagerInstance.rendered === false) {
+                    if (!window.totmManagerInstance) {
                         const tiles = getFilteredTiles();
                         window.totmManagerInstance = new totmManager(tiles);
                         window.totmManagerInstance.render(true);
                         console.log("TotM Manager: Instance created and rendered");
+                    } else if (window.totmManagerInstance.rendered === false) {
+                        window.totmManagerInstance.render(true);
+                        console.log("TotM Manager: Instance rendered again");
                     } else {
-                        window.totmManagerInstance.bringToTop();
-                        console.log("TotM Manager: Instance brought to top");
+                        window.totmManagerInstance.close();
+                        console.log("TotM Manager: Instance closed");
                     }
                 },
                 button: true
