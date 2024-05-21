@@ -1,6 +1,6 @@
 {
-  "id": "totm-manager",
-  "title": "TotM Manager",
+    "id": "totm-manager",
+    "title": "TotM Manager",
     "version": "0.6.8",
     "compatibility": {
         "minimum": "10",
@@ -33,20 +33,6 @@
     "authors": [
         {
             "name": "LichLife"
-        }
-    ],
-    "settings": [
-        {
-            "key": "keybindingOpenManager",
-            "name": "Open TotM Manager",
-            "hint": "Set the keybinding to open the TotM Manager.",
-            "scope": "client",
-            "config": true,
-            "type": "Object",
-            "default": {
-                "key": "KeyT",
-                "modifiers": ["CONTROL"]
-            }
         }
     ],
     "esmodules": [

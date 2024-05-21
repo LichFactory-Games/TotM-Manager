@@ -23,6 +23,13 @@
      border: none;
  }
 
+ #search-results img {
+  width: 50%;
+  height: auto; /* Maintain aspect ratio */
+  cursor: pointer; /* Change cursor to indicate clickability */
+}
+
+
 </style>
 
 
@@ -39,6 +46,10 @@
                border-bottom: 1px solid var(--color-border-light-primary);">
 
     <!-- Image navigation controls -->
+    <div id="search-container">
+      <input type="text" id="image-search-bar" placeholder="Search by name or tag...">
+      <div id="search-results"></div>
+    </div>
     <div class="form-group" style="margin-top: 10px;">
         <button type="button" class="prev-image" style="margin-right: 5px;">Prev Image</button>
         <button type="button" class="next-image">Next Image</button>

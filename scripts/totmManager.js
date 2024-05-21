@@ -20,6 +20,7 @@ export class totmManager extends Application {
         this.tiles = tiles;   // Ensure this.tiles is always an array
         console.log("totmManager initialized with tiles:", this.tiles);
         this.currentActiveTag = ''; // Initialize with an empty string
+        this.escapePressed = false; // Flag to track escape key press
 
         // Bind the method to ensure 'this' refers to the class instance
         this.cycleImages = this.cycleImages.bind(this);
@@ -311,8 +312,47 @@ export class totmManager extends Application {
         });
     }
 
-    //// Activate listeners
+    imageSearchBarListeners(html) {
+        // Attach search event listener
+        html.find('#image-search-bar').on('input', event => {
+            const query = event.target.value;
+            console.log('Input event detected, query:', query); // Debugging log
+            this.escapePressed = false; // Reset escape flag on new input
+            this.performImageSearch(query);
+        });
 
+        // Attach keydown event listener to handle Esc and Enter keys
+        html.find('#image-search-bar').on('keydown', event => {
+            if (event.key === 'Escape') {
+                event.stopPropagation(); // Prevent the default behavior of closing the window
+                if (this.escapePressed) {
+                    this.close(); // Close the window on second escape press
+                } else {
+                    event.target.value = '';
+                    this.escapePressed = false; // Reset escape flag
+                    this.performImageSearch(''); // Clear the search results
+                    this.render(false, {}); // Re-render the window without closing it
+                    event.target.blur(); // Unfocus the search bar
+                }
+            } else if (event.key === 'Enter') {
+                if (!event.target.value.trim()) {
+                    event.preventDefault();
+                    this.performImageSearch(''); // Clear the search results if Enter is pressed on an empty search bar
+                } else {
+                    const firstMatch = this.imagePaths.find(image =>
+                        image.displayImg.toLowerCase().includes(event.target.value.toLowerCase()) ||
+                            image.tags.some(tag => tag.toLowerCase().includes(event.target.value.toLowerCase()))
+                    );
+                    if (firstMatch) {
+                        this.activateImage(firstMatch, this.imagePaths.indexOf(firstMatch));
+                    }
+                }
+            }
+        });
+    }
+
+
+    //// Activate listeners
     activateListeners(html) {
         super.activateListeners(html);
 
@@ -328,7 +368,12 @@ export class totmManager extends Application {
 
         imagePathList.on("mouseover", ".path-field", (event) => {
             const img = $(event.currentTarget).next('img');
-            img.show();
+            const previewImageSize = game.settings.get('totm-manager', 'previewImageSize'); // Get the user-defined preview image size
+            img.css({
+                display: 'block',
+                width: `${previewImageSize}px`,
+                height: 'auto'
+            });
         });
 
         imagePathList.on("mouseout", ".path-field", (event) => {
@@ -338,6 +383,9 @@ export class totmManager extends Application {
 
         // Attach event listeners for managing image and tile navigation
         this.activateImageNavigationListeners(html); // Include navigation listeners
+
+        // Attach event listeners for search of images
+        this.imageSearchBarListeners(html);
 
         // Handling the adding of paths and directories
         this.activatePathManagementListeners(html);
@@ -453,6 +501,64 @@ export class totmManager extends Application {
         }
     }
 
+    // Search for image by query
+    performImageSearch(query) {
+        const lowerCaseQuery = query.toLowerCase();
+        const results = this.imagePaths.filter(image =>
+            image.displayImg.toLowerCase().includes(lowerCaseQuery) ||
+                image.tags.some(tag => tag.toLowerCase().includes(lowerCaseQuery))
+        );
+        console.log('Search results:', results); // Debugging log
+        this.displaySearchResults(results);
+    }
+
+    // Display search results
+    displaySearchResults(results) {
+        const imageSize = game.settings.get('totm-manager', 'imageSize'); // Get the user-defined image size
+        const resultsContainer = document.getElementById('search-results');
+        resultsContainer.innerHTML = ''; // Clear previous results
+
+        results.forEach((image, index) => {
+            const imageElement = document.createElement('img');
+            imageElement.src = image.img;
+            imageElement.alt = image.displayImg;
+            imageElement.style.width = `${imageSize}px`; // Set the desired width based on user setting
+            imageElement.style.height = 'auto'; // Maintain aspect ratio
+            imageElement.style.cursor = 'pointer'; // Change cursor to indicate clickability
+            imageElement.addEventListener('click', () => this.activateImage(image, index));
+            resultsContainer.appendChild(imageElement);
+        });
+    }
+
+    // Activate searched image
+    activateImage(image, index) {
+        if (!this.currentTile) {
+            console.error("No currently active tile.");
+            ui.notifications.error("Error setting image. No tile is currently active.");
+            return;
+        }
+
+        this.currentTile.document.update({ 'texture.src': image.img })
+            .then(() => {
+                this.currentTile.document.setFlag('core', 'imgIndex', index);
+                this.applyGlowEffect(this.currentTile, index); // Apply glow effect or other effects as needed
+                ui.notifications.info(`Image ${image.displayImg} activated.`);
+            })
+            .catch(error => {
+                console.error("Error activating image:", error);
+                ui.notifications.error("Failed to activate image.");
+            });
+    }
+
+    // Focus searcfield
+    focusSearchField() {
+        setTimeout(() => {
+            const searchField = this.element.find('#image-search-bar')[0];
+            if (searchField) searchField.focus();
+        }, 0);
+    }
+
+    // Activate specific tile image
     activateTile(tile) {
         if (!tile) {
             this.currentTile = null;

@@ -23,25 +23,41 @@ export function registerHooks() {
             console.error('Error loading templates:', error);
         }
 
-        // Register the keybinding setting
-        game.settings.register(moduleId, 'keybindingOpenManager', {
-            name: 'Open TotM Manager',
-            hint: 'Set the keybinding to open the TotM Manager.',
+        // Register search image size setting
+        game.settings.register('totm-manager', 'imageSize', {
+            name: 'Search Image Size',
+            hint: 'Set the size of images in search results.',
             scope: 'client',
-            config: false,
-            type: Object,
-            default: {
-                key: 'KeyT',
-                modifiers: ['CONTROL']
-            }
+            config: true,
+            type: Number,
+            range: {
+                min: 50,
+                max: 300,
+                step: 10
+            },
+            default: 100
+        });
+
+        // Register preview image size setting
+        game.settings.register('totm-manager', 'previewImageSize', {
+            name: 'Preview Image Size',
+            hint: 'Set the size of the preview images.',
+            scope: 'client',
+            config: true,
+            type: Number,
+            range: {
+                min: 50,
+                max: 300,
+                step: 10
+            },
+            default: 200
         });
 
         // Register keybinding from settings
-        const keybinding = game.settings.get(moduleId, 'keybindingOpenManager');
         game.keybindings.register(moduleId, 'openManager', {
             name: 'Open TotM Manager',
             hint: 'Opens the Theatre of the Mind Manager window.',
-            editable: [keybinding],
+            editable: [{ key: 'KeyT', modifiers: ['Control'] }], // Set default keybinding
             onDown: () => {
                 console.log("TotM Manager: Keybinding triggered");
                 if (!window.totmManagerInstance || window.totmManagerInstance.rendered === false) {
@@ -55,6 +71,28 @@ export function registerHooks() {
             },
             restricted: true
         });
+
+        // Register keybinding for opening TotM Manager and focusing search
+        game.keybindings.register('totm-manager', 'openAndFocusSearch', {
+            name: 'Open TotM Manager and Focus Search',
+            hint: 'Open the TotM Manager window and focus on the search field.',
+            editable: [{ key: 'KeyF', modifiers: ['Control'] }], // Set default keybinding
+            onDown: () => {
+                console.log("TotM Manager: Focus search keybinding triggered");
+                if (window.totmManagerInstance && window.totmManagerInstance.rendered) {
+                    window.totmManagerInstance.bringToTop();
+                    window.totmManagerInstance.focusSearchField();
+                } else {
+                    const tiles = getFilteredTiles();
+                    window.totmManagerInstance = new totmManager(tiles);
+                    window.totmManagerInstance.render(true);
+                    window.totmManagerInstance.focusSearchField();
+                }
+                return true;
+            },
+            restricted: true
+        });
+
         console.log("TotM Manager: Keybinding registered");
     });
 
