@@ -47,13 +47,21 @@ You may also delete the image by pressing the `-` button, activate the image by 
 
 Be sure to **save any changes** you make to an image by pressing the 'Save Changes' button!
 
+## Search
+
+If you have a tile with a lot of images you may find searching by image name or tag helpful. There is a search bar immediately above the image list that you can use to navigate images. It will give you a preview of all candidates. Press `Enter` to activate the first image in the list. You may also click on any image returned in the search to activate it. 
+
+## Settings 
+
+Settings right now are limited to keybindings (Ctrl-T for the window; Ctrl-F for search) and to image preview size. 
+
 ## Feature Roadmap
 
 The following features are ones I would consider adding at some point. 
 
 - [ ] Allow fine-grained control over color filter settings 
 - [ ] Allow for other tile setups and more than two speakers or one scene
-- [ ] Search function for images by name or tag. Helpful in cases where many images are connected with a tile. 
+- [X] Search function for images by name or tag. Helpful in cases where many images are connected with a tile. 
 - [ ] Video file support.
 - [ ] Support for more TokenMagic FX filters than glow (and possibly adding FXMaster support in addition to Token Magic). 
 - [ ] Ability to target and edit a text drawing for labeling of the scene/NPCs.
@@ -61,7 +69,8 @@ The following features are ones I would consider adding at some point.
 - [ ] Remove as many hard-coded variable names as possible & make them user definable
   - [X] Make keybinding for opening manager configurable.
   - [ ] Allow different tags than 'scene', 'speaker1', 'speaker2', etc. 
-  
+  - [X] Allow preview image size to be user determined
+  - [X] Add user accessible keybindings 
 
 ## Thanks
 
