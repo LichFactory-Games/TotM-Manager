@@ -90,6 +90,14 @@ if [ "$DEVELOPMENT" = false ]; then
   # Push changes and tags
   git push origin "$MAIN_BRANCH"
   git push origin "v$new_version"
+
+  # Ask for additional release notes
+  read -p "Enter additional release notes (or leave blank): " additional_notes
+  if [ -z "$additional_notes" ]; then
+    release_notes="Release $new_version"
+  else
+    release_notes="Release $new_version - $additional_notes"
+  fi
 fi
 
 # Create a temporary directory for the release
@@ -128,7 +136,7 @@ if [ "$DEVELOPMENT" = false ]; then
 
   # Create a GitHub release and upload assets
   echo "Creating Github release."
-  gh release create "v$new_version" "../$RELEASE_ZIP" --title "TotM-Manager-v$new_version" --notes "Release $new_version" "$MODULE_JSON"
+  gh release create "v$new_version" "../$RELEASE_ZIP" --title "TotM-Manager-v$new_version" --notes "$release_notes" "$MODULE_JSON"
 else
   echo "Unzipped release directory created at $RELEASE_DIR/totm-manager for development purposes."
 
