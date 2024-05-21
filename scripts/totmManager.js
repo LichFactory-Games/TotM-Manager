@@ -166,7 +166,6 @@ export class totmManager extends Application {
             const previewImageSrc = path.img; // URL to the image for preview
 
             // Construct the list item HTML string with image preview functionality
-            // TODO: fix preview it alternates side depending on context
             const listItem = `
                 <li class="form-field" draggable="true" data-index="${index}" style="display: flex; align-items: center; cursor: grab; margin-bottom: 10px;">
                 <span class="handle" style="cursor: move; margin-right: 5px;">&#9776;</span>
@@ -369,11 +368,45 @@ export class totmManager extends Application {
         imagePathList.on("mouseover", ".path-field", (event) => {
             const img = $(event.currentTarget).next('img');
             const previewImageSize = game.settings.get('totm-manager', 'previewImageSize'); // Get the user-defined preview image size
-            img.css({
-                display: 'block',
-                width: `${previewImageSize}px`,
-                height: 'auto'
-            });
+
+            // Get the position of the hovered item and the width of the viewport
+            const itemOffset = $(event.currentTarget).offset();
+            const itemWidth = $(event.currentTarget).outerWidth();
+            const viewportWidth = $(window).width();
+            const totmWindow = $('#totm-manager'); // Use the ID to select the window element
+
+            if (!totmWindow.length) {
+                console.error('TOTM window not found');
+                return;
+            }
+
+            // Get the offset of the totm window relative to the viewport
+            const totmWindowOffset = totmWindow.offset();
+            const totmWindowWidth = totmWindow.outerWidth();
+
+            // Calculate the required space for the preview image to appear on the right
+            const spaceOnRight = viewportWidth - (itemOffset.left + itemWidth);
+
+            // Determine if the image should appear on the right or left
+            if (spaceOnRight < previewImageSize || (totmWindowOffset.left + totmWindowWidth + previewImageSize > viewportWidth)) {
+                // Not enough space on the right, place the image on the left
+                img.css({
+                    display: 'block',
+                    width: `${previewImageSize}px`,
+                    height: 'auto',
+                    left: 'auto',
+                    right: '100%' // Align to the left of the hovered item
+                });
+            } else {
+                // Enough space on the right, place the image on the right
+                img.css({
+                    display: 'block',
+                    width: `${previewImageSize}px`,
+                    height: 'auto',
+                    left: '100%', // Align to the right of the hovered item
+                    right: 'auto'
+                });
+            }
         });
 
         imagePathList.on("mouseout", ".path-field", (event) => {
