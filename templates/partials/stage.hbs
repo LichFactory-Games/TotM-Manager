@@ -1,0 +1,61 @@
+<!-- Stage Buttons -->
+<div class="stage-buttons-container" style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+  {{#each tiles as |tile index|}}
+  <button type="button" class="tile-button {{#if (eq ../currentTileIndex index)}}active-button{{/if}}" data-tile-name="{{tile.name}}">{{tile.name}}</button>
+  {{/each}}
+</div>
+
+<hr style="margin: 10px 0; border-top: 1px solid var(--color-border-light-primary); border-bottom: 1px solid var(--color-border-light-primary);">
+
+<!-- Navigation & Add Image button -->
+<div class="add-image-container">
+  <div class="form-group" style=
+    "display: flex; align-items: center;">
+    <p style="margin-right: 12px;">Images</p>
+    <a class="add-image" style="margin-right: 12px;"><i class="fas fa-plus"></i>Add</a>
+    <button type="button" class="add-image" style="display: none;"></button>
+    <a class="add-folder" style="margin-right: 12px;"><i class="fas fa-folder"></i>Folder</a>
+    <button type="button" class="add-folder" style="display: none;"></button>
+  </div>
+  <div class="form-group" style="display: flex; align-items: center;">
+    <a class="prev-image" style="margin-left: 12px;"><i class="fas fa-arrow-left"></i></a>
+    <a class="next-image" style="margin-left: 12px;"><i class="fas fa-arrow-right"></i></a>
+  </div>
+</div>
+
+
+<!-- Image search -->
+<div id="search-container" style="width: 100%">
+  <input type="text" id="image-search-bar" placeholder="Search by name or tag...">
+  <div id="search-results"></div>
+</div>
+
+
+<!-- Image list and editing controls -->
+    <div class="form-group" style="overflow-y: auto;">
+  {{#unless isEmpty}}
+    <ul id="image-path-list" class="path-list" style="list-style: none; padding: 0;">
+      {{#each paths as |path index|}}
+      <li class="form-field {{#if (eq ../imgIndex index)}}active-image{{/if}}" draggable="true" data-index="{{index}}" style="display: flex; align-items: center; cursor: grab; margin-bottom: 10px;">
+        <span class="handle" style="cursor: move; margin-right: 5px;">&#9776;</span>
+        <span class="path-field" data-index="{{index}}" data-img="{{path.img}}" style="flex-grow: 1; min-width: 175px; max-width: 350px; margin-right: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; display: inline-block; line-height: 25px; height: 25px; align-items: center;">
+          {{path.displayImg}}
+        </span>
+        <img id="preview-img-{{index}}" src="{{path.img}}" style="display: none; position: absolute; right: 100%; width: auto; max-width: 300px; height: auto;" alt="Image preview">
+        
+        <input type="text" id="tags-input-{{index}}" name="tags{{index}}" value="{{path.tags}}" placeholder="Enter tags, comma-separated" class="tag-field" style="flex-grow: 1; min-width: 100px; max-width: none; margin-right: 10px; padding: 0 10px; height: 25px; line-height: 25px; display: inline-block; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">
+        <button type="button" class="set-image-button" data-index="{{index}}" style="display: flex; align-items: center; justify-content: center; width: 25px; height: 25px; font-size: 18px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; padding: 3; padding-top: 3px; margin-right: 5px;">*</button>
+        {{! <input type="color" class="color-picker" value="{{#if this.color}\}{{this.color}\}{{else}\}#000000{{/if}\}" data-index="{{@index}\}" style="display: flex; background: {{this.color}\}; align-items: center; justify-content: center; min-width: 25px; height: 25px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; padding: 3; padding-top: 3px;"> }}
+      </li>
+      {{/each}}
+    </ul>
+  {{else}}
+    <p>No tile or image paths set.</p>
+  {{/unless}}
+</div>
+
+<div class="form-group" style="margin-top: 10px;">
+  <button type="button" class="save-paths" style="color: green">Save Changes</button>
+</div>
+
+

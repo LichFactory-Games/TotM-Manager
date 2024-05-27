@@ -1,0 +1,185 @@
+ .active-button {
+     background-color: #4CAF50; /* Green background for active state */
+     color: white; /* White text for better visibility */
+ }
+ .color-picker {
+     -webkit-appearance: none;
+     -moz-appearance: none;
+     appearance: none;
+     background: transparent;
+     border: none;
+     width: 25px;
+     height: 25px;
+     border-radius: 3px;
+     cursor: pointer;
+ }
+
+ .color-picker::-webkit-color-swatch-wrapper {
+     padding: 0;
+ }
+ .color-picker::-webkit-color-swatch {
+     border: none;
+ }
+
+ #search-results img {
+     width: 50%;
+     height: auto; /* Maintain aspect ratio */
+     cursor: pointer; /* Change cursor to indicate clickability */
+ }
+
+#search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.add-image-container {
+    display: flex;
+    justify-content: space-between; /* Space between elements */
+    align-items: center;
+    /* border: 1px solid #666; */
+    /* border-radius: 4px; */
+    padding: 5px;
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+}
+
+.add-image-container p {
+    font-size: 16px;
+    font-weight: 600;
+    font-variant: small-caps;
+    color: #666;
+    text-align: left;
+    padding-left: 5px;
+    margin: 0;
+}
+
+
+.add-image-container button:hover {
+    text-decoration: none;
+}
+
+.add-image-container button::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+.add-folder::before {
+    content: "\f07b"; /* FontAwesome folder icon */
+}
+
+.add-image:before {
+    content: "\f055"; /* FontAwesome plus icon */
+}
+
+.add-image-container .prev-image::before {
+  content: "\f060"; /* FontAwesome left arrow icon */
+}
+
+.add-image-container .next-image::before {
+  content: "\f061"; /* FontAwesome right arrow icon */
+}
+
+a.add-folder, a.add-image {
+    color: #666;
+}
+
+a.prev-image, a.next-image, .prev-image, .next-image {
+    color: #666;
+    text-align: left;
+    padding-right: 5px;
+    padding-left: 20px;
+    margin: 0;
+}
+
+.add-folder {
+    padding-left: 5px;
+    text-align: left;
+    display: inline;
+    align-items: center;
+    cursor: pointer;
+    color: #666;
+    text-decoration: none;
+    font-size: 12px;
+    border: none;
+}
+
+ .add-image {
+     text-align: left;
+     display: inline;
+     align-items: center;
+     cursor: pointer;
+     color: #666;
+     text-decoration: none;
+     font-size: 12px;
+     border: none;
+ }
+
+.add-folder i, .add-image i {
+    margin-right: 5px;
+}
+
+.delete-image {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    text-decoration: none;
+    width: 2em;  /* Adjust width to be slightly larger than the icon */
+    height: 2em; /* Adjust height to be slightly larger than the icon */
+    border: 1px solid #666; /* Optional: Add a border */
+    border-radius: 4px; /* Optional: Add rounded corners */
+    background-color: inherit;
+    font-size: 1em; /* Icon size */
+    cursor: pointer; /* Pointer cursor on hover */
+    margin-left: 5px;
+    padding: 0;
+}
+
+.delete-image i {
+    font-size: 1em; /* Ensure the icon size fits well */
+    margin: 0;
+    padding: 0;
+}
+
+ .delete-all-paths {
+    text-align: right;
+     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+     color: #666;
+     font-size: 12px;
+    text-decoration: none;
+    width: 3em;  /* Adjust width to be slightly larger than the icon */
+    height: 2em; /* Adjust height to be slightly larger than the icon */
+    border: 1px solid #666; /* Optional: Add a border */
+    border-radius: 4px; /* Optional: Add rounded corners */
+    background-color: inherit;
+    font-size: 1em; /* Icon size */
+     cursor: pointer; /* Pointer cursor on hover */
+     padding: 10px;
+ }
+
+.delete-all-paths i {
+    text-align: right;
+    font-size: 1em; /* Ensure the icon size fits well */
+    padding: 0;
+    }
+
+.delete-image .delete-all-paths:hover {
+    background-color: #ccc; /* Optional: Change background on hover */
+}
+
+.delete-all-paths::before {
+  content: "\f1f8"; /* FontAwesome trash icon */
+}
+
+.tile-field input[type="text"] {
+  width: 150px;
+}
+
+.tile-field input[type="range"] {
+  width: 100px;
+}

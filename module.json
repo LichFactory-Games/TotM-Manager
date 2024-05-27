@@ -35,13 +35,17 @@
       "name": "LichLife"
     }
   ],
+  "styles": "styles/totmm.css",
   "esmodules": [
     "scripts/utilities.js",
     "scripts/glowEffects.js",
+    "scripts/tiles.js",
+    "scripts/images.js",
+    "scripts/listeners.js",
     "scripts/totmManager.js",
     "scripts/setup.js",
     "scripts/hooks.js",
-    "scripts/main.js"
+    "scripts/init.js"
   ],
   "packs": [
     {

@@ -1,0 +1,36 @@
+<div id="search-container">
+  <input type="text" id="effect-search-bar" placeholder="Search by name or tag...">
+  <div id="search-results"></div>
+</div>
+
+<div class="form-group" style="margin-top: 10px;">
+  <button type="button" class="add-effect">+Add Effect</button>
+</div>
+
+<div class="form-group" style="overflow-y: auto;">
+  {{#unless isEmpty}}
+  <ul id="effect-list" class="effect-list" style="list-style: none; padding: 0;">
+    {{#each effects as |effect index|}}
+    <li class="form-field" draggable="true" data-index="{{index}}" style="display: flex; align-items: center; cursor: grab; margin-bottom: 10px;">
+      <select class="target-type" data-index="{{index}}" style="margin-right: 10px;">
+        <option value="tile" {{if (eq effect.targetType 'tile') 'selected'}}>Tile</option>
+        <option value="image" {{if (eq effect.targetType 'image') 'selected'}}>Image</option>
+      </select>
+      <span class="name-field" data-index="{{index}}" style="flex-grow: 1; min-width: 175px; max-width: 350px; margin-right: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; display: inline-block; line-height: 25px; height: 25px; align-items: center;">
+        {{effect.name}}
+      </span>
+      <select class="effect-dropdown" data-index="{{index}}" style="margin-right: 10px;">
+        {{#each availableEffects}}
+        <option value="{{this}}" {{if (eq this ../effect.effect) 'selected'}}>{{this}}</option>
+        {{/each}}
+      </select>
+      <input type="color" class="color-picker" value="{{effect.color}}" data-index="{{@index}}" style="flex-grow: 1; min-width: 25px; height: 25px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; padding: 3;">
+      
+      <button type="button" class="delete-effect" data-index="{{index}}" style="display: flex; align-items: center; justify-content: center; width: 25px; height: 25px; font-size: 18px; padding: 5; margin-right: 5px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">−</button>
+    </li>
+    {{/each}}
+  </ul>
+  {{else}}
+  <p>No effects set.</p>
+  {{/unless}}
+</div>

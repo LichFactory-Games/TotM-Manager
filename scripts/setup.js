@@ -1,27 +1,44 @@
-export async function setuptotmManager() {
-    const matchesTags = tile => {
-        try {
-            const tags = Tagger.getTags(tile);
-            console.log("Tile:", tile, "Tags:", tags);  // Detailed tag logging
-            return tags.includes('scene') || tags.some(tag => /^speaker\d+$/.test(tag));
-        } catch (error) {
-            console.error("Error getting tags for tile:", tile, error);
-            return false;  // If error in getting tags, exclude this tile
-        }
-    };
+// scripts/setup.js
+export async function setupModule() {
+  console.log("Theatre of the Mind Manager | Setup module");
 
-    // Detailed logging to verify tiles before filtering
-    canvas.tiles.placeables.forEach(tile => {
-        const tags = Tagger.getTags(tile);
-        console.log("Pre-filter Tile:", tile, "Tags:", tags);
-    });
+  const templates = [
+    "modules/totm-manager/templates/totmm-window.hbs",
+    "modules/totm-manager/templates/partials/common.hbs",
+    "modules/totm-manager/templates/partials/effects.hbs",
+    "modules/totm-manager/templates/partials/stage.hbs",
+    "modules/totm-manager/templates/partials/tiles.hbs"
+  ];
 
-    // Filter tiles based on matching tags
-    const tiles = canvas.tiles.placeables.filter(matchesTags);
-    console.log("Filtered tiles after matching tags:", tiles);
+  try {
+    // Load all templates
+    await loadTemplates(templates);
 
-    if (tiles.length === 0) {
-        console.warn("No tiles found with specified tags.");
-        return;  // Exit if no matching tiles are found
-    }
+    // Explicitly register partials
+    const [stage, tiles, effects, common] = await Promise.all([
+      getTemplate("modules/totm-manager/templates/partials/stage.hbs"),
+      getTemplate("modules/totm-manager/templates/partials/tiles.hbs"),
+      getTemplate("modules/totm-manager/templates/partials/effects.hbs"),
+      getTemplate("modules/totm-manager/templates/partials/common.hbs")
+    ]);
+
+    Handlebars.registerPartial('stage', stage);
+    Handlebars.registerPartial('tiles', tiles);
+    Handlebars.registerPartial('effects', effects);
+    Handlebars.registerPartial('common', common);
+
+    console.log('Templates loaded successfully.');
+  } catch (error) {
+    console.error('Error loading templates:', error);
+  }
+}
+
+
+export function openTotMManager() {
+  if (!window.totmManagerInstance || !window.totmManagerInstance.rendered) {
+    window.totmManagerInstance = new TotMForm();
+    window.totmManagerInstance.render(true);
+  } else {
+    window.totmManagerInstance.bringToTop();
+  }
 }
