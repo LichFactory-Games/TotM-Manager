@@ -1,5 +1,5 @@
 <!-- Stage Buttons -->
-<div class="stage-buttons-container" style="margin-top: 10px; display: flex; gap: 5px; flex-wrap: wrap;">
+<div class="stage-buttons-container" style="margin-top: 10px;">
   {{#each tiles as |tile index|}}
   <button type="button" class="tile-button {{#if (eq ../currentTileIndex index)}}active-button{{/if}}" data-tile-name="{{tile.name}}">{{tile.name}}</button>
   {{/each}}

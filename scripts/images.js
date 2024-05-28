@@ -71,26 +71,48 @@ export function updateImageTags(instance, index, tags) {
   }
 }
 
-export function activateImage(instance, image, index) {
-  if (!instance.currentTile) {
-    console.error("No currently active tile.");
-    ui.notifications.error("Error setting image. No tile is currently active.");
-    return;
-  }
+export async function activateImage(instance, image, index) {
+    if (!instance.currentTile) {
+        console.error("No currently active tile.");
+        ui.notifications.error("Error setting image. No tile is currently active.");
+        return;
+    }
 
-  instance.currentTile.document.update({ 'texture.src': image.img })
-    .then(() => {
-      return instance.currentTile.document.setFlag('core', 'imgIndex', index);
-    })
-    .then(() => {
-      // Add any necessary effects application here
-      ui.notifications.info(`Image ${image.displayImg} activated.`);
-      instance.render();
-    })
-    .catch(error => {
-      console.error("Error activating image:", error);
-      ui.notifications.error("Failed to activate image.");
+    const tile = instance.currentTile;
+    const imagePaths = await tile.document.getFlag('core', 'imagePaths') || [];
+
+    // Remove effects of the previous image
+    const previousIndex = await tile.document.getFlag('core', 'imgIndex');
+    if (previousIndex !== undefined && imagePaths[previousIndex]) {
+        const previousImage = imagePaths[previousIndex];
+        const previousEffects = previousImage.effects || [];
+        previousEffects.forEach(async (effect) => {
+            await TokenMagic.deleteFilters(tile, effect);
+        });
+    }
+
+    // Apply effects of the new image
+    const currentEffects = image.effects || [];
+    currentEffects.forEach(async (effect) => {
+        const effectParams = TokenMagic.getPreset(effect);
+        if (game.modules.get('tokenmagic')?.active) {
+            await TokenMagic.addFilters(tile, effectParams);
+        } else {
+            console.warn("TokenMagic module is not active.");
+        }
     });
+
+    // Update the tile's texture and flag
+    tile.document.update({ 'texture.src': image.img })
+        .then(() => tile.document.setFlag('core', 'imgIndex', index))
+        .then(() => {
+            ui.notifications.info(`Image ${image.displayImg} activated.`);
+            instance.render();
+        })
+        .catch(error => {
+            console.error("Error activating image:", error);
+            ui.notifications.error("Failed to activate image.");
+        });
 }
 
 export async function cycleImages(instance, tile, direction) {
@@ -165,21 +187,21 @@ export async function reorderPaths(instance, origin, target) {
   await instance.currentTile.document.setFlag('core', 'imagePaths', imagePaths);
 }
 
- export async function deleteImageByPath(instance, imagePath) {
-  const imagePaths = instance.imagePaths;
-  const index = imagePaths.findIndex(image => image.img === imagePath);
-  if (index !== -1) {
-    imagePaths.splice(index, 1);
-    instance.imagePaths = imagePaths;  // Update the instance's imagePaths
-    console.log("Deleted image:", imagePath);
+export async function deleteImageByPath(instance, imagePath) {
+    const imagePaths = instance.imagePaths;
+    const index = imagePaths.findIndex(image => image.img === imagePath);
+    if (index !== -1) {
+        imagePaths.splice(index, 1);
+        instance.imagePaths = imagePaths;  // Update the instance's imagePaths
+        console.log("Deleted image:", imagePath);
 
-    // Save the updated paths to the tile document
-    await instance.currentTile.document.setFlag('core', 'imagePaths', imagePaths);
+        // Save the updated paths to the tile document
+        await instance.currentTile.document.setFlag('core', 'imagePaths', imagePaths);
 
-    // Load tile images to update UI
-    await loadTileImages(instance, instance.currentTile);
-  }
-  }
+        // Load tile images to update UI
+        await loadTileImages(instance, instance.currentTile);
+    }
+}
 
 export async function deleteAllPaths(instance) {
   instance.imagePaths = [];  // Clear the instance's imagePaths
@@ -226,13 +248,28 @@ export function performImageSearch(instance, query) {
   });
 }
 
-// export function focusSearchField(instance) {
-//   setTimeout(() => {
-//     const searchField = instance.element.find('#image-search-bar')[0];
-//     if (searchField) searchField.focus();
-//   }, 0);
-// }
+export function focusSearchField(instance) {
+  setTimeout(() => {
+    const searchField = instance.element.find('#image-search-bar')[0];
+    if (searchField) searchField.focus();
+  }, 0);
+}
 
+// Function to get an image by its ID
+export function getImageById(instance, imageId) {
+    const imagePaths = instance.imagePaths;
+    if (!imagePaths) {
+        console.error("Image paths are not defined.");
+        return null;
+    }
+
+    const image = imagePaths.find(img => img.img === imageId);
+    if (!image) {
+        console.error(`No image found with ID: ${imageId}`);
+        return null;
+    }
+    return image;
+}
 
 // TODO Requires toggleFeaturesBasedOnTags
 // export async function updateTileImage(tile, imageObj, index) {

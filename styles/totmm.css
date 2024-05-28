@@ -1,7 +1,40 @@
- .active-button {
-     background-color: #4CAF50; /* Green background for active state */
-     color: white; /* White text for better visibility */
- }
+.stage-buttons-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Create responsive grid columns */
+    gap: 5px; /* Space between buttons */
+}
+
+/* .stage-buttons-container { */
+/*     display: flex; */
+/*     gap: 5px; /\* Space between buttons *\/ */
+/*     justify-content: flex-start; */
+/*     flex-flow: inherit wrap; */
+/*     } */
+
+.tile-button {
+    text-align: center; /* Center the text inside buttons */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+.tile-button:only-child {
+    width: 100%; /* Make the single button fill the container */
+}
+.tile-button:hover {
+  background-color: #e0e0e0; /* Background color on hover */
+}
+
+.active-button {
+  background-color: #007bff; /* Active button background color */
+  color: #fff; /* Active button text color */
+  border-color: #007bff; /* Active button border color */
+}
+
+ /* .active-button { */
+ /*     background-color: #4CAF50; /\* Green background for active state *\/ */
+ /*     color: white; /\* White text for better visibility *\/ */
+ /* } */
+
  .color-picker {
      -webkit-appearance: none;
      -moz-appearance: none;

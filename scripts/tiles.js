@@ -225,36 +225,38 @@ export function switchToTileByTag(instance, tag) {
 }
 
 export async function loadTileImages(instance, tile) {
-  if (!tile) {
-    console.error("No tile provided or tile is undefined.");
-    return;
-  }
-
-  if (!tile.document) {
-    console.error("Tile does not have a document property:", tile);
-    return;
-  }
-
-  // Fetch the image paths stored in the tile's flags
-  let loadedPaths = tile.document.getFlag('core', 'imagePaths') || [];
-
-  // Prepare the image paths for display
-  instance.imagePaths = loadedPaths.map(path => {
-    let displayPath; // This will hold the filename for display purposes
-    if (typeof path === 'string') {  // Handle legacy or incorrectly saved paths
-      displayPath = path.split('/').pop(); // Extract filename from the full path
-      return { img: path, displayImg: displayPath, tags: [] };
-    } else {
-      displayPath = path.img.split('/').pop(); // Ensure to handle object structured paths
-      return { ...path, displayImg: displayPath };
+    if (!tile) {
+        console.error("No tile provided or tile is undefined.");
+        ui.notifications.warn("No tile provided or tile is undefined.");
+        return;
     }
-  });
-  console.log("TotM - Loaded image paths for tile:", instance.imagePaths);
 
-  // Call the render method to update the UI with loaded images
-  instance.render(true);
-  // Initial call to update the button state
-  setTimeout(() => updateActiveTileButton(instance), 10);  // Delay the update call to ensure DOM has updated
+    if (!tile.document) {
+        console.error("Tile does not have a document property:", tile);
+        ui.notifications.warn("Tile does not have a document property.");
+        return;
+    }
+
+    // Fetch the image paths stored in the tile's flags
+    let loadedPaths = tile.document.getFlag('core', 'imagePaths') || [];
+
+    // Prepare the image paths for display
+    instance.imagePaths = loadedPaths.map(path => {
+        let displayPath; // This will hold the filename for display purposes
+        if (typeof path === 'string') {  // Handle legacy or incorrectly saved paths
+            displayPath = path.split('/').pop(); // Extract filename from the full path
+            return { img: path, displayImg: displayPath, tags: [] };
+        } else {
+            displayPath = path.img.split('/').pop(); // Ensure to handle object structured paths
+            return { ...path, displayImg: displayPath };
+        }
+    });
+    console.log("TotM - Loaded image paths for tile:", instance.imagePaths);
+
+    // Call the render method to update the UI with loaded images
+    instance.render(true);
+    // Initial call to update the button state
+    setTimeout(() => updateActiveTileButton(instance), 10);  // Delay the update call to ensure DOM has updated
 }
 
 export async function activateTile(instance, tile) {

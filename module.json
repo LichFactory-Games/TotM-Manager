@@ -1,62 +1,62 @@
 {
-  "id": "totm-manager",
-  "title": "TotM Manager",
-  "version": "0.7.0",
-  "compatibility": {
-    "minimum": "10",
-    "verified": "11"
-  },
-  "relationships": {
-    "requires": [
-      {
-        "id": "lib-wrapper",
-        "type": "module",
-        "compatibility": {
-          "minimum": "1.0.0.0",
-          "verified": "1.12.6.0"
+    "id": "totm-manager",
+    "title": "TotM Manager",
+    "version": "0.7.0",
+    "compatibility": {
+        "minimum": "10",
+        "verified": "11"
+    },
+    "relationships": {
+        "requires": [
+            {
+                "id": "lib-wrapper",
+                "type": "module",
+                "compatibility": {
+                    "minimum": "1.0.0.0",
+                    "verified": "1.12.6.0"
+                }
+            },
+            {
+                "id": "tagger",
+                "type": "module"
+            },
+            {
+                "id": "tokenmagic",
+                "type": "module"
+            }
+        ]
+    },
+    "description": "A module to manage visual and thematic elements for theatre of the mind style play in Foundry VTT.",
+    "url": "https://github.com/LichFactory-Games/TotM-Manager",
+    "manifest": "https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/main/module.json",
+    "download": "https://github.com/LichFactory-Games/TotM-Manager/releases/download/v0.7.0/TotM-Manager-v0.7.0.zip",
+    "authors": [
+        {
+            "name": "LichLife"
         }
-      },
-      {
-        "id": "tagger",
-        "type": "module"
-      },
-      {
-        "id": "tokenmagic",
-        "type": "module"
-      }
+    ],
+    "styles": "styles/totmm.css",
+    "esmodules": [
+        "scripts/utilities.js",
+        "scripts/tiles.js",
+        "scripts/images.js",
+        "scripts/effects.js",
+        "scripts/listeners.js",
+        "scripts/totmManager.js",
+        "scripts/setup.js",
+        "scripts/hooks.js",
+        "scripts/init.js"
+    ],
+    "packs": [
+        {
+            "name": "totm-tile-template",
+            "label": "TotM Tile Template",
+            "path": "packs/totm-tile-template",
+            "type": "Scene",
+            "ownership": {
+                "PLAYER": "OBSERVER",
+                "ASSISTANT": "OWNER"
+            }
+        }
     ]
-  },
-  "description": "A module to manage visual and thematic elements for theatre of the mind style play in Foundry VTT.",
-  "url": "https://github.com/LichFactory-Games/TotM-Manager",
-  "manifest": "https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/main/module.json",
-  "download": "https://github.com/LichFactory-Games/TotM-Manager/releases/download/v0.7.0/TotM-Manager-v0.7.0.zip",
-  "authors": [
-    {
-      "name": "LichLife"
-    }
-  ],
-  "styles": "styles/totmm.css",
-  "esmodules": [
-    "scripts/utilities.js",
-    "scripts/glowEffects.js",
-    "scripts/tiles.js",
-    "scripts/images.js",
-    "scripts/listeners.js",
-    "scripts/totmManager.js",
-    "scripts/setup.js",
-    "scripts/hooks.js",
-    "scripts/init.js"
-  ],
-  "packs": [
-    {
-      "name": "totm-tile-template",
-      "label": "TotM Tile Template",
-      "path": "packs/totm-tile-template",
-      "type": "Scene",
-      "ownership": {
-        "PLAYER": "OBSERVER",
-        "ASSISTANT": "OWNER"
-      }
-    }
-  ]
 }
