@@ -30,24 +30,31 @@ export async function populateEffectsDropdown() {
     console.log("Dropdown populated with presets.");
 }
 
-export async function populateTileDropdown(tiles) {
-    const dropdown = document.getElementById('tile-dropdown');
-    if (!dropdown) {
+export function populateTileDropdown(tiles, currentTileId) {
+    const tileDropdown = document.getElementById('tile-dropdown');
+    if (!tileDropdown) {
         console.error("Tile dropdown element not found!");
         return;
     }
 
-    console.log("Populating tile dropdown...");
-    dropdown.innerHTML = '';
+    // Clear the existing options
+    tileDropdown.innerHTML = '';
 
+    // Populate the dropdown with tile names and IDs
     tiles.forEach(tile => {
         const option = document.createElement('option');
         option.value = tile.id;
-        option.textContent = tile.name;
-        dropdown.appendChild(option);
+        const tileName = tile.document.getFlag('core', 'tileName') || `Tile ${tile.id}`; // Use tileName flag or ID if not present
+        option.textContent = tileName;
+        tileDropdown.appendChild(option);
     });
 
-    console.log("Tile dropdown populated.");
+    // Set the selected value to the current tile ID
+    if (currentTileId) {
+        tileDropdown.value = currentTileId;
+    }
+
+    console.log("Tile dropdown populated with tiles:", tiles);
 }
 
 export async function populateImageDropdown(instance) {

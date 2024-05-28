@@ -1,7 +1,7 @@
 // scripts/totmManager.js
 import { generateTileFields, loadTileData, saveTileData, updateStageButtons, switchToTileByTag, loadTileImages } from './tiles.js';
 import { addImageToTile, addDirectoryToTile, setActiveImage, updateImageTags, cycleImages, updateActiveImageButton } from './images.js';
-import { activateGeneralListeners, activatePathManagementListeners, activateImageSearchBarListeners, activateImagePreviewListeners, activateEffectEventListeners} from './listeners.js';
+import { activateGeneralListeners, activatePathManagementListeners, activateImageSearchBarListeners, activateImagePreviewListeners, activateEffectEventListeners, onTargetChange } from './listeners.js';
 import { populateEffectsDropdown, updateCurrentEffects } from './effects.js'; // Import the function
 
 
@@ -9,6 +9,8 @@ export class TotMForm extends FormApplication {
     constructor(...args) {
         super(...args);
         this.currentActiveTag = null; // Initialize active tag property
+        this.selectedTarget = 'tile'; // Default to 'tile' or any other desired default
+
     }
 
     // Add a static property to hold the singleton instance
@@ -64,8 +66,18 @@ export class TotMForm extends FormApplication {
         await super._render(force, options);
         this._initializeTabs();
 
-        // populate dropdown on render
+        // Populate dropdown on render
         await populateEffectsDropdown();
+
+        // Set the target dropdown to the last selected target
+        const targetDropdown = document.getElementById('target-dropdown');
+        if (this.selectedTarget) {
+            targetDropdown.value = this.selectedTarget;
+        }
+
+        // Trigger onTargetChange for the initial target value
+        const initialTarget = document.getElementById('target-dropdown').value;
+        onTargetChange({ target: { value: initialTarget } }, this);
 
         // Ensure the current tile is set and update current effects
         if (this.currentTile) {

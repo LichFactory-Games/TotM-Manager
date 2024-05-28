@@ -56,7 +56,7 @@ export async function loadTileData(instance) {
 
     // Only return tiles that have a valid name
     if (name) {
-      return { name, opacity, tint };
+        return { name, opacity, tint };
     }
   }).filter(tile => tile !== undefined); // Filter out undefined entries
 

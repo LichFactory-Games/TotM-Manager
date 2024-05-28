@@ -3,7 +3,7 @@
 /////////////////////////////
 
 import { addImageToTile, addDirectoryToTile, setActiveImage, updateImageTags, cycleImages, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths, performImageSearch, getImageById } from './images.js';
-import { saveTileData, generateTileFields, switchToTileByTag, loadTileData } from './tiles.js';
+import { saveTileData, generateTileFields, switchToTileByTag, loadTileData, loadTileImages } from './tiles.js';
 import { populateTileDropdown, populateImageDropdown, populateEffectsDropdown, applyEffectToTile, applyEffectToImage, removeEffectFromImage, removeEffectFromTile, updateCurrentEffects } from './effects.js';
 
 
@@ -217,7 +217,7 @@ export function activateEffectEventListeners(instance) {
     document.getElementById('target-dropdown').addEventListener('change', (event) => onTargetChange(event, instance));
 
     document.getElementById('add-effect-button').addEventListener('click', () => addEffect(instance));
-    document.getElementById('remove-effect-button').addEventListener('click', () => removeEffect(instance)); // Add remove effect listener
+    document.getElementById('remove-effect-button').addEventListener('click', () => removeEffect(instance));
     document.getElementById('update-effect-button').addEventListener('click', updateEffect);
 
     // Example: Set current tile when a tile is selected
@@ -234,8 +234,10 @@ export function activateEffectEventListeners(instance) {
     });
 }
 
-function onTargetChange(event, instance) {
+export function onTargetChange(event, instance) {
     const target = event.target.value;
+    instance.selectedTarget = target; // Store the selected target in the instance
+
     console.log(`Target changed to: ${target}`);
     console.log(`Current tile:`, instance.currentTile);
     console.log(`Current image paths:`, instance.imagePaths);
@@ -246,7 +248,7 @@ function onTargetChange(event, instance) {
         // Populate tile dropdown
         const tiles = canvas.tiles.placeables; // Assuming you have access to canvas tiles
         console.log(`Tiles available:`, tiles);
-        populateTileDropdown(tiles);
+        populateTileDropdown(tiles, instance.currentTile?.id);
     } else if (target === 'image') {
         document.getElementById('tile-selection').style.display = 'none';
         document.getElementById('image-selection').style.display = 'block';
