@@ -32,6 +32,7 @@ function generateFields(instance, tileFieldsContainer, count) {
                 <input type="range" name="tile-opacity-${i}" min="0" max="1" step="0.01" style="margin-right: 10px;">
                 <input type="color" name="tile-tint-${i}" style="margin-right: 10px;">
             </div>
+            <button type="button" class="delete-tile" data-index="${i}"><i class="fas fa-trash"></i></button>
         `);
 
     tileFieldsContainer.append(tileField);
@@ -176,6 +177,7 @@ function updateTileFields(instance) {
         <input type="text" name="tile-name-${index}" placeholder="Tile Name" value="${tile.name}" style="margin-right: 10px;">
         <input type="range" name="tile-opacity-${index}" min="0" max="1" step="0.01" value="${tile.opacity}" style="margin-right: 10px;">
         <input type="color" name="tile-tint-${index}" value="${tile.tint}" style="margin-right: 10px;">
+        <button type="button" class="delete-tile" data-index="${index}"><i class="fas fa-trash"></i></button>
       `;
 
     tileFieldsContainer.appendChild(tileField);
@@ -288,4 +290,18 @@ export async function initializeTiles(instance) {
     if (!instance.currentTile && canvas.tiles.placeables.length > 0) {
         await activateTile(instance, canvas.tiles.placeables[0]);
     }
+}
+
+export function deleteTile(instance, index) {
+    // Remove the tile from the instance's tiles array
+    instance.tiles.splice(index, 1);
+
+    // Update the indices of the remaining tiles
+    instance.tiles.forEach((tile, idx) => {
+        tile.index = idx;
+    });
+
+    // Update the tile fields and stage buttons
+    updateTileFields(instance);
+    updateStageButtons(instance);
 }

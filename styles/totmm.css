@@ -50,6 +50,41 @@
     border-width: 2px;
 }
 
+button.delete-tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    text-decoration: none;
+    width: 2em;  /* Adjust width to be slightly larger than the icon */
+    height: 2em; /* Adjust height to be slightly larger than the icon */
+    border: 1px solid #666; /* Optional: Add a border */
+    border-radius: 4px; /* Optional: Add rounded corners */
+    background-color: inherit;
+    font-size: 1em; /* Icon size */
+    cursor: pointer; /* Pointer cursor on hover */
+    margin-left: 5px;
+    padding: 0;
+}
+
+button.delete-tile i {
+    font-size: 1em; /* Ensure the icon size fits well */
+    margin: 0;
+    padding: 0;
+}
+
+input[type="color" i] {
+     -webkit-appearance: none;
+     -moz-appearance: none;
+     appearance: none;
+     background: transparent;
+     border: none;
+     width: 25px;
+     height: 25px;
+     border-radius: 3px;
+     cursor: pointer;
+}
+
  .color-picker {
      -webkit-appearance: none;
      -moz-appearance: none;
