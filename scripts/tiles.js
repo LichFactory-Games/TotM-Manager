@@ -278,3 +278,14 @@ export async function activateTile(instance, tile) {
   }
 }
 
+export function deselectActiveTile(instance) {
+    instance.currentTile = null;
+    instance.currentTileIndex = null;
+    instance.render(true);
+}
+
+export async function initializeTiles(instance) {
+    if (!instance.currentTile && canvas.tiles.placeables.length > 0) {
+        await activateTile(instance, canvas.tiles.placeables[0]);
+    }
+}

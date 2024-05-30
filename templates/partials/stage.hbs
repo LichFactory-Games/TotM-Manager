@@ -1,12 +1,3 @@
-<!-- Stage Buttons -->
-<div class="stage-buttons-container" style="margin-top: 10px;">
-  {{#each tiles as |tile index|}}
-  <button type="button" class="tile-button {{#if (eq ../currentTileIndex index)}}active-button{{/if}}" data-tile-name="{{tile.name}}">{{tile.name}}</button>
-  {{/each}}
-</div>
-
-<hr style="margin: 10px 0; border-top: 1px solid var(--color-border-light-primary); border-bottom: 1px solid var(--color-border-light-primary);">
-
 <!-- Navigation & Add Image button -->
 <div class="add-image-container">
   <div class="form-group" style=

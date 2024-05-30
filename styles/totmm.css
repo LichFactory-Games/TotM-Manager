@@ -1,15 +1,36 @@
+/* Target the TotM Manager window */
+#totm-manager.window-app {
+    display: block;
+}
+
+
+.tabs {
+    margin-bottom: 10px; /* Adjust as needed for spacing */
+}
+
+.tabs .item {
+    padding: 10px 15px 5px 15px; /* Adjust padding as needed */
+    cursor: pointer;
+    text-align: center;
+    position: relative; /* Required for the underline positioning */
+}
+
+.tabs .item.active {
+    background-color: var(--color-selected); /* Foundry VTT's selected color */
+    border-bottom: 2px solid var(--color-underline-header); /* Optional: highlight the border */
+    margin-bottom: -2px; /* Adjust to counter the border-bottom height */
+}
+
+.tabs .item:not(.active):hover {
+    background-color: var(--color-background-hover); /* Optional: hover effect */
+}
+
+
 .stage-buttons-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Create responsive grid columns */
     gap: 5px; /* Space between buttons */
 }
-
-/* .stage-buttons-container { */
-/*     display: flex; */
-/*     gap: 5px; /\* Space between buttons *\/ */
-/*     justify-content: flex-start; */
-/*     flex-flow: inherit wrap; */
-/*     } */
 
 .tile-button {
     text-align: center; /* Center the text inside buttons */
@@ -25,15 +46,9 @@
 }
 
 .active-button {
-  background-color: #007bff; /* Active button background color */
-  color: #fff; /* Active button text color */
-  border-color: #007bff; /* Active button border color */
+    border-color: var(--color-border-highlight);
+    border-width: 2px;
 }
-
- /* .active-button { */
- /*     background-color: #4CAF50; /\* Green background for active state *\/ */
- /*     color: white; /\* White text for better visibility *\/ */
- /* } */
 
  .color-picker {
      -webkit-appearance: none;
@@ -215,4 +230,9 @@ a.prev-image, a.next-image, .prev-image, .next-image {
 
 .tile-field input[type="range"] {
   width: 100px;
+}
+
+.drag-over {
+  border: 2px dashed #000;
+    background-color: var(--color-hightlight);
 }

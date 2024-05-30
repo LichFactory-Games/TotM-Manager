@@ -1,5 +1,5 @@
 // scripts/totmManager.js
-import { generateTileFields, loadTileData, saveTileData, updateStageButtons, switchToTileByTag, loadTileImages } from './tiles.js';
+import { generateTileFields, loadTileData, saveTileData, updateStageButtons, switchToTileByTag, loadTileImages, initializeTiles } from './tiles.js';
 import { addImageToTile, addDirectoryToTile, setActiveImage, updateImageTags, cycleImages, updateActiveImageButton } from './images.js';
 import { activateGeneralListeners, activatePathManagementListeners, activateImageSearchBarListeners, activateImagePreviewListeners, activateEffectEventListeners, onTargetChange } from './listeners.js';
 import { populateEffectsDropdown, updateCurrentEffects } from './effects.js'; // Import the function
@@ -10,6 +10,7 @@ export class TotMForm extends FormApplication {
         super(...args);
         this.currentActiveTag = null; // Initialize active tag property
         this.selectedTarget = 'tile'; // Default to 'tile' or any other desired default
+        this.isInitialized = false;  // Flag for header tile button setup
 
     }
 
@@ -84,6 +85,13 @@ export class TotMForm extends FormApplication {
             updateCurrentEffects(this.currentTile); // Update current effects on render
         } else {
             console.warn("No current tile selected.");
+        }
+
+        // Initialize tiles only once (HACK)
+        // There is probably a better way to do this...
+        if (!this.isInitialized) {
+            await initializeTiles(this);
+            this.isInitialized = true; // Mark as initialized
         }
     }
 
