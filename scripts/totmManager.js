@@ -111,6 +111,27 @@ export class TotMForm extends FormApplication {
         }
     }
 
+    _showTab(tabName) {
+        const contents = document.querySelectorAll('.tab-content');
+        contents.forEach(content => {
+            content.style.display = content.getAttribute('data-tab') === tabName ? 'block' : 'none';
+        });
+
+        this.selectedTarget = tabName;
+        this._highlightActiveTab(tabName);
+    }
+
+    _highlightActiveTab(tabName) {
+        const tabButtons = document.querySelectorAll('.tabs .item');
+        tabButtons.forEach(button => {
+            if (button.getAttribute('data-tab') === tabName) {
+                button.classList.add('active');
+            } else {
+                button.classList.remove('active');
+            }
+        });
+    }
+
     setActiveTile(tileName) {
         const tile = this.tiles.find(t => t.name === tileName);
         if (tile) {
