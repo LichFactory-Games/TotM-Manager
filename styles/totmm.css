@@ -50,6 +50,30 @@
     border-width: 2px;
 }
 
+button#generate-tiles {
+  transform: translateY(-1px); /* Move the button up by 5 pixels */
+        display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    text-decoration: none;
+    width: 2em;  /* Adjust width to be slightly larger than the icon */
+    height: 2em; /* Adjust height to be slightly larger than the icon */
+    border: 1px solid #666; /* Optional: Add a border */
+    border-radius: 4px; /* Optional: Add rounded corners */
+    background-color: inherit;
+    font-size: 1em; /* Icon size */
+    cursor: pointer; /* Pointer cursor on hover */
+    padding: 0;
+}
+
+button#generate-tiles i {
+    font-size: 1em; /* Ensure the icon size fits well */
+    margin: 0;
+    padding: 0;
+}
+
+
 button.delete-tile {
     display: inline-flex;
     align-items: center;
