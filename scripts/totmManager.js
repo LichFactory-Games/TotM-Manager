@@ -42,14 +42,14 @@ export class TotMForm extends FormApplication {
         });
     }
 
-    getData() {
-        return {
-            tiles: this.tiles || [],
-            currentTileIndex: this.currentTileIndex || 0,
-            paths: this.currentTile ? this.currentTile.document.getFlag('core', 'imagePaths') : [],
-            imgIndex: this.currentTile ? this.currentTile.document.getFlag('core', 'imgIndex') : 0
-        };
-    }
+ getData() {
+    return {
+        tiles: this.tiles ? this.tiles.sort((a, b) => a.order - b.order) : [],
+        currentTileIndex: this.currentTileIndex || 0,
+        paths: this.currentTile ? this.currentTile.document.getFlag('core', 'imagePaths') : [],
+        imgIndex: this.currentTile ? this.currentTile.document.getFlag('core', 'imgIndex') : 0
+    };
+}
 
     activateListeners(html) {
         super.activateListeners(html);

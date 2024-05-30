@@ -42,7 +42,7 @@ function generateFields(instance, tileFieldsContainer, count) {
     const tileId = `tile-${i}-${Date.now()}`;
 
     // Add a new tile to the tiles array with the generated ID
-    instance.tiles.push({ id: tileId, name: '', opacity: 1, tint: '' });
+    instance.tiles.push({ id: tileId, name: '', opacity: 1, tint: '', order: i });
   }
 
   console.log("Generated tile fields:", instance.tiles);
@@ -54,6 +54,7 @@ export async function loadTileData(instance) {
     const name = tile.document.getFlag('core', 'tileName') || '';
     const opacity = tile.document.getFlag('core', 'opacity') || 1;
     const tint = tile.document.getFlag('core', 'tint') || '';
+    const order = tile.document.getFlag('core', 'order') || 0; // Add order attribute
     const imagePaths = tile.document.getFlag('core', 'imagePaths') || [];
 
     // Only return tiles that have a valid name
@@ -73,6 +74,8 @@ export async function clearTileFlags(instance) {
     await tile.document.unsetFlag('core', 'tileName');
     await tile.document.unsetFlag('core', 'opacity');
     await tile.document.unsetFlag('core', 'tint');
+    await tile.document.unsetFlag('core', 'order');
+
   }
   instance.tiles = []; // Clear the instance's tile data
   console.log('Tile flags cleared and instance tiles reset.');
@@ -97,8 +100,9 @@ export async function saveTileData(instance, html) {
       const name = $tileField.find(`input[name="tile-name-${index}"]`).val();
       const opacity = $tileField.find(`input[name="tile-opacity-${index}"]`).val();
       const tint = $tileField.find(`input[name="tile-tint-${index}"]`).val();
+      const order = $tileField.attr('data-order');
 
-      tileData.push({ name, opacity, tint });
+      tileData.push({ name, opacity, tint, order });
     });
 
     instance.tiles = tileData;
@@ -170,6 +174,7 @@ function updateTileFields(instance) {
     const tileField = document.createElement('div');
     tileField.classList.add('tile-field');
     tileField.setAttribute('data-index', index);
+    tileField.setAttribute('data-order', tile.order); // Store the order attribute
     tileField.setAttribute('draggable', 'true'); // Ensure the tile field is draggable
     tileField.style.display = 'flex';
     tileField.style.alignItems = 'center';
@@ -284,7 +289,7 @@ export async function activateTile(instance, tile) {
     instance.render(true); // Re-render to update UI with new tile data
   } catch (error) {
     console.error("Error controlling tile:", error);
-    ui.notifications.error("Failed to activate tile.");
+    ui.notifications.error("Failed to activate tile; Please add tiles.");
   }
 }
 
@@ -296,17 +301,17 @@ export function deselectActiveTile(instance) {
 
 export async function initializeTiles(instance) {
   if (!instance.currentTile && canvas.tiles.placeables.length > 0) {
-    await activateTile(instance, canvas.tiles.placeables[0]);
+    const sortedTiles = instance.tiles.sort((a, b) => a.order - b.order);
+    await activateTile(instance, sortedTiles[0]);
   }
 }
 
-export function deleteTile(instance, index, html) {
+export async function deleteTile(instance, index, html) {
   // Remove the tile from the instance's tiles array
   instance.tiles.splice(index, 1);
 
   // Update the indices and order of the remaining tiles
   instance.tiles.forEach((tile, idx) => {
-    tile.index = idx;
     tile.order = idx; // Update order to match new index
   });
 
@@ -315,6 +320,6 @@ export function deleteTile(instance, index, html) {
   updateStageButtons(instance);
 
   // Save the updated tile data
-  saveTileData(instance, html);
+  await saveTileData(instance, html);
 
 }
