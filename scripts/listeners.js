@@ -33,10 +33,10 @@ export function activateGeneralListeners(instance, html) {
 
     html.find('#save-tiles').click(() => saveTileData(instance, html));
 
-    // Add a listener for the delete button
     html.find('#tile-fields-container').on('click', '.delete-tile', event => {
         const index = parseInt($(event.currentTarget).data('index'));
-        deleteTile(instance, index);
+      deleteTile(instance, index, html);
+
     });
 
     loadTileData(instance);

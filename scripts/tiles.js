@@ -58,7 +58,7 @@ export async function loadTileData(instance) {
 
     // Only return tiles that have a valid name
     if (name) {
-        return { name, opacity, tint };
+      return { name, opacity, tint };
     }
   }).filter(tile => tile !== undefined); // Filter out undefined entries
 
@@ -188,26 +188,31 @@ function updateTileFields(instance) {
 }
 
 export function updateStageButtons(instance) {
-  const stageButtonsContainer = document.querySelector('.stage-buttons-container');
-  if (!stageButtonsContainer) {
+  // Select all elements with the class 'stage-buttons-container'
+  const stageButtonsContainers = document.querySelectorAll('.stage-buttons-container');
+
+  if (!stageButtonsContainers.length) {
     console.warn('Stage buttons container not found.');
     return;
   }
 
-  stageButtonsContainer.innerHTML = ''; // Clear existing buttons
+  // Loop through each container and update its buttons
+  stageButtonsContainers.forEach(stageButtonsContainer => {
+    stageButtonsContainer.innerHTML = ''; // Clear existing buttons
 
-  instance.tiles.forEach((tile, index) => {
-    if (tile.name) { // Only create buttons for tiles with names
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.classList.add('tile-button');
-      button.dataset.tileName = tile.name;
-      button.textContent = tile.name || `Tile ${index + 1}`;
-      stageButtonsContainer.appendChild(button);
+    instance.tiles.forEach((tile, index) => {
+      if (tile.name) { // Only create buttons for tiles with names
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.classList.add('tile-button');
+        button.dataset.tileName = tile.name;
+        button.textContent = tile.name || `Tile ${index + 1}`;
+        stageButtonsContainer.appendChild(button);
 
-      // Debugging: Log number of buttons created
-      console.log(`Created button for tile: ${tile.name}`);
-    }
+        // Debugging: Log number of buttons created
+        console.log(`Created button for tile: ${tile.name}`);
+      }
+    });
   });
 }
 
@@ -230,38 +235,38 @@ export function switchToTileByTag(instance, tag) {
 }
 
 export async function loadTileImages(instance, tile) {
-    if (!tile) {
-        console.error("No tile provided or tile is undefined.");
-        ui.notifications.warn("No tile provided or tile is undefined.");
-        return;
+  if (!tile) {
+    console.error("No tile provided or tile is undefined.");
+    ui.notifications.warn("No tile provided or tile is undefined.");
+    return;
+  }
+
+  if (!tile.document) {
+    console.error("Tile does not have a document property:", tile);
+    ui.notifications.warn("Tile does not have a document property.");
+    return;
+  }
+
+  // Fetch the image paths stored in the tile's flags
+  let loadedPaths = tile.document.getFlag('core', 'imagePaths') || [];
+
+  // Prepare the image paths for display
+  instance.imagePaths = loadedPaths.map(path => {
+    let displayPath; // This will hold the filename for display purposes
+    if (typeof path === 'string') {  // Handle legacy or incorrectly saved paths
+      displayPath = path.split('/').pop(); // Extract filename from the full path
+      return { img: path, displayImg: displayPath, tags: [] };
+    } else {
+      displayPath = path.img.split('/').pop(); // Ensure to handle object structured paths
+      return { ...path, displayImg: displayPath };
     }
+  });
+  console.log("TotM - Loaded image paths for tile:", instance.imagePaths);
 
-    if (!tile.document) {
-        console.error("Tile does not have a document property:", tile);
-        ui.notifications.warn("Tile does not have a document property.");
-        return;
-    }
-
-    // Fetch the image paths stored in the tile's flags
-    let loadedPaths = tile.document.getFlag('core', 'imagePaths') || [];
-
-    // Prepare the image paths for display
-    instance.imagePaths = loadedPaths.map(path => {
-        let displayPath; // This will hold the filename for display purposes
-        if (typeof path === 'string') {  // Handle legacy or incorrectly saved paths
-            displayPath = path.split('/').pop(); // Extract filename from the full path
-            return { img: path, displayImg: displayPath, tags: [] };
-        } else {
-            displayPath = path.img.split('/').pop(); // Ensure to handle object structured paths
-            return { ...path, displayImg: displayPath };
-        }
-    });
-    console.log("TotM - Loaded image paths for tile:", instance.imagePaths);
-
-    // Call the render method to update the UI with loaded images
-    instance.render(true);
-    // Initial call to update the button state
-    setTimeout(() => updateActiveTileButton(instance), 10);  // Delay the update call to ensure DOM has updated
+  // Call the render method to update the UI with loaded images
+  instance.render(true);
+  // Initial call to update the button state
+  setTimeout(() => updateActiveTileButton(instance), 10);  // Delay the update call to ensure DOM has updated
 }
 
 export async function activateTile(instance, tile) {
@@ -284,27 +289,32 @@ export async function activateTile(instance, tile) {
 }
 
 export function deselectActiveTile(instance) {
-    instance.currentTile = null;
-    instance.currentTileIndex = null;
-    instance.render(true);
+  instance.currentTile = null;
+  instance.currentTileIndex = null;
+  instance.render(true);
 }
 
 export async function initializeTiles(instance) {
-    if (!instance.currentTile && canvas.tiles.placeables.length > 0) {
-        await activateTile(instance, canvas.tiles.placeables[0]);
-    }
+  if (!instance.currentTile && canvas.tiles.placeables.length > 0) {
+    await activateTile(instance, canvas.tiles.placeables[0]);
+  }
 }
 
-export function deleteTile(instance, index) {
-    // Remove the tile from the instance's tiles array
-    instance.tiles.splice(index, 1);
+export function deleteTile(instance, index, html) {
+  // Remove the tile from the instance's tiles array
+  instance.tiles.splice(index, 1);
 
-    // Update the indices of the remaining tiles
-    instance.tiles.forEach((tile, idx) => {
-        tile.index = idx;
-    });
+  // Update the indices and order of the remaining tiles
+  instance.tiles.forEach((tile, idx) => {
+    tile.index = idx;
+    tile.order = idx; // Update order to match new index
+  });
 
-    // Update the tile fields and stage buttons
-    updateTileFields(instance);
-    updateStageButtons(instance);
+  // Update the tile fields and stage buttons
+  updateTileFields(instance);
+  updateStageButtons(instance);
+
+  // Save the updated tile data
+  saveTileData(instance, html);
+
 }
