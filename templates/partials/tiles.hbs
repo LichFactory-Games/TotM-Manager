@@ -11,7 +11,8 @@
 
 <div id="tile-fields-container">
   {{#each tiles as |tile index|}}
-    <div class="tile-field" data-index="{{index}}" style="display: flex; align-items: center; margin-bottom: 10px;">
+  <div class="tile-field" data-index="{{index}}" style="display: flex; align-items: center; margin-bottom: 10px;">
+      <span class="handle" style="cursor: move; margin-right: 5px;">&#9776;</span>
       <input type="text" name="tile-name-{{index}}" placeholder="Tile Name" value="{{tile.name}}" style="margin-right: 10px;">
       <input type="range" name="tile-opacity-{{index}}" min="0" max="1" step="0.01" value="{{tile.opacity}}" style="margin-right: 10px;">
       <input type="color" name="tile-tint-{{index}}" value="{{tile.tint}}" style="margin-right: 10px;">

@@ -28,6 +28,7 @@ function generateFields(instance, tileFieldsContainer, count) {
   for (let i = 0; i < count; i++) {
     const tileField = $(`
             <div class="tile-field" data-index="${i}" style="display: flex; align-items: center; margin-bottom: 10px;">
+                <span class="handle" data-index="handle-${i}" style="cursor: move; margin-right: 5px;">&#9776;</span>
                 <input type="text" name="tile-name-${i}" placeholder="Tile Name" style="margin-right: 10px;">
                 <input type="range" name="tile-opacity-${i}" min="0" max="1" step="0.01" style="margin-right: 10px;">
                 <input type="color" name="tile-tint-${i}" style="margin-right: 10px;">
@@ -169,11 +170,13 @@ function updateTileFields(instance) {
     const tileField = document.createElement('div');
     tileField.classList.add('tile-field');
     tileField.setAttribute('data-index', index);
+    tileField.setAttribute('draggable', 'true'); // Ensure the tile field is draggable
     tileField.style.display = 'flex';
     tileField.style.alignItems = 'center';
     tileField.style.marginBottom = '10px';
 
     tileField.innerHTML = `
+            <span class="handle" data-index="handle-${index}" style="cursor: move; margin-right: 5px;">&#9776;</span>
         <input type="text" name="tile-name-${index}" placeholder="Tile Name" value="${tile.name}" style="margin-right: 10px;">
         <input type="range" name="tile-opacity-${index}" min="0" max="1" step="0.01" value="${tile.opacity}" style="margin-right: 10px;">
         <input type="color" name="tile-tint-${index}" value="${tile.tint}" style="margin-right: 10px;">
