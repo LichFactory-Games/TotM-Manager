@@ -4,55 +4,55 @@
 }
 
 
-.tabs {
+.totm-manager .tabs {
     margin-bottom: 10px; /* Adjust as needed for spacing */
 }
 
-.tabs .item {
+.totm-manager .tabs .item {
     padding: 10px 15px 5px 15px; /* Adjust padding as needed */
     cursor: pointer;
     text-align: center;
     position: relative; /* Required for the underline positioning */
 }
 
-.tabs .item.active {
+.totm-manager .tabs .item.active {
     background-color: var(--color-selected); /* Foundry VTT's selected color */
     border-bottom: 2px solid var(--color-underline-header); /* Optional: highlight the border */
     margin-bottom: -2px; /* Adjust to counter the border-bottom height */
 }
 
-.tabs .item:not(.active):hover {
+.totm-manager .tabs .item:not(.active):hover {
     background-color: var(--color-background-hover); /* Optional: hover effect */
 }
 
 
-.stage-buttons-container {
+.totm-manager .stage-buttons-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Create responsive grid columns */
     gap: 5px; /* Space between buttons */
 }
 
-.tile-button {
+.totm-manager .tile-button {
     text-align: center; /* Center the text inside buttons */
     border-radius: 4px; /* Rounded corners */
     cursor: pointer; /* Pointer cursor on hover */
 }
 
-.tile-button:only-child {
+.totm-manager .tile-button:only-child {
     width: 100%; /* Make the single button fill the container */
 }
-.tile-button:hover {
-  background-color: #e0e0e0; /* Background color on hover */
+.totm-manager .tile-button:hover {
+    background-color: #e0e0e0; /* Background color on hover */
 }
 
-.active-button {
+.totm-manager .active-button {
     border-color: var(--color-border-highlight);
     border-width: 2px;
 }
 
-button#generate-tiles {
-  transform: translateY(-1px); /* Move the button up by 5 pixels */
-        display: inline-flex;
+.totm-manager button#generate-tiles {
+    transform: translateY(-1px); /* Move the button up by 5 pixels */
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     color: #666;
@@ -67,14 +67,13 @@ button#generate-tiles {
     padding: 0;
 }
 
-button#generate-tiles i {
+.totm-manager button#generate-tiles i {
     font-size: 1em; /* Ensure the icon size fits well */
     margin: 0;
     padding: 0;
 }
 
-
-button.delete-tile {
+.totm-manager button.delete-tile {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -91,25 +90,25 @@ button.delete-tile {
     padding: 0;
 }
 
-button.delete-tile i {
+.totm-manager button.delete-tile i {
     font-size: 1em; /* Ensure the icon size fits well */
     margin: 0;
     padding: 0;
 }
 
-input[type="color" i] {
-     -webkit-appearance: none;
-     -moz-appearance: none;
-     appearance: none;
-     background: transparent;
-     border: none;
-     width: 25px;
-     height: 25px;
-     border-radius: 3px;
-     cursor: pointer;
+.totm-manager input[type="color" i] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: none;
+    width: 25px;
+    height: 25px;
+    border-radius: 3px;
+    cursor: pointer;
 }
 
- .color-picker {
+ .totm-manager .color-picker {
      -webkit-appearance: none;
      -moz-appearance: none;
      appearance: none;
@@ -121,26 +120,26 @@ input[type="color" i] {
      cursor: pointer;
  }
 
- .color-picker::-webkit-color-swatch-wrapper {
-     padding: 0;
- }
- .color-picker::-webkit-color-swatch {
-     border: none;
- }
+.totm-manager .color-picker::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+.totm-manager .color-picker::-webkit-color-swatch {
+    border: none;
+}
 
- #search-results img {
-     width: 50%;
-     height: auto; /* Maintain aspect ratio */
-     cursor: pointer; /* Change cursor to indicate clickability */
- }
+.totm-manager #search-results img {
+    width: 50%;
+    height: auto; /* Maintain aspect ratio */
+    cursor: pointer; /* Change cursor to indicate clickability */
+}
 
-#search-container {
+.totm-manager #search-container {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.add-image-container {
+.totm-manager .add-image-container {
     display: flex;
     justify-content: space-between; /* Space between elements */
     align-items: center;
@@ -152,7 +151,7 @@ input[type="color" i] {
     box-sizing: border-box;
 }
 
-.add-image-container p {
+.totm-manager .add-image-container p {
     font-size: 16px;
     font-weight: 600;
     font-variant: small-caps;
@@ -163,37 +162,37 @@ input[type="color" i] {
 }
 
 
-.add-image-container button:hover {
+.totm-manager .add-image-container button:hover {
     text-decoration: none;
 }
 
-.add-image-container button::before {
+.totm-manager .add-image-container button::before {
     font-family: "Font Awesome 5 Free";
     font-weight: 900;
     margin-right: 5px;
 }
 
-.add-folder::before {
+.totm-manager .add-folder::before {
     content: "\f07b"; /* FontAwesome folder icon */
 }
 
-.add-image:before {
+.totm-manager .add-image:before {
     content: "\f055"; /* FontAwesome plus icon */
 }
 
-.add-image-container .prev-image::before {
-  content: "\f060"; /* FontAwesome left arrow icon */
+.totm-manager .add-image-container .prev-image::before {
+    content: "\f060"; /* FontAwesome left arrow icon */
 }
 
-.add-image-container .next-image::before {
-  content: "\f061"; /* FontAwesome right arrow icon */
+.totm-manager .add-image-container .next-image::before {
+    content: "\f061"; /* FontAwesome right arrow icon */
 }
 
-a.add-folder, a.add-image {
+.totm-manager a.add-folder, a.add-image {
     color: #666;
 }
 
-a.prev-image, a.next-image, .prev-image, .next-image {
+.totm-manager a.prev-image, a.next-image, .prev-image, .next-image {
     color: #666;
     text-align: left;
     padding-right: 5px;
@@ -201,7 +200,7 @@ a.prev-image, a.next-image, .prev-image, .next-image {
     margin: 0;
 }
 
-.add-folder {
+.totm-manager .add-folder {
     padding-left: 5px;
     text-align: left;
     display: inline;
@@ -213,22 +212,22 @@ a.prev-image, a.next-image, .prev-image, .next-image {
     border: none;
 }
 
- .add-image {
-     text-align: left;
-     display: inline;
-     align-items: center;
-     cursor: pointer;
-     color: #666;
-     text-decoration: none;
-     font-size: 12px;
-     border: none;
- }
+.totm-manager .add-image {
+    text-align: left;
+    display: inline;
+    align-items: center;
+    cursor: pointer;
+    color: #666;
+    text-decoration: none;
+    font-size: 12px;
+    border: none;
+}
 
-.add-folder i, .add-image i {
+.totm-manager .add-folder i, .add-image i {
     margin-right: 5px;
 }
 
-.delete-image {
+.totm-manager .delete-image {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -245,53 +244,53 @@ a.prev-image, a.next-image, .prev-image, .next-image {
     padding: 0;
 }
 
-.delete-image i {
+.totm-manager .delete-image i {
     font-size: 1em; /* Ensure the icon size fits well */
     margin: 0;
     padding: 0;
 }
 
- .delete-all-paths {
-    text-align: right;
+ .totm-manager .delete-all-paths {
+     text-align: right;
      display: inline-flex;
-    align-items: center;
-    justify-content: center;
+     align-items: center;
+     justify-content: center;
      color: #666;
      font-size: 12px;
-    text-decoration: none;
-    width: 3em;  /* Adjust width to be slightly larger than the icon */
-    height: 2em; /* Adjust height to be slightly larger than the icon */
-    border: 1px solid #666; /* Optional: Add a border */
-    border-radius: 4px; /* Optional: Add rounded corners */
-    background-color: inherit;
-    font-size: 1em; /* Icon size */
+     text-decoration: none;
+     width: 3em;  /* Adjust width to be slightly larger than the icon */
+     height: 2em; /* Adjust height to be slightly larger than the icon */
+     border: 1px solid #666; /* Optional: Add a border */
+     border-radius: 4px; /* Optional: Add rounded corners */
+     background-color: inherit;
+     font-size: 1em; /* Icon size */
      cursor: pointer; /* Pointer cursor on hover */
      padding: 10px;
  }
 
-.delete-all-paths i {
+.totm-manager .delete-all-paths i {
     text-align: right;
     font-size: 1em; /* Ensure the icon size fits well */
     padding: 0;
-    }
+}
 
-.delete-image .delete-all-paths:hover {
+.totm-manager .delete-image .delete-all-paths:hover {
     background-color: #ccc; /* Optional: Change background on hover */
 }
 
-.delete-all-paths::before {
-  content: "\f1f8"; /* FontAwesome trash icon */
+.totm-manager .delete-all-paths::before {
+    content: "\f1f8"; /* FontAwesome trash icon */
 }
 
-.tile-field input[type="text"] {
-  width: 150px;
+.totm-manager .tile-field input[type="text"] {
+    width: 150px;
 }
 
-.tile-field input[type="range"] {
-  width: 100px;
+.totm-manager .tile-field input[type="range"] {
+    width: 100px;
 }
 
-.drag-over {
-  border: 2px dashed #000;
+.totm-manager .drag-over {
+    border: 2px dashed #000;
     background-color: var(--color-hightlight);
 }
