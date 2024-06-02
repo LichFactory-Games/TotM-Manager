@@ -59,42 +59,90 @@ export function getFilteredTiles() {
 }
 
 export function updateActiveTileButton(instance) {
-  // Ensure a current tile and its document are available
+    console.log("updateActiveTileButton called");
   if (!instance.currentTile || !instance.currentTile.document) {
     console.warn("No currently active tile or missing document property.");
-    return; // Exit the function to prevent further errors
-  }
-
-  // Use Tagger to get the tile's tag
-  const tileTag = instance.currentTile.document.getFlag('core', 'tileName');
-
-  if (!tileTag) {
-    console.warn("Current tile does not have a 'tileName' tag.");
     return;
   }
 
-  // Update the active button based on the tag
-  $('.tile-button').removeClass('active-button active');
-  const selector = `.tile-button[data-tile-id="${instance.currentTile.id}"]`;
-  $(selector).addClass('active-button active');
-  console.log("Updating active tile button");
+  // Use Tagger to get the tile's tag
+  const tileTag = Tagger.getTags(instance.currentTile)[0]; // Assuming the first tag is the tile name
+
+  if (!tileTag) {
+    console.warn("Current tile does not have a tag.");
+    return;
+  }
+
+  // Log the current tile and tileTag
+  console.log(`Current tile ID: ${instance.currentTile.id}, Tile tag: ${tileTag}`);
+
+  // Remove the active class from all tile buttons
+  $('.tile-button').removeClass('active-button');
+
+  // Log to ensure buttons are being targeted
+  console.log("Removed active class from all tile buttons");
+
+  // Select the button corresponding to the current tile
+  const selector = `.tile-button[data-tile-name="${tileTag}"]`;
+  console.log("Selecting button with selector: ", selector);
+
+  const button = $(selector);
+  if (button.length === 0) {
+    console.warn("No button found with selector: ", selector);
+    return;
+  }
+
+  // Add the active class to the selected button
+  button.addClass('active-button');
+  console.log("Button after adding class:", button[0]);
+  console.log("Added active class to button with selector: ", selector);
 }
+
+
+// export function updateActiveTileButton(instance) {
+//   // Ensure a current tile and its document are available
+//   if (!instance.currentTile || !instance.currentTile.document) {
+//     console.warn("No currently active tile or missing document property.");
+//     return; // Exit the function to prevent further errors
+//   }
+
+//   // Use Tagger to get the tile's tag
+//   const tileTag = instance.currentTile.document.getFlag('core', 'tileName');
+
+//   if (!tileTag) {
+//     console.warn("Current tile does not have a 'tileName' tag.");
+//     return;
+//   }
+
+//   // Update the active button based on the tag
+//   $('.tile-button').removeClass('active-button active');
+//   const selector = `.tile-button[data-tile-name="${tileTag}"]`;
+//   $(selector).addClass('active-button active');
+//   console.log("Updating active tile button");
+// }
 
 /**
  * Assigns a unique order number to each tile on the canvas that has an undefined order.
  * Preserves existing order values.
  */
 export function assignOrderToTiles() {
-  let maxOrder = Math.max(...canvas.tiles.placeables.map(tile => Number(tile.document.getFlag('core', 'order')) || 0), 0);
+  // Get all existing orders
+  let existingOrders = new Set(canvas.tiles.placeables.map(tile => Number(tile.document.getFlag('core', 'order'))).filter(order => order !== undefined && order !== null));
 
+  // Find the max order value
+  let maxOrder = existingOrders.size > 0 ? Math.max(...existingOrders) : 0;
+
+  // Assign orders to tiles without one
   canvas.tiles.placeables.forEach(tile => {
-    const order = tile.document.getFlag('core', 'order');
-    if (order === undefined || order === null) {
+    let order = Number(tile.document.getFlag('core', 'order'));
+    if (order === undefined || order === null || existingOrders.has(order)) {
       maxOrder += 1;
       tile.document.setFlag('core', 'order', maxOrder);
+      existingOrders.add(maxOrder);
       console.log(`Set order flag for tile ID: ${tile.id}, Order: ${maxOrder}`);
     }
   });
+  console.log("Assigned unique order numbers to tiles.");
 }
 
 

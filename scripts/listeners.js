@@ -44,13 +44,12 @@ export function activateGeneralListeners(instance, html) {
   });
 
   html.find('.stage-buttons-container').on('click', '.tile-button', async event => {
-    const tileId = event.currentTarget.dataset.tileId;
-    console.log(`Switching to tile with ID: ${tileId}`);
     const tileName = event.currentTarget.dataset.tileName;
+    console.log(`Switching to tile with Name: ${tileName}`);
     switchToTileByTag(instance, tileName);
-    updateActiveImageButton(instance);
   });
 
+  
   html.find('.set-image-button').click(async event => {
     const index = $(event.currentTarget).data('index');
     await setActiveImage(instance, index);
@@ -339,13 +338,3 @@ async function removeEffect(instance) {
 function updateEffect() {
   // Functionality to update the effect
 }
-
-function debounce(func, wait) {
-  let timeout;
-  return function(...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), wait);
-  };
-}
-
-const debouncedHandleSaveAndRender = debounce(handleSaveAndRender, 300);

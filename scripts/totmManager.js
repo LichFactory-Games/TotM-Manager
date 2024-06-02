@@ -76,49 +76,47 @@ export class TotMForm extends FormApplication {
 
 
   // Ensure the render method properly uses the data
-async render(force = false, options = {}) {
+  async render(force = false, options = {}) {
+    if (!this.rendered) {
+      setTimeout(() => this._initializeTileManager(), 50);
+    }
     super.render(force, options);
           this._initializeTabs();
-
-        // After rendering, load data and update the UI
-      setTimeout(() => this._postRender(), 100);
-
   }
-    // console.log("Rendered MyForm with data:", this.tiles);
+  
 
-      // loadTileData(this);
+  // loadTileData(this);
 
-      // // Populate dropdown on render
-      // await populateEffectsDropdown();
+  // // Populate dropdown on render
+  // await populateEffectsDropdown();
 
-      // // Set the target dropdown to the last selected target
-      // const targetDropdown = document.getElementById('target-dropdown');
-      // if (this.selectedTarget) {
-      //     targetDropdown.value = this.selectedTarget;
-      // }
+  // // Set the target dropdown to the last selected target
+  // const targetDropdown = document.getElementById('target-dropdown');
+  // if (this.selectedTarget) {
+  //     targetDropdown.value = this.selectedTarget;
+  // }
 
-      // // Trigger onTargetChange for the initial target value
-      // const initialTarget = document.getElementById('target-dropdown').value;
-      // onTargetChange({ target: { value: initialTarget } }, this);
+  // // Trigger onTargetChange for the initial target value
+  // const initialTarget = document.getElementById('target-dropdown').value;
+  // onTargetChange({ target: { value: initialTarget } }, this);
 
-      // // Ensure the current tile is set and update current effects
-      // if (this.currentTile) {
-      //     updateCurrentEffects(this.currentTile); // Update current effects on render
-      // } else {
-      //     console.warn("No current tile selected.");
-      // }
+  // // Ensure the current tile is set and update current effects
+  // if (this.currentTile) {
+  //     updateCurrentEffects(this.currentTile); // Update current effects on render
+  // } else {
+  //     console.warn("No current tile selected.");
+  // }
 
-      // // Initialize tiles only once (HACK)
-      // // // There is probably a better way to do this...
-      // if (!this.isInitialized) {
-      //     await initializeTiles(this);
-      //     this.isInitialized = true; // Mark as initialized
-      // }
+  // // Initialize tiles only once (HACK)
+  // // // There is probably a better way to do this...
+  // if (!this.isInitialized) {
+  //     await initializeTiles(this);
+  //     this.isInitialized = true; // Mark as initialized
+  // }
 
-// Custom post-render method
-  async _postRender() {
-    assignOrderToTiles();
-    
+  async _initializeTileManager() {
+    console.log("Initializing Tile Manager...");
+
     console.log("Loading tile data...");
     await loadTileData(this);
 
@@ -127,40 +125,40 @@ async render(force = false, options = {}) {
 
     console.log("Updating tile fields...");
     updateTileFields(this);
-
-    console.log("Rendering completed.");
+    
+    console.log("Initialization completed.");
+  }
+  
+  _initializeTabs() {
+    if (!this._tabs) {
+      this._tabs = new Tabs({
+        navSelector: ".tabs",
+        contentSelector: ".content",
+        initial: "stage",
+        callback: this._onChangeTab.bind(this)
+      });
+      this._tabs.bind(this.element[0]);
+    }
   }
 
-  _initializeTabs() {
-      if (!this._tabs) {
-        this._tabs = new Tabs({
-          navSelector: ".tabs",
-          contentSelector: ".content",
-          initial: "stage",
-          callback: this._onChangeTab.bind(this)
-        });
-        this._tabs.bind(this.element[0]);
+  _showTab(tabName) {
+    const contents = document.querySelectorAll('.tab-content');
+    contents.forEach(content => {
+      content.style.display = content.getAttribute('data-tab') === tabName ? 'block' : 'none';
+    });
+
+    this.selectedTarget = tabName;
+    this._highlightActiveTab(tabName);
+  }
+
+  _highlightActiveTab(tabName) {
+    const tabButtons = document.querySelectorAll('.tabs .item');
+    tabButtons.forEach(button => {
+      if (button.getAttribute('data-tab') === tabName) {
+        button.classList.add('active');
+      } else {
+        button.classList.remove('active');
       }
-    }
-
-    _showTab(tabName) {
-      const contents = document.querySelectorAll('.tab-content');
-      contents.forEach(content => {
-        content.style.display = content.getAttribute('data-tab') === tabName ? 'block' : 'none';
-      });
-
-      this.selectedTarget = tabName;
-      this._highlightActiveTab(tabName);
-    }
-
-    _highlightActiveTab(tabName) {
-      const tabButtons = document.querySelectorAll('.tabs .item');
-      tabButtons.forEach(button => {
-        if (button.getAttribute('data-tab') === tabName) {
-          button.classList.add('active');
-        } else {
-          button.classList.remove('active');
-        }
-      });
-    }
+    });
+  }
   }

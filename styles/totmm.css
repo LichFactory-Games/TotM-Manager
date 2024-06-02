@@ -3,7 +3,6 @@
     display: block;
 }
 
-
 .totm-manager .tabs {
     margin-bottom: 10px; /* Adjust as needed for spacing */
 }
@@ -24,7 +23,6 @@
 .totm-manager .tabs .item:not(.active):hover {
     background-color: var(--color-background-hover); /* Optional: hover effect */
 }
-
 
 .totm-manager .stage-buttons-container {
     display: grid;
@@ -160,7 +158,6 @@
     padding-left: 5px;
     margin: 0;
 }
-
 
 .totm-manager .add-image-container button:hover {
     text-decoration: none;

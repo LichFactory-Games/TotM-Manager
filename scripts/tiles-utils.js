@@ -245,7 +245,6 @@ export function updateStageButtons(instance) {
   });
 }
 
-
 export async function activateTile(instance, tile) {
   if (!tile) {
     console.log("TotM - No tile is currently active.");
@@ -258,9 +257,9 @@ export async function activateTile(instance, tile) {
     console.log(`TotM - Activated tile with ID: ${tile.id}`);
     instance.currentTile = tile; // Update the current tile
     instance.currentTileId = tile.id; // Update the current tile
+    console.log("Check - Current Tile ID: ", instance.currentTileId);
     await loadTileImages(instance, tile); // Load images for the new active tile
     updateActiveTileButton(instance); // Update button states
-    instance.render(true); // Re-render to update UI with new tile data
   } catch (error) {
     console.error("Error controlling tile:", error);
     ui.notifications.error("Failed to activate tile; Please add tiles.");
@@ -273,19 +272,19 @@ export function deselectActiveTile(instance) {
   instance.render(true);
 }
 
-
 export function switchToTileByTag(instance, tag) {
   const tiles = canvas.tiles.placeables;
   console.log(`TotM - Checking for tiles with tag: ${tag}`);
 
-  const tileWithTag = tiles.find(t => Tagger.hasTags(t, tag, { caseInsensitive: true, matchExactly: true }));
+  const tileWithTag = tiles.find(t => Tagger.hasTags(t, [tag], { caseInsensitive: true, matchExactly: true }));
 
   if (tileWithTag) {
     console.log("TotM - Found tile with tag:", tag);
     instance.currentActiveTag = tag; // Update the current active tag
+    instance.currentTile = tileWithTag; // Update the current tile
+    instance.currentTileId = tileWithTag.id; // Update the current tile ID (for reference)
     activateTile(instance, tileWithTag);
     updateActiveTileButton(instance); // Update button states
-    instance.render();
   } else {
     console.log("TotM - No tile found with the specified tag:", tag);
     ui.notifications.error(`No tile found with tag: ${tag}`);

@@ -1,4 +1,5 @@
 // scripts/hooks.js
+import { assignOrderToTiles } from "./utilities.js";
 import { TotMForm } from "./totmManager.js";
 import { saveTileData } from "./tiles.js";
 
@@ -79,4 +80,10 @@ export function initializeHooks() {
   Hooks.on('closeTotMForm', (app, html) => {
     saveTileData(app, html);
   });
+
+  Hooks.on('createTile', (tile, options, userId) => {
+  console.log('Tile created, assigning order...');
+  assignOrderToTiles();
+});
+
 }
