@@ -1,5 +1,6 @@
 // scripts/images.js
-import { saveTileData, loadTileImages } from './tiles.js';
+import { saveTileData } from './tiles.js';
+import { loadTileImages } from './tiles-utils.js';
 
 export async function addImageToTile(instance, tile, imagePath) {
   if (!tile) {

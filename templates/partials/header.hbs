@@ -1,7 +1,7 @@
 <!-- Tile Buttons -->
 <div class="stage-buttons-container">
-  {{#each tiles as |tile index|}}
-  <button type="button" class="tile-button {{#if (eq ../currentTileIndex index)}}active-button{{/if}}" data-tile-name="{{tile.name}}">{{tile.name}}</button>
+  {{#each tiles as |tile|}}
+  <button type="button" class="tile-button {{#if (eq ../currentTileId tile.id)}}active-button{{/if}}" data-tile-id="{{tile.id}}" data-tile-name="{{tile.name}}">{{tile.name}}</button>
   {{/each}}
 </div>
 

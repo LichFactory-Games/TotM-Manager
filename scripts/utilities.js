@@ -31,10 +31,12 @@ export function adjustColor(hex, amount) {
 //  Tiles & Tags   //
 /////////////////////
 
-// Method to find a tile by tagger tag
+// Function to find a tile by its tag
 export function findTileByTag(tag) {
   const tiles = canvas.tiles.placeables;
-  return tiles.find(t => Tagger.hasTags(t, [tag], { caseInsensitive: true }));
+  const foundTile = tiles.find(t => Tagger.hasTags(t, [tag], { caseInsensitive: true }));
+  console.log(`findTileByTag: Looking for tag ${tag}, found: ${foundTile ? foundTile.id : 'none'}`);
+  return foundTile;
 }
 
 export function getFilteredTiles() {
@@ -62,8 +64,48 @@ export function updateActiveTileButton(instance) {
     console.warn("No currently active tile or missing document property.");
     return; // Exit the function to prevent further errors
   }
-  $('.tile-button').removeClass('active-button');
-  const selector = `.tile-button[data-tile-name="${instance.currentTile.document.getFlag('core', 'tileName')}"]`;
-  $(selector).addClass('active-button');
+
+  // Use Tagger to get the tile's tag
+  const tileTag = instance.currentTile.document.getFlag('core', 'tileName');
+
+  if (!tileTag) {
+    console.warn("Current tile does not have a 'tileName' tag.");
+    return;
+  }
+
+  // Update the active button based on the tag
+  $('.tile-button').removeClass('active-button active');
+  const selector = `.tile-button[data-tile-id="${instance.currentTile.id}"]`;
+  $(selector).addClass('active-button active');
   console.log("Updating active tile button");
 }
+
+/**
+ * Assigns a unique order number to each tile on the canvas that has an undefined order.
+ * Preserves existing order values.
+ */
+export function assignOrderToTiles() {
+  let maxOrder = Math.max(...canvas.tiles.placeables.map(tile => Number(tile.document.getFlag('core', 'order')) || 0), 0);
+
+  canvas.tiles.placeables.forEach(tile => {
+    const order = tile.document.getFlag('core', 'order');
+    if (order === undefined || order === null) {
+      maxOrder += 1;
+      tile.document.setFlag('core', 'order', maxOrder);
+      console.log(`Set order flag for tile ID: ${tile.id}, Order: ${maxOrder}`);
+    }
+  });
+}
+
+
+// export function updateActiveTileButton(instance) {
+//   // Ensure a current tile and its document are available
+//   if (!instance.currentTile || !instance.currentTile.document) {
+//     console.warn("No currently active tile or missing document property.");
+//     return; // Exit the function to prevent further errors
+//   }
+//   $('.tile-button').removeClass('active-button');
+//   const selector = `.tile-button[data-tile-name="${instance.currentTile.document.getFlag('core', 'tileName')}"]`;
+//   $(selector).addClass('active-button');
+//   console.log("Updating active tile button");
+// }

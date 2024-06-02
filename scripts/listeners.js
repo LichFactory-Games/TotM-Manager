@@ -3,7 +3,8 @@
 /////////////////////////////
 
 import { addImageToTile, addDirectoryToTile, setActiveImage, updateImageTags, cycleImages, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths, performImageSearch, getImageById } from './images.js';
-import { saveTileData, generateTileFields, switchToTileByTag, loadTileData, loadTileImages, deleteTile } from './tiles.js';
+import { saveTileData, generateTileFields, handleSaveAndRender, handleDeleteAndSave, deleteTileData } from './tiles.js';
+import { loadTileData, loadTileImages, updateTileFields, updateStageButtons, switchToTileByTag  } from './tiles-utils.js'
 import { populateTileDropdown, populateImageDropdown, populateEffectsDropdown, applyEffectToTile, applyEffectToImage, removeEffectFromImage, removeEffectFromTile, updateCurrentEffects } from './effects.js';
 
 
@@ -23,34 +24,37 @@ export function activateGeneralListeners(instance, html) {
     }).browse();
   });
 
-  html.find('.save-paths').click(() => saveTileData(instance, html));
+  html.find('.save-paths').click(() => handleSaveAndRender(instance, html));
 
-  html.find('#generate-tiles').click(() => {
+  html.find('#save-tiles').click(() => handleSaveAndRender(instance, html));
+
+  html.find('#generate-tiles').click(async () => {
     const replace = html.find('#replace-tiles').is(':checked');
     const count = parseInt(html.find('#tile-count').val(), 10);
-    generateTileFields(instance, html, { replace, count });
+    await generateTileFields(instance, html, { replace, count });
   });
 
-  html.find('#save-tiles').click(() => saveTileData(instance, html));
 
-  html.find('#tile-fields-container').on('click', '.delete-tile', event => {
-    const order = parseInt($(event.currentTarget).closest('.tile-field').data('order')); // Get the order attribute
-    const index = instance.tiles.findIndex(tile => tile.order === order); // Find the index based on the order
-    deleteTile(instance, index, html);
+  // Event listener for delete button
+  html.find('#tile-fields-container').on('click', '.delete-tile', async event => {
+    const order = parseInt($(event.currentTarget).closest('.tile-field').data('order'), 10); // Get the order attribute
+    console.log(`Deleting tile with order: ${order}`);
+    await deleteTileData(instance, order, html);
+    await handleSaveAndRender(instance, html);  // Ensure the state is saved and re-rendered correctly
   });
 
-  loadTileData(instance);
-
-  html.find('.stage-buttons-container').on('click', '.tile-button', event => {
+  html.find('.stage-buttons-container').on('click', '.tile-button', async event => {
+    const tileId = event.currentTarget.dataset.tileId;
+    console.log(`Switching to tile with ID: ${tileId}`);
     const tileName = event.currentTarget.dataset.tileName;
     switchToTileByTag(instance, tileName);
-    instance.render(true);
     updateActiveImageButton(instance);
   });
 
   html.find('.set-image-button').click(async event => {
     const index = $(event.currentTarget).data('index');
     await setActiveImage(instance, index);
+    handleSaveAndRender(instance, html);
     instance.render(true);
     updateActiveImageButton(instance);
   });
@@ -335,3 +339,13 @@ async function removeEffect(instance) {
 function updateEffect() {
   // Functionality to update the effect
 }
+
+function debounce(func, wait) {
+  let timeout;
+  return function(...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
+
+const debouncedHandleSaveAndRender = debounce(handleSaveAndRender, 300);
