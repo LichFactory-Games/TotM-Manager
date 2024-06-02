@@ -81,39 +81,32 @@ export class TotMForm extends FormApplication {
       setTimeout(() => this._initializeTileManager(), 50);
     }
     super.render(force, options);
-          this._initializeTabs();
+    this._initializeTabs();
+    setTimeout(() => this._initializeEffectsManager(), 100);
+  }
+
+  async _initializeEffectsManager() {
+    // Populate dropdown on render
+    await populateEffectsDropdown();
+
+    // Set the target dropdown to the last selected target
+    const targetDropdown = document.getElementById('target-dropdown');
+    if (this.selectedTarget) {
+      targetDropdown.value = this.selectedTarget;
+    }
+
+    // Trigger onTargetChange for the initial target value
+    const initialTarget = document.getElementById('target-dropdown').value;
+    onTargetChange({ target: { value: initialTarget } }, this);
+
+    // Ensure the current tile is set and update current effects
+    if (this.currentTile) {
+      updateCurrentEffects(this.currentTile); // Update current effects on render
+    } else {
+      console.warn("No current tile selected.");
+    }
   }
   
-
-  // loadTileData(this);
-
-  // // Populate dropdown on render
-  // await populateEffectsDropdown();
-
-  // // Set the target dropdown to the last selected target
-  // const targetDropdown = document.getElementById('target-dropdown');
-  // if (this.selectedTarget) {
-  //     targetDropdown.value = this.selectedTarget;
-  // }
-
-  // // Trigger onTargetChange for the initial target value
-  // const initialTarget = document.getElementById('target-dropdown').value;
-  // onTargetChange({ target: { value: initialTarget } }, this);
-
-  // // Ensure the current tile is set and update current effects
-  // if (this.currentTile) {
-  //     updateCurrentEffects(this.currentTile); // Update current effects on render
-  // } else {
-  //     console.warn("No current tile selected.");
-  // }
-
-  // // Initialize tiles only once (HACK)
-  // // // There is probably a better way to do this...
-  // if (!this.isInitialized) {
-  //     await initializeTiles(this);
-  //     this.isInitialized = true; // Mark as initialized
-  // }
-
   async _initializeTileManager() {
     console.log("Initializing Tile Manager...");
 

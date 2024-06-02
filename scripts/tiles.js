@@ -104,33 +104,6 @@ export async function handleSaveAndRender(instance, html) {
   console.log("Completed handleSaveAndRender");
 }
 
-// export async function deleteTileData(instance, order, html) {
-//   // Find the index of the tile with the given order
-//   console.log("Before deletion, instance.tiles:", instance.tiles);
-
-//   const index = instance.tiles.findIndex(tile => tile.order == order);
-
-//   // Remove the tile field from the HTML container
-//   html.find(`.tile-field[data-order="${order}"]`).remove();  
-//   // Remove the tile from the instance's tiles array
-//   instance.tiles.splice(index, 1);
-//   console.log("After deletion, instance.tiles:", instance.tiles);
-
-//   // Update the order of the remaining tiles
-//   for (let idx = 0; idx < instance.tiles.length; idx++) {
-//     const tile = instance.tiles[idx];
-//     tile.order = idx; // Update order to match new index
-
-//     // Update the order flag in the tile document as well
-//     const foundTile = canvas.tiles.placeables.find(t => t.id === tile.id);
-//     if (foundTile) {
-//       await foundTile.document.setFlag('core', 'order', idx);
-//     }
-//   }
-//   // Log the state of instance.tiles after updating orders
-//   console.log("After updating orders, instance.tiles:", instance.tiles);
-// }
-
 export async function deleteTileData(instance, order, html) {
   if (!instance || !instance.tiles) {
     console.error("Instance or instance.tiles is undefined");

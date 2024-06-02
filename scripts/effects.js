@@ -40,11 +40,14 @@ export function populateTileDropdown(tiles, currentTileId) {
     // Clear the existing options
     tileDropdown.innerHTML = '';
 
-    // Populate the dropdown with tile names and IDs
-    tiles.forEach(tile => {
+    // Filter tiles to include only those with a tileName flag
+    const filteredTiles = tiles.filter(tile => tile.document.getFlag('core', 'tileName'));
+
+    // Populate the dropdown with filtered tile names and IDs
+    filteredTiles.forEach(tile => {
         const option = document.createElement('option');
         option.value = tile.id;
-        const tileName = tile.document.getFlag('core', 'tileName') || `Tile ${tile.id}`; // Use tileName flag or ID if not present
+        const tileName = tile.document.getFlag('core', 'tileName'); // We know tileName exists because of the filter
         option.textContent = tileName;
         tileDropdown.appendChild(option);
     });
@@ -54,7 +57,7 @@ export function populateTileDropdown(tiles, currentTileId) {
         tileDropdown.value = currentTileId;
     }
 
-    console.log("Tile dropdown populated with tiles:", tiles);
+    console.log("Tile dropdown populated with tiles:", filteredTiles);
 }
 
 export async function populateImageDropdown(instance) {
