@@ -281,3 +281,80 @@
     border: 2px dashed #000;
     background-color: var(--color-hightlight);
 }
+
+.dropdown-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.dropdown-container select {
+    width: 100%;
+}
+
+.effect-field {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.effect-target-type,
+.effect-target-name {
+    flex-grow: 1;
+    min-width: 100px;
+    margin-right: 5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 10px;
+    border: 1px solid var(--color-border-light-tertiary);
+    border-radius: 3px;
+    line-height: 25px;
+    height: 25px;
+    display: inline-flex;
+    align-items: center;
+}
+
+.effect-field input[type="text"] {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.effect-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    text-decoration: none;
+    width: 2em;
+    height: 2em;
+    border: 1px solid #666;
+    border-radius: 4px;
+    background-color: inherit;
+    font-size: 1em;
+    cursor: pointer;
+    padding: 0;
+}
+
+.effect-button i {
+    font-size: 1em;
+    margin: 0;
+    padding: 0;
+}
+
+.effect-button:hover {
+    color: #333;
+    border-color: #333;
+}
+
+.effect-button:active {
+    transform: translateY(0);
+}
+
+.section-header {
+    margin-top: 20px;  /* Increase the space above the header */
+    margin-bottom: 20px;  /* Increase the space below the header */
+    /* Optional: Add additional styles for better appearance */
+    font-size: 1.5em;
+    color: #333;
+}
