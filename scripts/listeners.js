@@ -2,6 +2,7 @@
 // // Listener Methods  // //
 /////////////////////////////
 
+import { updateActiveTileButton } from './utilities.js'
 import { addImageToTile, addDirectoryToTile, setActiveImage, updateImageTags, cycleImages, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths, performImageSearch, getImageById } from './images.js';
 import { saveTileData, generateTileFields, handleSaveAndRender, handleDeleteAndSave, deleteTileData } from './tiles.js';
 import { loadTileData, loadTileImages, updateTileFields, updateStageButtons, switchToTileByTag  } from './tiles-utils.js'
@@ -46,9 +47,12 @@ export function activateGeneralListeners(instance, html) {
   html.find('.stage-buttons-container').on('click', '.tile-button', async event => {
     const tileName = event.currentTarget.dataset.tileName;
     console.log(`Switching to tile with Name: ${tileName}`);
-    switchToTileByTag(instance, tileName);
-  });
+    await switchToTileByTag(instance, tileName);
+    instance.render(true);
 
+    // Call updateActiveTileButton after rendering
+    setTimeout(() => updateActiveTileButton(instance), 5);
+  });
   
   html.find('.set-image-button').click(async event => {
     const index = $(event.currentTarget).data('index');
