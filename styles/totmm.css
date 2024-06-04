@@ -48,8 +48,9 @@
     border-width: 2px;
 }
 
-.totm-manager button#generate-tiles {
-    transform: translateY(-1px); /* Move the button up by 5 pixels */
+/* Target buttons within .totm-manager that contain an <i> element */
+.totm-manager button:has(i) {
+    transform: translateY(-1px); /* Move the button up slightly */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -65,33 +66,22 @@
     padding: 0;
 }
 
-.totm-manager button#generate-tiles i {
-    font-size: 1em; /* Ensure the icon size fits well */
+/* Ensure the icon size fits well */
+.totm-manager button i {
+    font-size: 1em;
     margin: 0;
     padding: 0;
 }
 
-.totm-manager button.delete-tile {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: #666;
-    text-decoration: none;
-    width: 2em;  /* Adjust width to be slightly larger than the icon */
-    height: 2em; /* Adjust height to be slightly larger than the icon */
-    border: 1px solid #666; /* Optional: Add a border */
-    border-radius: 4px; /* Optional: Add rounded corners */
-    background-color: inherit;
-    font-size: 1em; /* Icon size */
-    cursor: pointer; /* Pointer cursor on hover */
-    margin-left: 5px;
-    padding: 0;
+/* Add hover effects for better user experience */
+.totm-manager button:has(i):hover {
+    color: #333; /* Change text color on hover */
+    border-color: #333; /* Change border color on hover */
 }
 
-.totm-manager button.delete-tile i {
-    font-size: 1em; /* Ensure the icon size fits well */
-    margin: 0;
-    padding: 0;
+/* Adjust the position when the button is active */
+.totm-manager button:has(i):active {
+    transform: translateY(0);
 }
 
 .totm-manager input[type="color" i] {
