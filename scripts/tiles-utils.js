@@ -1,3 +1,4 @@
+import { NAMESPACE } from './utilities.js';
 import { findTileByTag, updateActiveTileButton } from './utilities.js';
 
 // Helper function to collect tile data
@@ -29,10 +30,10 @@ export function collectImagePaths(container) {
 // Helper function to save tile flags
 export async function saveTileFlags(tile, foundTile, imagePaths) {
   console.log(`Saving flags for tile: ${tile.name}`);
-  await foundTile.document.setFlag('core', 'tileName', tile.name);
-  await foundTile.document.setFlag('core', 'opacity', tile.opacity);
-  await foundTile.document.setFlag('core', 'tint', tile.tint);
-  await foundTile.document.setFlag('core', 'order', tile.order);
+  await foundTile.document.setFlag(NAMESPACE, 'tileName', tile.name);
+  await foundTile.document.setFlag(NAMESPACE, 'opacity', tile.opacity);
+  await foundTile.document.setFlag(NAMESPACE, 'tint', tile.tint);
+  await foundTile.document.setFlag(NAMESPACE, 'order', tile.order);
 
   console.log("Flags saved:", {
     tileName: tile.name,
@@ -43,17 +44,17 @@ export async function saveTileFlags(tile, foundTile, imagePaths) {
 
   
   if (imagePaths) {
-    const existingPaths = await foundTile.document.getFlag('core', 'imagePaths') || [];
+    const existingPaths = await foundTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
     const pathsToSave = imagePaths.map((path, index) => ({
       img: path.img,
       displayImg: path.displayImg,
       tags: path.tags,
       color: path.color || existingPaths[index]?.color
     }));
-    await foundTile.document.setFlag('core', 'imagePaths', pathsToSave);
+    await foundTile.document.setFlag(NAMESPACE, 'imagePaths', pathsToSave);
 
-    const currentImgIndex = await foundTile.document.getFlag('core', 'imgIndex') || 0;
-    await foundTile.document.setFlag('core', 'imgIndex', currentImgIndex >= pathsToSave.length ? pathsToSave.length - 1 : currentImgIndex);
+    const currentImgIndex = await foundTile.document.getFlag(NAMESPACE, 'imgIndex') || 0;
+    await foundTile.document.setFlag(NAMESPACE, 'imgIndex', currentImgIndex >= pathsToSave.length ? pathsToSave.length - 1 : currentImgIndex);
   }
 }
 
@@ -98,26 +99,26 @@ export async function saveTileFlags(tile, foundTile, imagePaths) {
 
 // // Helper function to save tile flags
 // export async function saveTileFlags(tile, foundTile, imagePaths) {
-//   await foundTile.document.setFlag('core', 'tileName', tile.name);
-//   await foundTile.document.setFlag('core', 'opacity', tile.opacity);
-//   await foundTile.document.setFlag('core', 'tint', tile.tint);
-//   await foundTile.document.setFlag('core', 'order', tile.order); // Ensure order is saved
+//   await foundTile.document.setFlag(NAMESPACE, 'tileName', tile.name);
+//   await foundTile.document.setFlag(NAMESPACE, 'opacity', tile.opacity);
+//   await foundTile.document.setFlag(NAMESPACE, 'tint', tile.tint);
+//   await foundTile.document.setFlag(NAMESPACE, 'order', tile.order); // Ensure order is saved
 
 //   if (imagePaths) {
-//     const existingPaths = await foundTile.document.getFlag('core', 'imagePaths') || [];
+//     const existingPaths = await foundTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
 //     const pathsToSave = existingPaths.map((path, index) => ({
 //       img: path.img,
 //       displayImg: path.displayImg,
 //       tags: path.tags,
 //       color: path.color || existingPaths[index]?.color
 //     }));
-//     await foundTile.document.setFlag('core', 'imagePaths', pathsToSave);
-//     const currentImgIndex = await foundTile.document.getFlag('core', 'imgIndex') || 0;
+//     await foundTile.document.setFlag(NAMESPACE, 'imagePaths', pathsToSave);
+//     const currentImgIndex = await foundTile.document.getFlag(NAMESPACE, 'imgIndex') || 0;
 //     if (currentImgIndex >= pathsToSave.length) {
 //       const newIndex = pathsToSave.length > 0 ? pathsToSave.length - 1 : 0;
-//       await foundTile.document.setFlag('core', 'imgIndex', newIndex);
+//       await foundTile.document.setFlag(NAMESPACE, 'imgIndex', newIndex);
 //     } else {
-//       await foundTile.document.setFlag('core', 'imgIndex', currentImgIndex);
+//       await foundTile.document.setFlag(NAMESPACE, 'imgIndex', currentImgIndex);
 //     }
 //   }
 // }
@@ -126,10 +127,10 @@ export async function saveTileFlags(tile, foundTile, imagePaths) {
 export async function clearTileFlags(instance) {
   const tiles = canvas.tiles.placeables;
   for (let tile of tiles) {
-    await tile.document.unsetFlag('core', 'tileName');
-    await tile.document.unsetFlag('core', 'opacity');
-    await tile.document.unsetFlag('core', 'tint');
-    await tile.document.unsetFlag('core', 'order');
+    await tile.document.unsetFlag(NAMESPACE, 'tileName');
+    await tile.document.unsetFlag(NAMESPACE, 'opacity');
+    await tile.document.unsetFlag(NAMESPACE, 'tint');
+    await tile.document.unsetFlag(NAMESPACE, 'order');
 
   }
   instance.tiles = []; // Clear the instance's tile data
@@ -138,11 +139,11 @@ export async function clearTileFlags(instance) {
 
 export async function loadTileData(instance) {
   instance.tiles = canvas.tiles.placeables.map(tile => {
-    const name = tile.document.getFlag('core', 'tileName') || '';
-    const opacity = tile.document.getFlag('core', 'opacity') || 1;
-    const tint = tile.document.getFlag('core', 'tint') || '';
-    const order = Number(tile.document.getFlag('core', 'order')); 
-    const imagePaths = tile.document.getFlag('core', 'imagePaths') || [];
+    const name = tile.document.getFlag(NAMESPACE, 'tileName') || '';
+    const opacity = tile.document.getFlag(NAMESPACE, 'opacity') || 1;
+    const tint = tile.document.getFlag(NAMESPACE, 'tint') || '';
+    const order = Number(tile.document.getFlag(NAMESPACE, 'order'));
+    const imagePaths = tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
 
     // Only return tiles that have a valid name
     if (name.trim() !== '') { // only load tiles w/valid names
@@ -162,7 +163,7 @@ export async function loadTileImages(instance, tile) {
   }
 
   // Fetch the image paths stored in the tile's flags
-  let loadedPaths = tile.document.getFlag('core', 'imagePaths') || [];
+  let loadedPaths = tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
 
   // Prepare the image paths for display
   instance.imagePaths = loadedPaths.map(path => {

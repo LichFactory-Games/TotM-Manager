@@ -1,4 +1,8 @@
 // scripts/utilities.js
+
+// Define namespace
+export const NAMESPACE = 'totm-manager';
+
 export function logMessage(message) {
   console.log(`Theatre of the Mind Manager | ${message}`);
 }
@@ -107,7 +111,7 @@ export function updateActiveTileButton(instance) {
 //   }
 
 //   // Use Tagger to get the tile's tag
-//   const tileTag = instance.currentTile.document.getFlag('core', 'tileName');
+//   const tileTag = instance.currentTile.document.getFlag(NAMESPACE, 'tileName');
 
 //   if (!tileTag) {
 //     console.warn("Current tile does not have a 'tileName' tag.");
@@ -127,17 +131,17 @@ export function updateActiveTileButton(instance) {
  */
 export function assignOrderToTiles() {
   // Get all existing orders
-  let existingOrders = new Set(canvas.tiles.placeables.map(tile => Number(tile.document.getFlag('core', 'order'))).filter(order => order !== undefined && order !== null));
+  let existingOrders = new Set(canvas.tiles.placeables.map(tile => Number(tile.document.getFlag(NAMESPACE, 'order'))).filter(order => order !== undefined && order !== null));
 
   // Find the max order value
   let maxOrder = existingOrders.size > 0 ? Math.max(...existingOrders) : 0;
 
   // Assign orders to tiles without one
   canvas.tiles.placeables.forEach(tile => {
-    let order = Number(tile.document.getFlag('core', 'order'));
+    let order = Number(tile.document.getFlag(NAMESPACE, 'order'));
     if (order === undefined || order === null || existingOrders.has(order)) {
       maxOrder += 1;
-      tile.document.setFlag('core', 'order', maxOrder);
+      tile.document.setFlag(NAMESPACE, 'order', maxOrder);
       existingOrders.add(maxOrder);
       console.log(`Set order flag for tile ID: ${tile.id}, Order: ${maxOrder}`);
     }
@@ -153,7 +157,7 @@ export function assignOrderToTiles() {
 //     return; // Exit the function to prevent further errors
 //   }
 //   $('.tile-button').removeClass('active-button');
-//   const selector = `.tile-button[data-tile-name="${instance.currentTile.document.getFlag('core', 'tileName')}"]`;
+//   const selector = `.tile-button[data-tile-name="${instance.currentTile.document.getFlag(NAMESPACE, 'tileName')}"]`;
 //   $(selector).addClass('active-button');
 //   console.log("Updating active tile button");
 // }

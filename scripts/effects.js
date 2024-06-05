@@ -1,5 +1,4 @@
-console.log("effects.js loaded!");
-
+import { NAMESPACE } from './utilities.js';
 import { hexToDecimal, adjustColor, findTileByTag } from './utilities.js';
 import { getImageById } from './images.js';
 
@@ -42,13 +41,13 @@ export function populateTileDropdown(tiles, currentTileId) {
     tileDropdown.innerHTML = '';
 
     // Filter tiles to include only those with a tileName flag
-    const filteredTiles = tiles.filter(tile => tile.document.getFlag('core', 'tileName'));
+    const filteredTiles = tiles.filter(tile => tile.document.getFlag(NAMESPACE, 'tileName'));
 
     // Populate the dropdown with filtered tile names and IDs
     filteredTiles.forEach(tile => {
         const option = document.createElement('option');
         option.value = tile.id;
-        const tileName = tile.document.getFlag('core', 'tileName'); // We know tileName exists because of the filter
+        const tileName = tile.document.getFlag(NAMESPACE, 'tileName'); // We know tileName exists because of the filter
         option.textContent = tileName;
         tileDropdown.appendChild(option);
     });
@@ -125,12 +124,12 @@ export async function applyEffectToImage(instance, tile, image, effectName) {
         image.effects = imageEffects;
 
         // Save the updated image paths with effects to the tile
-        const imagePaths = await tile.document.getFlag('core', 'imagePaths') || [];
-        const updatedImagePaths = imagePaths.map(imgPath => imgPath.img === image.img ? { ...imgPath, effects: imageEffects } : imgPath);
-        await tile.document.setFlag('core', 'imagePaths', updatedImagePaths);
+      const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+      const updatedImagePaths = imagePaths.map(imgPath => imgPath.img === image.img ? { ...imgPath, effects: imageEffects } : imgPath);
+      await tile.document.setFlag(NAMESPACE, 'imagePaths', updatedImagePaths);
 
-        // Update current effects list
-        updateCurrentEffects(tile);
+      // Update current effects list
+      updateCurrentEffects(tile);
     } else {
         console.warn("TokenMagic module is not active.");
     }
@@ -190,19 +189,19 @@ export async function removeEffectFromImage(instance, tile, image, effectName) {
         image.effects = imageEffects;
 
         // Save the updated image paths with effects to the tile
-        const imagePaths = await tile.document.getFlag('core', 'imagePaths') || [];
-        const updatedImagePaths = imagePaths.map(imgPath => imgPath.img === image.img ? { ...imgPath, effects: imageEffects } : imgPath);
-        await tile.document.setFlag('core', 'imagePaths', updatedImagePaths);
+      const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+      const updatedImagePaths = imagePaths.map(imgPath => imgPath.img === image.img ? { ...imgPath, effects: imageEffects } : imgPath);
+      await tile.document.setFlag(NAMESPACE, 'imagePaths', updatedImagePaths);
 
-        // Update current effects list
-        updateCurrentEffects(tile);
+      // Update current effects list
+      updateCurrentEffects(tile);
     } else {
         console.warn("TokenMagic module is not active.");
     }
 }
 
 function createEffectItem(targetType, targetName, effect, effectId, tile, image = null) {
-  let tileName = tile.document.getFlag('core', 'tileName') || 'Unknown Tile';
+  let tileName = tile.document.getFlag(NAMESPACE, 'tileName') || 'Unknown Tile';
   const effectItem = document.createElement('div');
   effectItem.classList.add('effect-item');
   effectItem.innerHTML = `
@@ -246,7 +245,7 @@ export function updateCurrentEffects(tile) {
   });
 
   // Get image-specific effects
-  const imagePaths = tile.document.getFlag('core', 'imagePaths') || [];
+  const imagePaths = tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
   imagePaths.forEach((image, imageIndex) => {
     const imageEffects = image.effects || [];
     imageEffects.forEach((effect, effectIndex) => {
@@ -353,3 +352,5 @@ export async function removeEffect(instance) {
 export function modifyEffect() {
   // Functionality to update the effect
 }
+
+console.log("effects.js loaded!");

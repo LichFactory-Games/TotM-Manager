@@ -1,4 +1,6 @@
 // scripts/setup.js
+import { NAMESPACE } from './utilities.js';
+
 export async function setupModule() {
     console.log("Theatre of the Mind Manager | Setup module");
 

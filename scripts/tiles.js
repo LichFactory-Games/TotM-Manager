@@ -1,3 +1,4 @@
+import { NAMESPACE } from './utilities.js';
 import { findTileByTag, updateActiveTileButton } from './utilities.js';
 import { collectTileData, collectImagePaths, saveTileFlags, clearTileFlags }  from './tiles-utils.js';
 import { loadTileData, loadTileImages, updateStageButtons, updateTileFields } from './tiles-utils.js';
@@ -139,11 +140,11 @@ export async function deleteTileData(instance, order, html) {
     const foundTile = findTileByTag(tileToDelete.name);
     console.log("Tile delete name: ${foundTile}");
     if (foundTile) {
-      await foundTile.document.unsetFlag('core', 'tileName');
-      await foundTile.document.unsetFlag('core', 'opacity');
-      await foundTile.document.unsetFlag('core', 'tint');
-      await foundTile.document.unsetFlag('core', 'order');
-      await foundTile.document.unsetFlag('core', 'imagePaths');
+      await foundTile.document.unsetFlag(NAMESPACE, 'tileName');
+      await foundTile.document.unsetFlag(NAMESPACE, 'opacity');
+      await foundTile.document.unsetFlag(NAMESPACE, 'tint');
+      await foundTile.document.unsetFlag(NAMESPACE, 'order');
+      await foundTile.document.unsetFlag(NAMESPACE, 'imagePaths');
 
       console.log("Tile Flags Unset!");
     }

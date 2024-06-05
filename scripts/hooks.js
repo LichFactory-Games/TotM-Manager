@@ -1,4 +1,5 @@
 // scripts/hooks.js
+import { NAMESPACE } from './utilities.js';
 import { assignOrderToTiles } from "./utilities.js";
 import { TotMForm } from "./totmManager.js";
 import { saveTileData } from "./tiles.js";

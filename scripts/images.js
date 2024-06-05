@@ -1,4 +1,5 @@
 // scripts/images.js
+import { NAMESPACE } from './utilities.js';
 import { saveTileData } from './tiles.js';
 import { loadTileImages } from './tiles-utils.js';
 
@@ -9,14 +10,14 @@ export async function addImageToTile(instance, tile, imagePath) {
     return;
   }
 
-  let imagePaths = await tile.document.getFlag('core', 'imagePaths') || [];
+  let imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
   imagePaths.push({
     img: imagePath,
     displayImg: imagePath.split('/').pop(),
     tags: []
   });
 
-  await tile.document.setFlag('core', 'imagePaths', imagePaths);
+  await tile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
   instance.imagePaths = imagePaths;  // Update the instance's imagePaths
   console.log("Image paths updated for tile:", imagePaths);
 
@@ -37,10 +38,10 @@ export async function addDirectoryToTile(instance, tile, directoryPath) {
       displayImg: path.split('/').pop(),
       tags: []
     }));
-    let existingPaths = await tile.document.getFlag('core', 'imagePaths') || [];
+    let existingPaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
     existingPaths = existingPaths.concat(newImagePaths);
 
-    await tile.document.setFlag('core', 'imagePaths', existingPaths);
+    await tile.document.setFlag(NAMESPACE, 'imagePaths', existingPaths);
     instance.imagePaths = existingPaths;  // Update the instance's imagePaths
     console.log("Image paths updated for tile:", existingPaths);
 
@@ -52,7 +53,7 @@ export async function addDirectoryToTile(instance, tile, directoryPath) {
 
 export async function setActiveImage(instance, index) {
   try {
-    const imagePaths = await instance.currentTile.document.getFlag('core', 'imagePaths') || [];
+    const imagePaths = await instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
     if (imagePaths.length > index) {
       await activateImage(instance, imagePaths[index], index);
       console.log(`Active image set to index ${index}`);
@@ -65,10 +66,10 @@ export async function setActiveImage(instance, index) {
 }
 
 export function updateImageTags(instance, index, tags) {
-  const imagePaths = instance.currentTile.document.getFlag('core', 'imagePaths') || [];
+  const imagePaths = instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
   if (imagePaths.length > index) {
     imagePaths[index].tags = tags.split(',').map(tag => tag.trim());
-    instance.currentTile.document.setFlag('core', 'imagePaths', imagePaths);
+    instance.currentTile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
   }
 }
 
@@ -80,10 +81,10 @@ export async function activateImage(instance, image, index) {
     }
 
     const tile = instance.currentTile;
-    const imagePaths = await tile.document.getFlag('core', 'imagePaths') || [];
+    const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
 
     // Remove effects of the previous image
-    const previousIndex = await tile.document.getFlag('core', 'imgIndex');
+    const previousIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
     if (previousIndex !== undefined && imagePaths[previousIndex]) {
         const previousImage = imagePaths[previousIndex];
         const previousEffects = previousImage.effects || [];
@@ -105,7 +106,7 @@ export async function activateImage(instance, image, index) {
 
     // Update the tile's texture and flag
     tile.document.update({ 'texture.src': image.img })
-        .then(() => tile.document.setFlag('core', 'imgIndex', index))
+        .then(() => tile.document.setFlag(NAMESPACE, 'imgIndex', index))
         .then(() => {
             ui.notifications.info(`Image ${image.displayImg} activated.`);
             instance.render();
@@ -117,17 +118,17 @@ export async function activateImage(instance, image, index) {
 }
 
 export async function cycleImages(instance, tile, direction) {
-  const imagePaths = await tile.document.getFlag('core', 'imagePaths') || [];
+  const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
   if (imagePaths.length === 0) {
     ui.notifications.warn("No images to cycle. Please add images.");
     return;
   }
-  let currentIndex = await tile.document.getFlag('core', 'imgIndex') || 0;
+  let currentIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex') || 0;
   currentIndex = direction === 'next' ? (currentIndex + 1) % imagePaths.length : (currentIndex - 1 + imagePaths.length) % imagePaths.length;
   const currentImage = imagePaths[currentIndex];
   try {
     await tile.document.update({ 'texture.src': currentImage.img });
-    await tile.document.setFlag('core', 'imgIndex', currentIndex);
+    await tile.document.setFlag(NAMESPACE, 'imgIndex', currentIndex);
     // Apply glow effect or any additional effects here if needed
     console.log("Cycled to new image at index:", currentIndex, "Path:", currentImage.img);
 
@@ -147,13 +148,13 @@ export function updateActiveImageButton(instance) {
     return;
   }
 
-  const imagePaths = instance.currentTile.document.getFlag('core', 'imagePaths');
+  const imagePaths = instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths');
   if (!imagePaths || imagePaths.length === 0) {
     console.warn("No image paths available for the current tile:", instance.currentTile.id);
     return;
   }
 
-  const imageIndex = instance.currentTile.document.getFlag('core', 'imgIndex');
+  const imageIndex = instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
   if (imageIndex === undefined || imageIndex < 0 || imageIndex >= imagePaths.length) {
     console.warn(`Image index is out of bounds or undefined: ${imageIndex}`);
     return;
@@ -185,7 +186,7 @@ export async function reorderPaths(instance, origin, target) {
   console.log("Reordered imagePaths:", instance.imagePaths);
 
   // Save the updated paths to the tile document
-  await instance.currentTile.document.setFlag('core', 'imagePaths', imagePaths);
+  await instance.currentTile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
 }
 
 export async function deleteImageByPath(instance, imagePath) {
@@ -197,7 +198,7 @@ export async function deleteImageByPath(instance, imagePath) {
         console.log("Deleted image:", imagePath);
 
         // Save the updated paths to the tile document
-        await instance.currentTile.document.setFlag('core', 'imagePaths', imagePaths);
+        await instance.currentTile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
 
         // Load tile images to update UI
         await loadTileImages(instance, instance.currentTile);
@@ -209,7 +210,7 @@ export async function deleteAllPaths(instance) {
   console.log("Deleted all image paths");
 
   // Save the cleared paths to the tile document
-  await instance.currentTile.document.setFlag('core', 'imagePaths', []);
+  await instance.currentTile.document.setFlag(NAMESPACE, 'imagePaths', []);
 
   // Update the tile document with a blank texture source
   await instance.currentTile.document.update({'texture.src': null})
@@ -276,7 +277,7 @@ export function getImageById(instance, imageId) {
 // export async function updateTileImage(tile, imageObj, index) {
 //   try {
 //     await tile.document.update({ 'texture.src': imageObj.img });
-//     await tile.document.setFlag('core', 'imgIndex', index);
+//     await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
 //     await applyGlowEffect(tile, index);
 //     const imageTags = imageObj.tags || [];
 //     await toggleFeaturesBasedOnTags(imageTags);

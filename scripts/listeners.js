@@ -2,6 +2,7 @@
 // // Listener Methods  // //
 /////////////////////////////
 
+import { NAMESPACE } from './utilities.js';
 import { updateActiveTileButton } from './utilities.js'
 import { addImageToTile, addDirectoryToTile, setActiveImage, updateImageTags, cycleImages, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths, performImageSearch, getImageById } from './images.js';
 import { saveTileData, generateTileFields, handleSaveAndRender, handleDeleteAndSave, deleteTileData } from './tiles.js';

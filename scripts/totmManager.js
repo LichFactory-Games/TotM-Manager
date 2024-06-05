@@ -1,4 +1,5 @@
 // scripts/totmManager.js
+import { NAMESPACE } from './utilities.js';
 import { assignOrderToTiles } from './utilities.js'
 import { generateTileFields, saveTileData, handleSaveAndRender } from './tiles.js';
 import { loadTileData, updateStageButtons, switchToTileByTag, loadTileImages, updateTileFields } from './tiles-utils.js'
@@ -52,9 +53,9 @@ export class TotMForm extends FormApplication {
       // Return the current tile index, which should match the 'order' if that's how tiles are identified
       currentTileIndex: this.currentTileIndex || 0,
       // Retrieve the 'imagePaths' flag for the current tile
-      paths: this.currentTile ? this.currentTile.document.getFlag('core', 'imagePaths') : [],
+      paths: this.currentTile ? this.currentTile.document.getFlag(NAMESPACE, 'imagePaths') : [],
       // Retrieve the 'imgIndex' flag for the current tile
-      imgIndex: this.currentTile ? this.currentTile.document.getFlag('core', 'imgIndex') : 0
+      imgIndex: this.currentTile ? this.currentTile.document.getFlag(NAMESPACE, 'imgIndex') : 0
     };
   }
 
