@@ -6,7 +6,7 @@ import { updateActiveTileButton } from './utilities.js'
 import { addImageToTile, addDirectoryToTile, setActiveImage, updateImageTags, cycleImages, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths, performImageSearch, getImageById } from './images.js';
 import { saveTileData, generateTileFields, handleSaveAndRender, handleDeleteAndSave, deleteTileData } from './tiles.js';
 import { loadTileData, loadTileImages, updateTileFields, updateStageButtons, switchToTileByTag  } from './tiles-utils.js'
-import { populateTileDropdown, populateImageDropdown, populateEffectsDropdown, applyEffectToTile, applyEffectToImage, removeEffectFromImage, removeEffectFromTile, updateCurrentEffects } from './effects.js';
+import { populateTileDropdown, populateImageDropdown, populateEffectsDropdown, applyEffectToTile, applyEffectToImage, removeEffectFromImage, removeEffectFromTile, updateCurrentEffects, removeEffect, modifyEffect, addEffect, onTargetChange } from './effects.js';
 
 
 export function activateGeneralListeners(instance, html) {
@@ -231,7 +231,7 @@ export function activateEffectEventListeners(instance) {
 
   document.getElementById('add-effect-button').addEventListener('click', () => addEffect(instance));
   document.getElementById('remove-effect-button').addEventListener('click', () => removeEffect(instance));
-  document.getElementById('update-effect-button').addEventListener('click', updateEffect);
+  document.getElementById('update-effect-button').addEventListener('click', modifyEffect);
 
   // Example: Set current tile when a tile is selected
   document.getElementById('tile-dropdown').addEventListener('change', async (event) => {
@@ -247,98 +247,3 @@ export function activateEffectEventListeners(instance) {
   });
 }
 
-export function onTargetChange(event, instance) {
-  const target = event.target.value;
-  instance.selectedTarget = target; // Store the selected target in the instance
-
-  console.log(`Target changed to: ${target}`);
-  console.log(`Current tile:`, instance.currentTile);
-  console.log(`Current image paths:`, instance.imagePaths);
-
-  if (target === 'tile') {
-    document.getElementById('tile-selection').style.display = 'block';
-    document.getElementById('image-selection').style.display = 'none';
-    // Populate tile dropdown
-    const tiles = canvas.tiles.placeables; // Assuming you have access to canvas tiles
-    console.log(`Tiles available:`, tiles);
-    populateTileDropdown(tiles, instance.currentTile?.id);
-  } else if (target === 'image') {
-    document.getElementById('tile-selection').style.display = 'none';
-    document.getElementById('image-selection').style.display = 'block';
-    // Ensure a tile is selected and imagePaths are populated
-    if (!instance.currentTile) {
-      console.error("No tile selected. Please select a tile first.");
-      ui.notifications.warn("No tile selected. Please select a tile first.");
-      return;
-    }
-    if (instance.imagePaths && instance.imagePaths.length > 0) {
-      console.log("Image paths found, populating image dropdown.");
-      populateImageDropdown(instance);
-    } else {
-      console.error("Image paths are not populated or empty.");
-      ui.notifications.warn("No images found for the selected tile. Please add images first.");
-    }
-  }
-}
-
-async function addEffect(instance) {
-  const target = document.getElementById('target-dropdown').value;
-  const effect = document.getElementById('effect-dropdown').value;
-  console.log(`Adding effect: ${effect} to target: ${target}`);
-
-  if (target === 'tile') {
-    const tileId = document.getElementById('tile-dropdown').value;
-    console.log(`Tile ID selected: ${tileId}`);
-    const tile = canvas.tiles.get(tileId);
-    if (tile) {
-      console.log(`Applying effect to tile:`, tile);
-      await applyEffectToTile(tile, effect); // Function to apply effect to the tile
-    } else {
-      console.error("No tile found to apply effect.");
-    }
-  } else if (target === 'image') {
-    const imageId = document.getElementById('image-dropdown').value;
-    console.log(`Image ID selected: ${imageId}`);
-    const image = getImageById(instance, imageId); // Get the image by ID
-    console.log(`Image found:`, image);
-    if (image && instance.currentTile) {
-      console.log(`Applying effect to image:`, image);
-      await applyEffectToImage(instance, instance.currentTile, image, effect); // Function to apply effect to the image
-    } else {
-      console.error("No image found to apply effect or no tile selected.");
-    }
-  }
-}
-
-async function removeEffect(instance) {
-  const target = document.getElementById('target-dropdown').value;
-  const effect = document.getElementById('effect-dropdown').value;
-  console.log(`Removing effect: ${effect} from target: ${target}`);
-
-  if (target === 'tile') {
-    const tileId = document.getElementById('tile-dropdown').value;
-    console.log(`Tile ID selected: ${tileId}`);
-    const tile = canvas.tiles.get(tileId);
-    if (tile) {
-      console.log(`Removing effect from tile:`, tile);
-      await removeEffectFromTile(tile, effect); // Function to remove effect from the tile
-    } else {
-      console.error("No tile found to remove effect.");
-    }
-  } else if (target === 'image') {
-    const imageId = document.getElementById('image-dropdown').value;
-    console.log(`Image ID selected: ${imageId}`);
-    const image = getImageById(instance, imageId); // Get the image by ID
-    console.log(`Image found:`, image);
-    if (image && instance.currentTile) {
-      console.log(`Removing effect from image:`, image);
-      await removeEffectFromImage(instance, instance.currentTile, image, effect); // Function to remove effect from the image
-    } else {
-      console.error("No image found to remove effect or no tile selected.");
-    }
-  }
-}
-
-function updateEffect() {
-  // Functionality to update the effect
-}
