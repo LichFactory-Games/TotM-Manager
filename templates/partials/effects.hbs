@@ -32,10 +32,9 @@
     <span class="effect-target-type" data-index="{{index}}">
   {{{ifThen (eq effect.targetType 'Tile') '<i class="fas fa-square"></i>' '<i class="fas fa-image"></i>'}}}
 </span>
-    </span>
-    <span class="effect-target-name" data-index="{{index}}">{{effect.targetName}}</span>
-    <input type="text" name="effect-name-{{effect.order}}" placeholder="Effect Name" value="{{effect.name}}">
-    <button type="button" class="delete-effect" data-order="{{effect.order}}" style="width: 2.5em; height: 2.5em;"><i class="fas fa-trash"></i></button>
+<span class="effect-target-name" data-index="{{index}}">{{effect.targetName}}</span>
+<span class="effect-name" data-index="{{index}}">{{effect.name}}</span>
+<button type="button" class="delete-effect" data-order="{{effect.order}}"><i class="fas fa-trash"></i></button>
   </div>
   {{/each}}
 </div>

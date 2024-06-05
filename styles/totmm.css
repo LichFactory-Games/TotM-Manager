@@ -304,7 +304,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px; /* Space between effect items */
-    padding: 10px;
+    padding: none;
 
 }
 
@@ -320,21 +320,18 @@
     width: 2em;  /* Adjust width to be slightly larger than the icon */
     height: 2em; /* Adjust height to be slightly larger than the icon */
     border: 1px solid #666; /* Optional: Add a border */
-    background-color: inherit;
     font-size: 1em; /* Icon size */
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: auto;
     border-radius: 3px;
-    background-color: inherit;
-}
+    }
 
 .effect-target-name {
     display: inline-block;
     flex-grow: 1;
     min-width: 100px;
-    max-width: 250px;
+    max-width: 150px;
     margin-right: auto;
     margin-left: 5px;
     padding: 5px;
@@ -350,7 +347,7 @@
     display: inline-block;
     flex-grow: 1;
     min-width: 100px;
-    max-width: 250px;
+    max-width: 150px;
     margin-left: 5px;
     margin-right: 5px;
     padding: 5px;
@@ -368,5 +365,5 @@
 }
 
 .delete-effect:hover {
-    background-color: #ff1a1a;
+    border-color: #ff1a1a;
 }

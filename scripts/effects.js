@@ -202,13 +202,14 @@ export async function removeEffectFromImage(instance, tile, image, effectName) {
 }
 
 function createEffectItem(targetType, targetName, effect, effectId, tile, image = null) {
+  let tileName = tile.document.getFlag('core', 'tileName') || 'Unknown Tile';
   const effectItem = document.createElement('div');
   effectItem.classList.add('effect-item');
   effectItem.innerHTML = `
     <span class="effect-target-type">
       ${targetType === 'Tile' ? '<i class="fas fa-square"></i>' : '<i class="fas fa-image"></i>'}
     </span>
-    <span class="effect-target-name">${targetName}</span>
+    <span class="effect-target-name">${targetType === 'Tile' ? tileName : targetName}</span>
     <span class="effect-name">${effect}</span>
     <button class="delete-effect" data-effect-id="${effectId}"><i class="fas fa-trash"></i></button>
   `;
@@ -220,6 +221,7 @@ function createEffectItem(targetType, targetName, effect, effectId, tile, image 
 
   return effectItem;
 }
+
 
 export function updateCurrentEffects(tile) {
   if (!tile) {
