@@ -135,6 +135,24 @@ export async function applyEffectToImage(instance, tile, image, effectName) {
     }
 }
 
+async function deleteEffect(instance, tile, effectName, image = null) {
+  console.log(`Deleting effect: ${effectName} from target: ${image ? 'image' : 'tile'}`);
+
+   if (!tile) {
+    console.error("No tile provided.");
+    return;
+  }
+
+  if (image) {
+    console.log(`Deleting effect from image:`, image);
+    await removeEffectFromImage(instance, tile, image, effectName); // Function to remove effect from the image
+  } else {
+    console.log(`Deleting effect from tile:`, tile);
+    await removeEffectFromTile(tile, effectName); // Function to remove effect from the tile
+  }
+}
+
+
 export async function removeEffectFromTile(tile, effectName) {
     if (!tile) {
         console.error("No tile provided.");
@@ -183,42 +201,57 @@ export async function removeEffectFromImage(instance, tile, image, effectName) {
     }
 }
 
-export function updateCurrentEffects(tile) {
-    if (!tile) {
-        console.error("No tile provided.");
-        return;
-    }
+function createEffectItem(targetType, targetName, effect, effectId, tile, image = null) {
+  const effectItem = document.createElement('div');
+  effectItem.classList.add('effect-item');
+  effectItem.innerHTML = `
+    <span class="effect-target-type">
+      ${targetType === 'Tile' ? '<i class="fas fa-square"></i>' : '<i class="fas fa-image"></i>'}
+    </span>
+    <span class="effect-target-name">${targetName}</span>
+    <span class="effect-name">${effect}</span>
+    <button class="delete-effect" data-effect-id="${effectId}"><i class="fas fa-trash"></i></button>
+  `;
 
-    const effectsContainer = document.getElementById('current-effects-container'); // Updated ID
-    if (!effectsContainer) {
-        console.error("Current effects container not found.");
-        return;
-    }
+  // Add event listener to delete button
+  effectItem.querySelector('.delete-effect').addEventListener('click', () => {
+    deleteEffect(null, tile, effect, image);
+  });
 
-    // Clear the existing effects list
-    effectsContainer.innerHTML = '';
-
-    // Get tile-wide effects
-    const tileEffects = tile.document.getFlag('totm-manager', 'tileEffects') || [];
-    tileEffects.forEach(effect => {
-        const effectItem = document.createElement('div');
-        effectItem.textContent = `Tile-wide effect: ${effect}`;
-        effectsContainer.appendChild(effectItem);
-    });
-
-    // Get image-specific effects
-    const imagePaths = tile.document.getFlag('core', 'imagePaths') || [];
-    imagePaths.forEach(image => {
-        const imageEffects = image.effects || [];
-        imageEffects.forEach(effect => {
-            const effectItem = document.createElement('div');
-            effectItem.textContent = `Image-specific effect: ${effect} on ${image.displayImg}`;
-            effectsContainer.appendChild(effectItem);
-        });
-    });
-
-    console.log(`Updated current effects for tile ${tile.id}`);
+  return effectItem;
 }
 
+export function updateCurrentEffects(tile) {
+  if (!tile) {
+    console.error("No tile provided.");
+    return;
+  }
 
+  const effectsContainer = document.getElementById('current-effects-container');
+  if (!effectsContainer) {
+    console.error("Current effects container not found.");
+    return;
+  }
 
+  // Clear the existing effects list
+  effectsContainer.innerHTML = '';
+
+  // Get tile-wide effects
+  const tileEffects = tile.document.getFlag('totm-manager', 'tileEffects') || [];
+  tileEffects.forEach((effect, index) => {
+    const effectItem = createEffectItem('Tile', 'Tile', effect, `tile-${index}`, tile);
+    effectsContainer.appendChild(effectItem);
+  });
+
+  // Get image-specific effects
+  const imagePaths = tile.document.getFlag('core', 'imagePaths') || [];
+  imagePaths.forEach((image, imageIndex) => {
+    const imageEffects = image.effects || [];
+    imageEffects.forEach((effect, effectIndex) => {
+      const effectItem = createEffectItem('Image', image.displayImg, effect, `image-${imageIndex}-${effectIndex}`, tile, image);
+      effectsContainer.appendChild(effectItem);
+    });
+  });
+
+  console.log(`Updated current effects for tile ${tile.id}`);
+}
