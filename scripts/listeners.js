@@ -246,5 +246,18 @@ export function activateEffectEventListeners(instance) {
       console.error("No tile found with the selected ID.");
     }
   });
-}
 
+  document.addEventListener('DOMContentLoaded', () => {
+  // Assuming your tab buttons have a class or ID you can select
+  const effectsTabButton = document.getElementById('effects-tab-button');
+
+  if (effectsTabButton) {
+    effectsTabButton.addEventListener('click', () => {
+      // Assuming you have access to the current tile when the tab is clicked
+      const currentTile = getCurrentTile(); // Replace with your method to get the current tile
+      updateCurrentEffects(currentTile);
+    });
+  }
+  });
+
+}
