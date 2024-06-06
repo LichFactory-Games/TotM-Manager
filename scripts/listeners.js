@@ -8,6 +8,8 @@ import { addImageToTile, addDirectoryToTile, setActiveImage, updateImageTags, cy
 import { saveTileData, generateTileFields, handleSaveAndRender, handleDeleteAndSave, deleteTileData } from './tiles.js';
 import { loadTileData, loadTileImages, updateTileFields, updateStageButtons, switchToTileByTag  } from './tiles-utils.js'
 import { populateTileDropdown, populateImageDropdown, populateEffectsDropdown, applyEffectToTile, applyEffectToImage, removeEffectFromImage, removeEffectFromTile, updateCurrentEffects, removeEffect, modifyEffect, addEffect, onTargetChange } from './effects.js';
+import { ModifyEffectForm } from './modifyEffectForm.js';
+
 
 
 export function activateGeneralListeners(instance, html) {
@@ -232,7 +234,17 @@ export function activateEffectEventListeners(instance) {
 
   document.getElementById('add-effect-button').addEventListener('click', () => addEffect(instance));
   document.getElementById('remove-effect-button').addEventListener('click', () => removeEffect(instance));
-  document.getElementById('update-effect-button').addEventListener('click', modifyEffect);
+
+  // Ensure the 'modify-effect-button' exists before attaching the listener
+  const modifyEffectButton = document.getElementById('modify-effect-button');
+  if (modifyEffectButton) {
+    modifyEffectButton.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      new ModifyEffectForm().render(true);
+    });
+  } else {
+    console.warn("modify-effect-button not found");
+  }
 
   // Example: Set current tile when a tile is selected
   document.getElementById('tile-dropdown').addEventListener('change', async (event) => {

@@ -44,6 +44,7 @@
     "scripts/effects.js",
     "scripts/listeners.js",
     "scripts/totmManager.js",
+    "scripts/modifyEffectForm.js"
     "scripts/setup.js",
     "scripts/hooks.js",
     "scripts/init.js"
