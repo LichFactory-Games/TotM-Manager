@@ -11,6 +11,11 @@ export function showNotification(message, type="info") {
   ui.notifications.notify(message, type);
 }
 
+// Register custom Handlebars helper
+Handlebars.registerHelper('jsonStringify', function (context) {
+    return JSON.stringify(context);
+});
+
 //////////////////////
 //  Color Helpers   //
 //////////////////////

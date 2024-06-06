@@ -260,7 +260,7 @@ export async function activateTile(instance, tile) {
     instance.currentTileId = tile.id; // Update the current tile
     console.log("Check - Current Tile ID: ", instance.currentTileId);
     await loadTileImages(instance, tile); // Load images for the new active tile
-    updateActiveTileButton(instance); // Update button states
+    // updateActiveTileButton(instance); // Update button states
   } catch (error) {
     console.error("Error controlling tile:", error);
     ui.notifications.error("Failed to activate tile; Please add tiles.");
@@ -285,7 +285,7 @@ export function switchToTileByTag(instance, tag) {
     instance.currentTile = tileWithTag; // Update the current tile
     instance.currentTileId = tileWithTag.id; // Update the current tile ID (for reference)
     activateTile(instance, tileWithTag);
-    updateActiveTileButton(instance); // Update button states
+    // updateActiveTileButton(instance); // Update button states
   } else {
     console.log("TotM - No tile found with the specified tag:", tag);
     ui.notifications.error(`No tile found with tag: ${tag}`);
