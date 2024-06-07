@@ -103,23 +103,24 @@ async function getEffectParams(effectName) {
 }
 
 export async function applyTokenMagicEffect(target, effectParams, isTile = true) {
-    if (!await isTokenMagicActive()) return;
+  if (!await isTokenMagicActive()) return;
 
-    effectParams.forEach((param, index) => {
-        if (!param.tmFilterId) {
-            param.tmFilterId = `${param.filterId}-${index}`;
-        }
-        if (!param.filterInternalId) {
-            param.filterInternalId = foundry.utils.randomID();
-        }
-        if (!param.filterOwner) {
-            param.filterOwner = game.userId;
-        }
-        console.log(`Applying param ${index}:`, param);
-    });
+  effectParams.forEach((param, index) => {
+    if (!param.tmFilterId) {
+      param.tmFilterId = `${param.filterId}-${index}`;
+    }
+    if (!param.filterInternalId) {
+      param.filterInternalId = foundry.utils.randomID();
+    }
+    if (!param.filterOwner) {
+      param.filterOwner = game.userId;
+    }
+    console.log(`Applying param ${index}:`, param);
+  });
 
-    await TokenMagic.addFilters(target, effectParams);
-    console.log(`Effect applied to ${isTile ? 'tile' : 'image'} ${target.id || target.displayImg}`);
+  console.log("Target before applying filters:", target);
+  await TokenMagic.addFilters(target, effectParams);
+  console.log(`Effect applied to ${isTile ? 'tile' : 'image'} ${target.id || target.displayImg}`);
 }
 
 export async function removeTokenMagicEffect(target, effectParams, isTile = true) {
@@ -146,24 +147,28 @@ export async function addEffect(instance) {
     const effectName = document.getElementById('effect-dropdown').value;
     const effectParams = await getEffectParams(effectName);
 
-    if (targetType === 'tile') {
-        const tileId = document.getElementById('tile-dropdown').value;
-        const tile = canvas.tiles.get(tileId);
-        if (tile) {
-            await applyTokenMagicEffect(tile, effectParams);
-            await updateEffects(tile, effectParams, true);
-        } else {
-            console.error("No tile found to apply effect.");
+    const applyEffect = async (tile, image, effectParams) => {
+        await applyTokenMagicEffect(tile, effectParams, image);
+        await updateEffects(tile, effectParams, true, image !== null);
+    };
+
+    try {
+        if (targetType === 'tile') {
+            const tileId = document.getElementById('tile-dropdown').value;
+            const tile = canvas.tiles.get(tileId);
+            if (!tile) throw new Error("No tile found to apply effect.");
+            await applyEffect(tile, null, effectParams);
+        } else if (targetType === 'image') {
+            const tileId = document.getElementById('tile-dropdown').value;
+            const tile = canvas.tiles.get(tileId);
+            const imageId = document.getElementById('image-dropdown').value;
+            const image = getImageById(instance, imageId);
+            if (!image || !tile) throw new Error("No image found to apply effect or no tile selected.");
+            await applyEffect(tile, image, effectParams);
         }
-    } else if (targetType === 'image') {
-        const imageId = document.getElementById('image-dropdown').value;
-        const image = getImageById(instance, imageId);
-        if (image && instance.currentTile) {
-            await applyTokenMagicEffect(image, effectParams, false);
-            await updateEffects(image, effectParams, true, false);
-        } else {
-            console.error("No image found to apply effect or no tile selected.");
-        }
+    } catch (error) {
+        console.error(error.message);
+        // Optionally, add UI notification here
     }
 }
 
@@ -171,24 +176,28 @@ export async function removeEffect(instance) {
     const targetType = document.getElementById('target-dropdown').value;
     const effectName = document.getElementById('effect-dropdown').value;
 
-    if (targetType === 'tile') {
-        const tileId = document.getElementById('tile-dropdown').value;
-        const tile = canvas.tiles.get(tileId);
-        if (tile) {
-            await deleteEffect(instance, tile, effectName);
-        } else {
-            console.error("No tile found to remove effect.");
+    const removeEffectFromTarget = async (target, isTile) => {
+        await deleteEffect(instance, isTile ? target : instance.currentTile, effectName, isTile ? null : target);
+    };
+
+    try {
+        if (targetType === 'tile') {
+            const tileId = document.getElementById('tile-dropdown').value;
+            const tile = canvas.tiles.get(tileId);
+            if (!tile) throw new Error("No tile found to remove effect.");
+            await removeEffectFromTarget(tile, true);
+        } else if (targetType === 'image') {
+            const imageId = document.getElementById('image-dropdown').value;
+            const image = getImageById(instance, imageId);
+            if (!image || !instance.currentTile) throw new Error("No image found to remove effect or no tile selected.");
+            await removeEffectFromTarget(image, false);
         }
-    } else if (targetType === 'image') {
-        const imageId = document.getElementById('image-dropdown').value;
-        const image = getImageById(instance, imageId);
-        if (image && instance.currentTile) {
-            await deleteEffect(instance, instance.currentTile, effectName, image);
-        } else {
-            console.error("No image found to remove effect or no tile selected.");
-        }
+    } catch (error) {
+        console.error(error.message);
+        // Optionally, add UI notification here
     }
 }
+
 
 function createEffectItem(targetType, targetName, effectName, effectId, tile, image = null) {
     let tileName = tile.document.getFlag(NAMESPACE, 'tileName') || 'Unknown Tile';
@@ -226,27 +235,29 @@ export function updateCurrentEffects(tile) {
     // Clear the existing effects list
     effectsContainer.innerHTML = '';
 
-    // Get tile-wide effects
-    const tileEffects = tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
-    tileEffects.forEach((effect, index) => {
-        const effectName = document.getElementById('effect-dropdown').value || "Unknown Effect!"
-        const effectItem = createEffectItem('Tile', 'Tile', effectName, `tile-${index}`, tile);
-        effectsContainer.appendChild(effectItem);
-    });
+    // Helper function to create and append effect items
+    const appendEffectItems = (effects, targetType, targetName, tile, image = null) => {
+        effects.forEach((effect, index) => {
+          const effectName = document.getElementById('effect-dropdown').value || "Unknown Effect!"
+          const effectItem = createEffectItem(targetType, targetName, effectName, `${targetType}-${index}`, tile, image);
+            effectsContainer.appendChild(effectItem);
+        });
+    };
 
-    // Get image-specific effects
+    // Get and display tile-wide effects
+    const tileEffects = tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
+    appendEffectItems(tileEffects, 'Tile', 'Tile', tile);
+
+    // Get and display image-specific effects
     const imagePaths = tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
     imagePaths.forEach((image, imageIndex) => {
         const imageEffects = image.effects || [];
-        imageEffects.forEach((effect, effectIndex) => {
-            const effectName = document.getElementById('effect-dropdown').value || "Unknown Effect!"
-            const effectItem = createEffectItem('Image', image.displayImg, effectName, `image-${imageIndex}-${effectIndex}`, tile, image);
-            effectsContainer.appendChild(effectItem);
-        });
+        appendEffectItems(imageEffects, 'Image', image.displayImg, tile, image);
     });
 
     console.log(`Updated current effects for tile ${tile.id}`);
 }
+
 
 async function deleteEffect(instance, tile, effectName, image = null) {
     console.log(`Deleting effect: ${effectName} from target: ${image ? 'image' : 'tile'}`);

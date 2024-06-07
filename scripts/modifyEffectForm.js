@@ -50,49 +50,47 @@ export class ModifyEffectForm extends FormApplication {
         });
     }
 
-    async _updateObject(event, formData) {
-        console.log("Form submission data:", formData);
+  async _updateObject(event, formData) {
+    console.log("Form submission data:", formData);
 
-        try {
-            const effectParams = JSON.parse(formData.effectParams);
-            console.log("Parsed effect parameters:", effectParams);
+    try {
+      const effectParams = JSON.parse(formData.effectParams);
+      console.log("Parsed effect parameters:", effectParams);
 
-            const target = this.data.target;
-            const instance = this.data.instance;
+      const target = this.data.target;
+      const instance = this.data.instance;
 
-            if (target === 'tile') {
-                const tileId = document.getElementById('tile-dropdown').value;
-                const tile = canvas.tiles.get(tileId);
-                if (tile) {
-                    await applyTokenMagicEffect(tile, effectParams);
-
-                    // Add effect to tile's flag
-                    await updateEffects(tile, effectParams, true);
-
-                    // Update current effects list
-                    updateCurrentEffects(tile);
-                } else {
-                    console.error("No tile found to apply effect.");
-                }
-            } else if (target === 'image') {
-                const imageId = document.getElementById('image-dropdown').value;
-                const image = getImageById(instance, imageId);
-                if (image && instance.currentTile) {
-                    await applyTokenMagicEffect(image, effectParams, false);
-
-                    // Add effect to image's flag
-                    await updateEffects(image, effectParams, true, false);
-
-                    // Update current effects list
-                    updateCurrentEffects(instance.currentTile);
-                } else {
-                    console.error("No image found to apply effect or no tile selected.");
-                }
-            }
-
-            this.close();
-        } catch (error) {
-            console.error("Error parsing or applying effect parameters:", error);
+      if (target === 'tile') {
+        const tileId = document.getElementById('tile-dropdown').value;
+        const tile = canvas.tiles.get(tileId);
+        if (tile) {
+          await applyTokenMagicEffect(tile, effectParams);
+          // Add effect to tile's flag
+          await updateEffects(tile, effectParams, true);
+          // Update current effects list
+          updateCurrentEffects(tile);
+        } else {
+          console.error("No tile found to apply effect.");
         }
+      } else if (target === 'image') {
+        const tileId = document.getElementById('tile-dropdown').value;
+        const tile = canvas.tiles.get(tileId);
+        const imageId = document.getElementById('image-dropdown').value;
+        const image = getImageById(instance, imageId);
+        if (image && tile) {
+          await applyTokenMagicEffect(tile, effectParams, image);
+          // Add effect to image's flag
+          await updateEffects(tile, effectParams, true, false);
+          // Update current effects list
+          updateCurrentEffects(tile);
+        } else {
+          console.error("No image found to apply effect or no tile selected.");
+        }
+      }
+
+      this.close();
+    } catch (error) {
+      console.error("Error parsing or applying effect parameters:", error);
     }
+  }
 }
