@@ -4,13 +4,12 @@
 
 import { NAMESPACE } from './utilities.js';
 import { updateActiveTileButton } from './utilities.js'
-import { addImageToTile, addDirectoryToTile, setActiveImage, updateImageTags, cycleImages, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths, performImageSearch, getImageById } from './images.js';
+import { addImageToTile, addDirectoryToTile, updateImageTags, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths, getImageById } from './images.js';
 import { saveTileData, generateTileFields, handleSaveAndRender, handleDeleteAndSave, deleteTileData } from './tiles.js';
 import { loadTileData, loadTileImages, updateTileFields, updateStageButtons, switchToTileByTag  } from './tiles-utils.js'
 import { populateTileDropdown, populateImageDropdown, populateEffectsDropdown, updateCurrentEffects, removeEffect, addEffect, onTargetChange } from './effects.js';
 import { ModifyEffectForm } from './modifyEffectForm.js';
-
-
+import {performImageSearch, cycleImages, setActiveImage } from './stage.js';
 
 export function activateGeneralListeners(instance, html) {
   html.find('.add-image').click(() => {
@@ -230,65 +229,47 @@ export function activateImagePreviewListeners(instance, html) {
 }
 
 export function activateEffectEventListeners(instance) {
-    document.getElementById('target-dropdown').addEventListener('change', (event) => onTargetChange(event, instance));
+  document.getElementById('target-dropdown').addEventListener('change', (event) => onTargetChange(event, instance));
 
-    document.getElementById('remove-effect-button').addEventListener('click', () => removeEffect(instance));
+  document.getElementById('add-effect-button').addEventListener('click', () => {
+    const target = document.getElementById('target-dropdown').value;
+    const effect = document.getElementById('effect-dropdown').value;
+    new ModifyEffectForm({ target, effect, instance }).render(true);
+  });
 
-    document.getElementById('add-effect-button').addEventListener('click', () => {
-        const target = document.getElementById('target-dropdown').value;
-        const effect = document.getElementById('effect-dropdown').value;
-        new ModifyEffectForm({ target, effect, instance }).render(true);
-    });
+  // // Ensure the 'modify-effect-button' exists before attaching the listener
+  // const modifyEffectButton = document.getElementById('modify-effect-button');
+  // if (modifyEffectButton) {
+  //   modifyEffectButton.addEventListener('click', (ev) => {
+  //     ev.preventDefault();
+  //     const target = document.getElementById('target-dropdown').value;
+  //     const effect = document.getElementById('effect-dropdown').value;
+  //     new ModifyEffectForm({ target, effect, instance }).render(true);
+  //   });
+  // } else {
+  //   console.warn("modify-effect-button not found");
+  // }
 
-    // Ensure the 'modify-effect-button' exists before attaching the listener
-    const modifyEffectButton = document.getElementById('modify-effect-button');
-    if (modifyEffectButton) {
-        modifyEffectButton.addEventListener('click', (ev) => {
-            ev.preventDefault();
-            const target = document.getElementById('target-dropdown').value;
-            const effect = document.getElementById('effect-dropdown').value;
-            new ModifyEffectForm({ target, effect, instance }).render(true);
-        });
+  // Example: Set current tile when a tile is selected
+  document.getElementById('tile-dropdown').addEventListener('change', async (event) => {
+    const tileId = event.target.value;
+    const tile = canvas.tiles.get(tileId);
+    if (tile) {
+      instance.currentTile = tile;
+      await loadTileImages(instance, tile);
+      updateCurrentEffects(tile); // Update the current effects list when a tile is selected
     } else {
-        console.warn("modify-effect-button not found");
+      console.error("No tile found with the selected ID.");
     }
+  });
 
-    // Example: Set current tile when a tile is selected
-    document.getElementById('tile-dropdown').addEventListener('change', async (event) => {
-        const tileId = event.target.value;
-        const tile = canvas.tiles.get(tileId);
-        if (tile) {
-            instance.currentTile = tile;
-            await loadTileImages(instance, tile);
-            updateCurrentEffects(tile); // Update the current effects list when a tile is selected
-        } else {
-            console.error("No tile found with the selected ID.");
-        }
-    });
+  // Event listener for switching to effects tab
+  document.querySelector('.tabs').addEventListener('click', (event) => {
+    if (event.target.dataset.tab === 'effects') {
+      if (instance.currentTile) {
+        updateCurrentEffects(instance.currentTile);
 
-    // Event listener for switching to effects tab
-    document.querySelector('.tabs').addEventListener('click', (event) => {
-        if (event.target.dataset.tab === 'effects') {
-            if (instance.currentTile) {
-                updateCurrentEffects(instance.currentTile);
-            }
-        }
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-        // Assuming your tab buttons have a class or ID you can select
-        const effectsTabButton = document.getElementById('effects-tab-button');
-
-        if (effectsTabButton) {
-            effectsTabButton.addEventListener('click', () => {
-                // Assuming you have access to the current tile when the tab is clicked
-                const currentTile = instance.currentTile; // Access the current tile from the instance
-                if (currentTile) {
-                    updateCurrentEffects(currentTile);
-                } else {
-                    console.error("No current tile available to update effects.");
-                }
-            });
-        }
-    });
+      }
+    }
+  });
 }

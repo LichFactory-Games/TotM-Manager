@@ -1,6 +1,7 @@
 <div class="tab-content" data-tab="effects">
 
   <h3 class="section-header">Select Target & Effect</h3>
+  
   <div class="dropdown-container" style="display: flex; gap: 10px; align-items: center;">
     <div style="flex-grow: 1;">
       <select id="target-dropdown" style="width: 100%;">
@@ -21,23 +22,23 @@
       <select id="effect-dropdown" style="width: 100%;"></select>
     </div>
     <button id="add-effect-button" class="effect-button"><i class="fas fa-plus"></i></button>
-    <button id="remove-effect-button" class="effect-button"><i class="fas fa-trash"></i></button>
-    <button id="modify-effect-button" class="effect-button"><i class="fas fa-palette"></i></button>
   </div>
 
   <h3 class="section-header">Current Effects</h3>
-<div id="current-effects-container">
-  {{#each effects as |effect index|}}
-  <div class="effect-item" data-order="{{effect.order}}">
-    <span class="effect-target-type" data-index="{{index}}">
-  {{{ifThen (eq effect.targetType 'Tile') '<i class="fas fa-square"></i>' '<i class="fas fa-image"></i>'}}}
-</span>
-<span class="effect-target-name" data-index="{{index}}">{{effect.targetName}}</span>
-<span class="effect-name" data-index="{{index}}">{{effect.name}}</span>
-<button type="button" class="delete-effect" data-order="{{effect.order}}"><i class="fas fa-trash"></i></button>
+  
+  <div id="current-effects-container">
+    {{#each effects as |effect index|}}
+    <div class="effect-item" data-order="{{effect.order}}">
+      <span id="current-target" class="effect-target-type" data-index="{{index}}">
+        {{{ifThen (eq effect.targetType 'Tile') '<i class="fas fa-square"></i>' '<i class="fas fa-image"></i>'}}}
+      </span>
+      <span id="current-name" class="effect-target-name" data-index="{{index}}">{{effect.targetName}}</span>
+      <span id-"current-effect" class="effect-name" data-index="{{index}}">{{effect.name}}</span>
+      {{! <button id="modify-effect-button" class="effect-button"><i class="fas fa-palette"></i></button> }}
+      <button type="button" id="remove-effect-button" class="effect-button" data-order="{{effect.order}}"><i class="fas fa-trash"></i></button>
+    </div>
+    {{/each}}
   </div>
-  {{/each}}
-</div>
 
 </div>
 

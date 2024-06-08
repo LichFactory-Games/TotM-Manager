@@ -3,10 +3,10 @@ import { NAMESPACE } from './utilities.js';
 import { assignOrderToTiles } from './utilities.js'
 import { generateTileFields, saveTileData, handleSaveAndRender } from './tiles.js';
 import { loadTileData, updateStageButtons, switchToTileByTag, loadTileImages, updateTileFields } from './tiles-utils.js'
-import { addImageToTile, addDirectoryToTile, setActiveImage, updateImageTags, cycleImages, updateActiveImageButton } from './images.js';
+import { addImageToTile, addDirectoryToTile, updateImageTags, updateActiveImageButton } from './images.js';
 import { activateGeneralListeners, activatePathManagementListeners, activateImageSearchBarListeners, activateImagePreviewListeners, activateEffectEventListeners } from './listeners.js';
 import { populateEffectsDropdown, updateCurrentEffects, onTargetChange } from './effects.js';
-
+import { cycleImages, setActiveImage } from './stage.js';
 
 export class TotMForm extends FormApplication {
   constructor(...args) {

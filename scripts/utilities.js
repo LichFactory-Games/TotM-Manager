@@ -108,28 +108,6 @@ export function updateActiveTileButton(instance) {
 }
 
 
-// export function updateActiveTileButton(instance) {
-//   // Ensure a current tile and its document are available
-//   if (!instance.currentTile || !instance.currentTile.document) {
-//     console.warn("No currently active tile or missing document property.");
-//     return; // Exit the function to prevent further errors
-//   }
-
-//   // Use Tagger to get the tile's tag
-//   const tileTag = instance.currentTile.document.getFlag(NAMESPACE, 'tileName');
-
-//   if (!tileTag) {
-//     console.warn("Current tile does not have a 'tileName' tag.");
-//     return;
-//   }
-
-//   // Update the active button based on the tag
-//   $('.tile-button').removeClass('active-button active');
-//   const selector = `.tile-button[data-tile-name="${tileTag}"]`;
-//   $(selector).addClass('active-button active');
-//   console.log("Updating active tile button");
-// }
-
 /**
  * Assigns a unique order number to each tile on the canvas that has an undefined order.
  * Preserves existing order values.
@@ -153,16 +131,3 @@ export function assignOrderToTiles() {
   });
   console.log("Assigned unique order numbers to tiles.");
 }
-
-
-// export function updateActiveTileButton(instance) {
-//   // Ensure a current tile and its document are available
-//   if (!instance.currentTile || !instance.currentTile.document) {
-//     console.warn("No currently active tile or missing document property.");
-//     return; // Exit the function to prevent further errors
-//   }
-//   $('.tile-button').removeClass('active-button');
-//   const selector = `.tile-button[data-tile-name="${instance.currentTile.document.getFlag(NAMESPACE, 'tileName')}"]`;
-//   $(selector).addClass('active-button');
-//   console.log("Updating active tile button");
-// }
