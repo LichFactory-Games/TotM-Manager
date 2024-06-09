@@ -133,7 +133,6 @@ export async function applyTokenMagicEffect(target, effectParams, isTile = true)
   }
 };
 
-
 export async function addEffect(instance, targetType, effectName, effectParams, tileId, imageId = null) {
   const applyEffect = async (tile, isTile) => {
     await applyTokenMagicEffect(tile, effectParams, isTile);
@@ -203,6 +202,8 @@ function createEffectItem(targetType, targetName, effectName, effectId, tile, im
 }
 
 function removeEffectFromList(effects, effectName) {
+  let removed = false;
+
   for (let i = 0; i < effects.length; i++) {
     if (Array.isArray(effects[i])) {
       for (let j = 0; j < effects[i].length; j++) {
@@ -211,66 +212,16 @@ function removeEffectFromList(effects, effectName) {
           if (effects[i].length === 0) {
             effects.splice(i, 1);
           }
-          console.log(`Removed effect: ${effectName} from nested array at index ${i}`);
-          return true;
+          removed = true;
         }
       }
     } else if (effects[i].filterId === effectName || effects[i].tmFilterId === effectName) {
       effects.splice(i, 1);
-      console.log(`Removed effect: ${effectName} from array at index ${i}`);
-      return true;
+      removed = true;
     }
   }
-  console.error(`No effect found with id: ${effectName}`);
-  return false;
-}
-
-export async function removeEffect(tile, targetType, effectName) {
-  console.log(`Attempting to remove effect: ${effectName} from tile`, tile);
-
-  if (!tile) {
-    console.error("No tile provided.");
-    return;
-  }
-
-  if (targetType === 'Tile') {
-    let tileEffects = tile.document.getFlag("totm-manager", 'tileEffects') || [];
-    console.log("Tile Effects Before Removal:", JSON.stringify(tileEffects, null, 2));
-    const result = removeEffectFromList(tileEffects, effectName);
-    console.log("Tile Effects After Removal:", JSON.stringify(tileEffects, null, 2));
-    if (result) {
-      await tile.document.setFlag("totm-manager", 'tileEffects', tileEffects);
-      console.log(`Effect ${effectName} removed from tile effects`);
-    } else {
-      console.error(`Failed to remove effect ${effectName} from tile effects`);
-    }
-
-    // Remove the effect using TokenMagic
-    await removeTokenMagicEffect(tile, effectName, true);
-  } else if (targetType === 'Image') {
-    const imageId = document.getElementById('image-dropdown').value;
-    let imagePaths = tile.document.getFlag("totm-manager", 'imagePaths') || [];
-    console.log("Image Paths Before Removal:", JSON.stringify(imagePaths, null, 2));
-    let image = imagePaths.find(img => img.img === imageId);
-    if (image) {
-      const result = removeEffectFromList(image.effects, effectName);
-      console.log("Image Paths After Removal:", JSON.stringify(imagePaths, null, 2));
-      if (result) {
-        await tile.document.setFlag("totm-manager", 'imagePaths', imagePaths);
-        console.log(`Effect ${effectName} removed from image effects`);
-      } else {
-        console.error(`Failed to remove effect ${effectName} from image effects`);
-      }
-      
-      // Remove the effect using TokenMagic
-      await removeTokenMagicEffect(tile, effectName, false);
-    } else {
-      console.error("No image found with the provided ID.");
-    }
-  } else {
-    console.error("Invalid target type.");
-  }
-  updateCurrentEffects(tile);
+  
+  return removed;
 }
 
 export async function removeTokenMagicEffect(target, effectName, isTile) {
@@ -300,10 +251,67 @@ export async function removeTokenMagicEffect(target, effectName, isTile) {
   }
 }
 
+export async function removeEffect(tile, targetType, effectName) {
+  console.log(`Attempting to remove effect: ${effectName} from tile`, tile);
 
+  if (!tile) {
+    console.error("No tile provided.");
+    return;
+  }
 
+  if (targetType === 'Tile') {
+    let tileEffects = tile.document.getFlag("totm-manager", 'tileEffects') || [];
+    console.log("Tile Effects Before Removal:", JSON.stringify(tileEffects, null, 2));
+    const result = removeEffectFromList(tileEffects, effectName);
+    console.log("Tile Effects After Removal:", JSON.stringify(tileEffects, null, 2));
+    if (result) {
+      await tile.document.setFlag("totm-manager", 'tileEffects', tileEffects);
+      console.log(`Effect ${effectName} removed from tile effects`);
+    } else {
+      console.error(`Failed to remove effect ${effectName} from tile effects`);
+    }
 
+    // Remove the effect using TokenMagic
+    await removeTokenMagicEffect(tile, effectName, true);
+  } else if (targetType === 'Image') {
+    // Find the effect element
+    const effectElement = Array.from(document.querySelectorAll('.effect-item')).find(el => 
+      el.querySelector('.effect-name').textContent === effectName
+    );
 
+    if (!effectElement) {
+      console.error("Effect element not found.");
+      return;
+    }
+
+    // Retrieve the image ID from the current-name span
+    const imageId = effectElement.querySelector('.effect-target-name').textContent.trim();
+    const imagePaths = tile.document.getFlag("totm-manager", 'imagePaths') || [];
+    console.log("Image Paths Before Removal:", JSON.stringify(imagePaths, null, 2));
+    
+    // Find the image by comparing imageId to the displayImg property
+    let image = imagePaths.find(img => img.displayImg === imageId);
+    
+    if (image) {
+      const result = removeEffectFromList(image.effects, effectName);
+      console.log("Image Paths After Removal:", JSON.stringify(imagePaths, null, 2));
+      if (result) {
+        await tile.document.setFlag("totm-manager", 'imagePaths', imagePaths);
+        console.log(`Effect ${effectName} removed from image effects`);
+      } else {
+        console.error(`Failed to remove effect ${effectName} from image effects`);
+      }
+      
+      // Remove the effect using TokenMagic
+      await removeTokenMagicEffect(tile, effectName, false);
+    } else {
+      console.error("No image found with the provided ID.");
+    }
+  } else {
+    console.error("Invalid target type.");
+  }
+  updateCurrentEffects(tile);
+}
 
 export function updateCurrentEffects(tile) {
   if (!tile) {
@@ -323,10 +331,20 @@ export function updateCurrentEffects(tile) {
   // Helper function to create and append effect items
   const appendEffectItems = (effects, targetType, targetName, tile, image = null) => {
     effects.forEach((effect, index) => {
-      const effectName = document.getElementById('effect-dropdown').value || "Unknown Effect!";
-      const effectId = `${targetType}-${index}`;
-      const effectItem = createEffectItem(targetType, targetName, effectName, effectId, tile, image);
-      effectsContainer.appendChild(effectItem);
+      // Handle nested arrays of effects
+      if (Array.isArray(effect)) {
+        effect.forEach((nestedEffect, nestedIndex) => {
+          const effectName = nestedEffect.filterId || nestedEffect.tmFilterId || "Unknown Effect!";
+          const effectId = `${targetType}-${index}-${nestedIndex}`;
+          const effectItem = createEffectItem(targetType, targetName, effectName, effectId, tile, image);
+          effectsContainer.appendChild(effectItem);
+        });
+      } else {
+        const effectName = effect.filterId || effect.tmFilterId || "Unknown Effect!";
+        const effectId = `${targetType}-${index}`;
+        const effectItem = createEffectItem(targetType, targetName, effectName, effectId, tile, image);
+        effectsContainer.appendChild(effectItem);
+      }
     });
   };
 
@@ -343,6 +361,10 @@ export function updateCurrentEffects(tile) {
 
   console.log(`Updated current effects for tile ${tile.id}`);
 }
+
+
+
+
 
 
 export async function updateEffects(target, effectParams, isAdd, isTile = true) {
