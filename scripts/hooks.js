@@ -1,8 +1,7 @@
 // scripts/hooks.js
-import { NAMESPACE } from './utilities.js';
 import { assignOrderToTiles } from "./utilities.js";
 import { TotMForm } from "./totmManager.js";
-import { saveTileData } from "./tiles.js";
+import { saveTileDataToFlags } from "./tiles-utils.js";
 
 // Define moduleId
 const moduleId = 'totm-manager';
@@ -19,6 +18,18 @@ export function initializeHooks() {
       return true;
     },
     restricted: true
+  });
+
+  game.settings.register(moduleId, 'initialTileTag', {
+    name: 'Initial Tile Tag',
+    hint: 'The tag of the initial tile to be selected when the module loads.',
+    scope: 'world',
+    config: true,
+    type: String,
+    default: 'scene', // You can set a default value here
+    onChange: value => {
+      console.log(`Initial Tile Tag setting changed to: ${value}`);
+    }
   });
 
   // Register search image size setting
@@ -79,7 +90,7 @@ export function initializeHooks() {
   });
 
   Hooks.on('closeTotMForm', (app, html) => {
-    saveTileData(app, html);
+    saveTileDataToFlags(app, html);
   });
 
   Hooks.on('createTile', (tile, options, userId) => {

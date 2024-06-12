@@ -2,14 +2,14 @@
 // // Listener Methods  // //
 /////////////////////////////
 
-import { NAMESPACE } from './utilities.js';
-import { updateActiveTileButton } from './utilities.js'
-import { addImageToTile, addDirectoryToTile, updateImageTags, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths, getImageById } from './images.js';
-import { saveTileData, generateTileFields, handleSaveAndRender, handleDeleteAndSave, deleteTileData } from './tiles.js';
-import { loadTileData, loadTileImages, updateTileFields, updateStageButtons, switchToTileByTag  } from './tiles-utils.js'
-import { populateTileDropdown, populateImageDropdown, populateEffectsDropdown, updateCurrentEffects, removeEffect, addEffect, onTargetChange } from './effects.js';
+import { NAMESPACE, activateTile, findAndSwitchToTileByTag } from './utilities.js';
+import { addImageToTile, addImageDirectoryToTile, updateImageTags, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
+import { generateTileFields, handleSaveAndRender, deleteTileData } from './tiles.js';
+import { loadTileImages } from './tiles-utils.js'
+import { updateEffectsUI, onTargetChange } from './effects.js';
 import { ModifyEffectForm } from './modifyEffectForm.js';
-import {performImageSearch, cycleImages, setActiveImage } from './stage.js';
+import { performImageSearch, cycleImages, setActiveImage } from './stage.js';
+
 
 export function activateGeneralListeners(instance, html) {
   html.find('.add-image').click(() => {
@@ -23,7 +23,7 @@ export function activateGeneralListeners(instance, html) {
   html.find('.add-folder').click(() => {
     new FilePicker({
       type: "folder",
-      callback: folderPath => addDirectoryToTile(instance, instance.currentTile, folderPath)
+      callback: folderPath => addImageDirectoryToTile(instance, instance.currentTile, folderPath)
     }).browse();
   });
 
@@ -37,7 +37,6 @@ export function activateGeneralListeners(instance, html) {
     await generateTileFields(instance, html, { replace, count });
   });
 
-
   // Event listener for delete button
   html.find('#tile-fields-container').on('click', '.delete-tile', async event => {
     const order = parseInt($(event.currentTarget).closest('.tile-field').data('order'), 10); // Get the order attribute
@@ -46,16 +45,23 @@ export function activateGeneralListeners(instance, html) {
     await handleSaveAndRender(instance, html);  // Ensure the state is saved and re-rendered correctly
   });
 
+  // Active Tile Button
   html.find('.stage-buttons-container').on('click', '.tile-button', async event => {
-    const tileName = event.currentTarget.dataset.tileName;
-    console.log(`Switching to tile with Name: ${tileName}`);
-    await switchToTileByTag(instance, tileName);
-    instance.render(true);
+    // Remove the active class from all buttons
+    html.find('.tile-button').removeClass('active-button');
 
-    // Call updateActiveTileButton after rendering
-    setTimeout(() => updateActiveTileButton(instance), 5);
+    // Add the active class to the clicked button
+    $(event.currentTarget).addClass('active-button');
+
+    // Get the index and tile name data
+    const index = $(event.currentTarget).data('index');
+    const tileName = event.currentTarget.dataset.tileName;
+
+    console.log(`Switching to tile with Name: ${tileName}`);
+    await findAndSwitchToTileByTag(instance, tileName);
+    instance.render(true);
   });
-  
+
   html.find('.set-image-button').click(async event => {
     const index = $(event.currentTarget).data('index');
     await setActiveImage(instance, index);
@@ -257,7 +263,7 @@ export function activateEffectEventListeners(instance) {
     if (tile) {
       instance.currentTile = tile;
       await loadTileImages(instance, tile);
-      updateCurrentEffects(tile); // Update the current effects list when a tile is selected
+      updateEffectsUI(tile); // Update the current effects list when a tile is selected
     } else {
       console.error("No tile found with the selected ID.");
     }
@@ -267,7 +273,7 @@ export function activateEffectEventListeners(instance) {
   document.querySelector('.tabs').addEventListener('click', (event) => {
     if (event.target.dataset.tab === 'effects') {
       if (instance.currentTile) {
-        updateCurrentEffects(instance.currentTile);
+        updateEffectsUI(instance.currentTile);
 
       }
     }

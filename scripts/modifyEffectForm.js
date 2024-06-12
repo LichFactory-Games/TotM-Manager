@@ -1,4 +1,4 @@
-import { applyTokenMagicEffect, updateEffects, updateCurrentEffects, removeTokenMagicEffect, addEffect, removeEffect } from './effects.js';
+import { applyTokenMagicEffect, updateEffectsUI, removeTokenMagicEffect, addEffect, removeEffect } from './effects.js';
 import { getImageById } from './images.js';
 
 export class ModifyEffectForm extends FormApplication {
@@ -68,7 +68,7 @@ async _updateObject(event, formData) {
 
       // Update current effects list
       const tile = canvas.tiles.get(tileId);
-      updateCurrentEffects(tile);
+      updateEffectsUI(tile);
     } else {
       console.error("Invalid target type.");
     }

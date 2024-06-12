@@ -1,6 +1,5 @@
 // scripts/images.js
 import { NAMESPACE } from './utilities.js';
-import { saveTileData } from './tiles.js';
 import { loadTileImages } from './tiles-utils.js';
 
 export async function addImageToTile(instance, tile, imagePath) {
@@ -24,7 +23,7 @@ export async function addImageToTile(instance, tile, imagePath) {
   instance.render(true);
 }
 
-export async function addDirectoryToTile(instance, tile, directoryPath) {
+export async function addImageDirectoryToTile(instance, tile, directoryPath) {
   if (!tile) {
     console.error("No active tile selected to add images from directory.");
     ui.notifications.error("No active tile selected to add images from directory.");
@@ -66,19 +65,26 @@ export function updateActiveImageButton(instance) {
   }
 
   const imagePaths = instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths');
+  console.log("Image paths:", imagePaths);
+
   if (!imagePaths || imagePaths.length === 0) {
     console.warn("No image paths available for the current tile:", instance.currentTile.id);
     return;
   }
 
   const imageIndex = instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
+  console.log("Image index:", imageIndex);
+
   if (imageIndex === undefined || imageIndex < 0 || imageIndex >= imagePaths.length) {
     console.warn(`Image index is out of bounds or undefined: ${imageIndex}`);
     return;
   }
 
   const imageButtonSelector = `.set-image-button[data-index="${imageIndex}"]`;
+  console.log("Image button selector:", imageButtonSelector);
+
   const activeImageButton = instance.element.find(imageButtonSelector);
+  console.log("Active image button element:", activeImageButton);
 
   instance.element.find('.set-image-button').removeClass('active-button');
   if (activeImageButton.length) {

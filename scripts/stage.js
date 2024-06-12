@@ -1,6 +1,5 @@
 import { NAMESPACE } from './utilities.js';
-import { applyTokenMagicEffect, removeTokenMagicEffect } from './effects.js';
-import { getImageById } from './images.js';
+import { applyEffectsToTile, removeEffectsFromTile } from './effects.js';
 import { updateActiveImageButton } from './images.js';
 
 
@@ -8,49 +7,41 @@ import { updateActiveImageButton } from './images.js';
 // Image Actions  //
 ////////////////////
 
-
 export async function activateImage(instance, image, index) {
-    if (!instance.currentTile) {
-        console.error("No currently active tile.");
-        ui.notifications.error("Error setting image. No tile is currently active.");
-        return;
-    }
+  if (!instance.currentTile) {
+    console.error("No currently active tile.");
+    ui.notifications.error("Error setting image. No tile is currently active.");
+    return;
+  }
 
-    const tile = instance.currentTile;
-    const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+  const tile = instance.currentTile;
+  const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
 
-    // Remove effects of the previous image
-    const previousIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
-    if (previousIndex !== undefined && imagePaths[previousIndex]) {
-        const previousImage = imagePaths[previousIndex];
-        const previousEffects = previousImage.effects || [];
-        previousEffects.forEach(async (effect) => {
-            await TokenMagic.deleteFilters(tile, effect);
-        });
-    }
+  // Deactivate effects of the previous image
+  const previousIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
+  if (previousIndex !== undefined && imagePaths[previousIndex]) {
+    const previousImage = imagePaths[previousIndex];
+    const previousEffects = previousImage.effects || [];
+    await removeEffectsFromTile(tile, previousEffects, false);
+  }
 
-    // Apply effects of the new image
-    const currentEffects = image.effects || [];
-    currentEffects.forEach(async (effect) => {
-        const effectParams = TokenMagic.getPreset(effect);
-        if (game.modules.get('tokenmagic')?.active) {
-            await TokenMagic.addFilters(tile, effectParams);
-        } else {
-            console.warn("TokenMagic module is not active.");
-        }
-    });
+  // Update the tile's texture and flag
+  await tile.document.update({ 'texture.src': image.img });
+  await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
 
-    // Update the tile's texture and flag
-    tile.document.update({ 'texture.src': image.img })
-        .then(() => tile.document.setFlag(NAMESPACE, 'imgIndex', index))
-        .then(() => {
-            ui.notifications.info(`Image ${image.displayImg} activated.`);
-            instance.render();
-        })
-        .catch(error => {
-            console.error("Error activating image:", error);
-            ui.notifications.error("Failed to activate image.");
-        });
+  // Apply tile-wide effects
+  const tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
+  await applyEffectsToTile(tile, tileEffects, true);
+
+  // Apply image-specific effects
+  const currentImage = imagePaths.find(img => img.img === image.img);
+  if (currentImage && currentImage.effects) {
+    await applyEffectsToTile(tile, currentImage.effects, false);
+  }
+
+  // Render the instance
+  instance.render();
+  console.log(`Image ${image.displayImg} activated.`);
 }
 
 export async function cycleImages(instance, tile, direction) {
@@ -63,10 +54,8 @@ export async function cycleImages(instance, tile, direction) {
   currentIndex = direction === 'next' ? (currentIndex + 1) % imagePaths.length : (currentIndex - 1 + imagePaths.length) % imagePaths.length;
   const currentImage = imagePaths[currentIndex];
   try {
-    await tile.document.update({ 'texture.src': currentImage.img });
-    await tile.document.setFlag(NAMESPACE, 'imgIndex', currentIndex);
-    // Apply glow effect or any additional effects here if needed
-    console.log("Cycled to new image at index:", currentIndex, "Path:", currentImage.img);
+    await activateImage(instance, currentImage, currentIndex);
+    // console.log("Cycled to new image at index:", currentIndex, "Path:", currentImage.img);
 
     // Update the instance's current image index and render the instance
     instance.currentImageIndex = currentIndex;
@@ -80,18 +69,29 @@ export async function cycleImages(instance, tile, direction) {
 
 export async function setActiveImage(instance, index) {
   try {
-    const imagePaths = await instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
-    if (imagePaths.length > index) {
+    // Ensure the current tile is defined
+    if (!instance.currentTile || !instance.currentTile.document) {
+      console.warn("No current tile is selected or missing document property.");
+      return;
+    }
+
+    // Retrieve the image paths from the tile flags
+    const imagePaths = await instance.currentTile.document.getFlag('totm-manager', 'imagePaths') || [];
+
+    // Log the retrieved image paths
+    console.log('Retrieved image paths:', imagePaths);
+
+    // Check if the index is within bounds
+    if (index >= 0 && index < imagePaths.length) {
       await activateImage(instance, imagePaths[index], index);
       console.log(`Active image set to index ${index}`);
     } else {
-      console.warn(`Index ${index} out of bounds for image paths`);
+      console.warn(`Index ${index} out of bounds for image paths. Image paths length: ${imagePaths.length}`);
     }
   } catch (error) {
     console.error("Error setting active image:", error);
   }
 }
-
 
 ////////////////////
 // Search Actions //

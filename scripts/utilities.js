@@ -1,20 +1,34 @@
 // scripts/utilities.js
 
-// Define namespace
+//// Define namespace
 export const NAMESPACE = 'totm-manager';
 
-export function logMessage(message) {
-  console.log(`Theatre of the Mind Manager | ${message}`);
+//// Handlebars
+// Register custom Handlebars helper
+Handlebars.registerHelper('jsonStringify', function (context) {
+    return JSON.stringify(context);
+});
+
+
+/////////////////////
+// Logging Helpers //
+/////////////////////
+
+export function logMessage(...message) {
+  console.log(`Theatre of the Mind Manager | `, ...message);
 }
 
 export function showNotification(message, type="info") {
   ui.notifications.notify(message, type);
 }
 
-// Register custom Handlebars helper
-Handlebars.registerHelper('jsonStringify', function (context) {
-    return JSON.stringify(context);
-});
+export function getElementByIdOrWarn(id, type) {
+  const element = document.getElementById(id);
+  if (!element) {
+    console.error(`${type} element not found!`);
+  }
+  return element;
+}
 
 //////////////////////
 //  Color Helpers   //
@@ -40,13 +54,95 @@ export function adjustColor(hex, amount) {
 //  Tiles & Tags   //
 /////////////////////
 
-// Function to find a tile by its tag
-export function findTileByTag(tag) {
+export function findAndSwitchToTileByTag(instance, tag, switchToTile = true) {
+  // Validate the tag
+  if (typeof tag !== 'string') {
+    console.error(`Invalid tag type: ${typeof tag}. Tag must be a string.`);
+    return null;
+  }
+
   const tiles = canvas.tiles.placeables;
-  const foundTile = tiles.find(t => Tagger.hasTags(t, [tag], { caseInsensitive: true }));
-  console.log(`findTileByTag: Looking for tag ${tag}, found: ${foundTile ? foundTile.id : 'none'}`);
-  return foundTile;
+  logMessage(`TotM - Checking for tiles with tag: ${tag}`);
+
+  // Find the tile with the specified tag using Tagger
+  const tileWithTag = tiles.find(t => Tagger.hasTags(t, [tag], { caseInsensitive: true, matchExactly: true }));
+  logMessage(`Tile found with tag ${tag}:`, tileWithTag);
+
+  if (switchToTile && tileWithTag) {
+    activateTile(instance, tileWithTag);
+  }
+  return tileWithTag;
 }
+
+////
+
+export async function activateTile(instance, tile) {
+  if (!tile) {
+    console.error("No tile provided.");
+    return;
+  }
+
+  const filteredTiles = getFilteredTiles();
+  if (!filteredTiles.includes(tile)) {
+    console.error("Tile is not in the filtered list of tiles.");
+    return;
+  }
+
+  // Check if tile is a valid Foundry Tile object
+  if (!(tile instanceof Tile)) {
+    console.error("Invalid tile object passed:", tile);
+    return;
+  }
+
+  // Ensure the tiles layer is active
+  if (canvas.tiles) {
+    canvas.tiles.activate();
+    console.log("Tiles layer activated.");
+  } else {
+    console.error("Tiles layer is not available.");
+    return;
+  }
+
+  // Ensure the tile is not destroyed
+  if (tile.destroyed) {
+    console.error("Tile is destroyed:", tile);
+    return;
+  }
+
+  // Ensure the parent scene is active
+  if (!tile.scene || !tile.scene.active) {
+    console.error("Tile's parent scene is not active or missing:", tile.scene);
+    return;
+  }
+
+  // Log tile properties for debugging
+  console.log("Tile properties:", {
+    id: tile.id,
+    destroyed: tile.destroyed,
+    controlled: tile._controlled,
+    layer: tile.layer,
+    scene: tile.scene
+  });
+
+  // Directly set control properties and force refresh
+  setTimeout(() => {
+    console.log("Attempting to control tile:", tile);
+    try {
+      canvas.tiles.releaseAll();
+      tile.control({ releaseOthers: true });
+      tile.refresh();
+      console.log("Tile should now be controlled:", tile);
+
+      instance.currentTile = tile;
+      instance.currentTileId = tile.id;
+      console.log(`Set current tile to ID ${tile.id}`);
+    } catch (e) {
+      console.error("Failed to control the tile:", tile);
+    }
+  }, 100); // Delay of 100ms
+}
+
+////
 
 export function getFilteredTiles() {
   console.log("TotM Manager: Filtering tiles");
@@ -67,45 +163,87 @@ export function getFilteredTiles() {
   return tiles;
 }
 
-export function updateActiveTileButton(instance) {
-    console.log("updateActiveTileButton called");
-  if (!instance.currentTile || !instance.currentTile.document) {
-    console.warn("No currently active tile or missing document property.");
+////
+
+
+export function updateTileButtons(instance) {
+  const stageButtonsContainers = document.querySelectorAll('.stage-buttons-container');
+
+  if (!stageButtonsContainers.length) {
+    console.warn('Stage buttons container not found.');
     return;
   }
 
-  // Use Tagger to get the tile's tag
-  const tileTag = Tagger.getTags(instance.currentTile)[0]; // Assuming the first tag is the tile name
+  logMessage("instance.tiles content:", instance.tiles);
 
-  if (!tileTag) {
-    console.warn("Current tile does not have a tag.");
-    return;
-  }
+  stageButtonsContainers.forEach(stageButtonsContainer => {
+    const currentButtons = stageButtonsContainer.querySelectorAll('.tile-button');
+    const currentButtonNames = Array.from(currentButtons).map(button => button.dataset.tileName);
+    const instanceTileNames = instance.tiles.map(tile => tile.name);
 
-  // Log the current tile and tileTag
-  console.log(`Current tile ID: ${instance.currentTile.id}, Tile tag: ${tileTag}`);
+    if (JSON.stringify(currentButtonNames) !== JSON.stringify(instanceTileNames)) {
+      stageButtonsContainer.innerHTML = '';
+      instance.tiles.forEach((tile, index) => {
+        logMessage(`Processing tile ${index}:`, tile);
+        if (tile.name) {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.classList.add('tile-button');
+          button.dataset.tileName = tile.name;
+          button.dataset.tileId = tile.id; // Add tile ID to the button dataset
+          button.textContent = tile.name || `Tile ${index + 1}`;
+          stageButtonsContainer.appendChild(button);
 
-  // Remove the active class from all tile buttons
-  $('.tile-button').removeClass('active-button');
-
-  // Log to ensure buttons are being targeted
-  console.log("Removed active class from all tile buttons");
-
-  // Select the button corresponding to the current tile
-  const selector = `.tile-button[data-tile-name="${tileTag}"]`;
-  console.log("Selecting button with selector: ", selector);
-
-  const button = $(selector);
-  if (button.length === 0) {
-    console.warn("No button found with selector: ", selector);
-    return;
-  }
-
-  // Add the active class to the selected button
-  button.addClass('active-button');
-  console.log("Button after adding class:", button[0]);
-  console.log("Added active class to button with selector: ", selector);
+          logMessage(`Created button for tile: ${tile.name}`);
+        } else {
+          logMessage(`Tile ${index} does not have a name.`);
+        }
+      });
+    }
+  });
 }
+
+
+
+// if (!instance.currentTile || !instance.currentTile.document) {
+//   console.warn("No currently active tile or missing document property.");
+//   return;
+// }
+
+// logMessage("Current tile document:", instance.currentTile.document);
+
+// logMessage("updateTileButtons: Updating active state");
+
+// const tags = Tagger.getTags(instance.currentTile);
+// logMessage(`Tags for current tile: ${tags}`);
+
+// if (!tags || tags.length === 0) {
+//   console.warn("Current tile does not have a tag.");
+//   return;
+// }
+
+// const tileTag = tags[0];
+
+// logMessage(`Current tile ID: ${instance.currentTile.id}, Tile tag: ${tileTag}`);
+
+// document.querySelectorAll('.tile-button').forEach(btn => btn.classList.remove('active-button'));
+// logMessage("Removed active class from all tile buttons");
+
+// const selector = `.tile-button[data-tile-name="${tileTag}"]`;
+// logMessage("Selecting button with selector: ", selector);
+
+// const button = document.querySelector(selector);
+// logMessage("Button found:", button);
+
+// if (!button) {
+//   console.warn("No button found with selector:", selector);
+//   return;
+// }
+
+// button.classList.add('active-button');
+// logMessage("Button after adding class:", button);
+// logMessage("Added active class to button with selector: ", selector);
+
 
 
 /**
@@ -126,8 +264,51 @@ export function assignOrderToTiles() {
       maxOrder += 1;
       tile.document.setFlag(NAMESPACE, 'order', maxOrder);
       existingOrders.add(maxOrder);
-      console.log(`Set order flag for tile ID: ${tile.id}, Order: ${maxOrder}`);
+      logMessage(`Set order flag for tile ID: ${tile.id}, Order: ${maxOrder}`);
     }
   });
-  console.log("Assigned unique order numbers to tiles.");
+  logMessage("Assigned unique order numbers to tiles.");
+}
+
+////
+
+export function getTileFlag(tile, flagName, defaultValue = []) {
+  const flag = tile.document.getFlag(NAMESPACE, flagName);
+  return flag !== undefined ? flag : defaultValue;
+}
+
+//////////////////////////
+// TokenMagic & Effects //
+//////////////////////////
+
+export async function isTokenMagicActive() {
+  if (!game.modules.get('tokenmagic')?.active) {
+    console.warn("TokenMagic module is not active.");
+    return false;
+  }
+  return true;
+}
+
+////
+
+export async function getEffectParams(effectName) {
+  // Assuming TokenMagic.getPreset is the function to get effect presets
+  const effectParams = TokenMagic.getPreset(effectName);
+  if (!effectParams) {
+    console.error(`No effect parameters found for effect: ${effectName}`);
+    return null;
+  }
+  return effectParams;
+}
+
+////
+
+export function populateDropdown(dropdown, items, valueKey, textKey) {
+  dropdown.innerHTML = '';
+  items.forEach(item => {
+    const option = document.createElement('option');
+    option.value = item[valueKey];
+    option.textContent = item[textKey];
+    dropdown.appendChild(option);
+  });
 }

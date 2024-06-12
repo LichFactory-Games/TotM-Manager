@@ -1,11 +1,10 @@
-import { NAMESPACE } from './utilities.js';
-import { findTileByTag, updateActiveTileButton } from './utilities.js';
-import { collectTileData, collectImagePaths, saveTileFlags, clearTileFlags }  from './tiles-utils.js';
-import { loadTileData, loadTileImages, updateStageButtons, updateTileFields } from './tiles-utils.js';
-import { activateTile, deselectActiveTile, switchToTileByTag }  from './tiles-utils.js';
+import { NAMESPACE, updateTileButtons, logMessage } from './utilities.js';
+import { findAndSwitchToTileByTag } from './utilities.js';
+import { collectTileData, collectImagePaths, saveTileDataToFlags, clearTileFlags }  from './tiles-utils.js';
+import { loadTileData, updateTileFields } from './tiles-utils.js';
 
 export function generateTileFields(instance, html, options = { replace: false, count: 1 }) {
-  console.log("Generating tile fields...");
+  logMessage("Generating tile fields...");
 
   const tileCount = options.count;
   const replaceTiles = options.replace;
@@ -57,14 +56,14 @@ function generateFields(instance, tileFieldsContainer, count) {
     instance.tiles.push({ id: tileId, name: '', opacity: 1, tint: '', order });
   }
 
-  console.log("Generated tile fields:", instance.tiles)
+  logMessage("Generated tile fields:", instance.tiles)
 }
 
 // Save data to tile document 
-export async function saveTileData(instance, html) {
-  console.log("Saving tile data...");
+export async function collectAndSaveTileData(instance, html) {
+  logMessage("Saving tile data...");
   const container = html.find('#tile-fields-container').length ? html.find('#tile-fields-container') : html.find('.add-image-container');
-  
+
   if (container.attr('id') === 'tile-fields-container') {
     instance.tiles = collectTileData(container);
   } else {
@@ -76,33 +75,40 @@ export async function saveTileData(instance, html) {
       console.warn("Skipping tile with empty name.");
       continue;
     }
-    const foundTile = findTileByTag(tile.name);
+
+    // Log the tile name before using it
+    logMessage(`Processing tile with name: ${tile.name}`);
+
+    const foundTile = findAndSwitchToTileByTag(instance, tile.name);
+
+    // Log the found tile before calling saveTileDataToFlags
+    logMessage(`Found tile:`, foundTile);
 
     if (foundTile) {
-      await saveTileFlags(tile, foundTile, instance.imagePaths);
+      await saveTileDataToFlags(tile, foundTile, instance.imagePaths);
     } else {
       console.warn(`No tile found with the name: ${tile.name}`);
     }
-    }
+  }
 }
 
 export async function handleSaveAndRender(instance, html) {
-  console.log("Saving tile data...");
-  await saveTileData(instance, html);
+  logMessage("Saving tile data...");
+  await collectAndSaveTileData(instance, html);
   
-  console.log("Loading tile data...");
+  logMessage("Loading tile data...");
   await loadTileData(instance);
   
-  console.log("Updating stage buttons...");
-  updateStageButtons(instance);
-  
-  console.log("Updating tile fields...");
+  // logMessage("Updating stage buttons...");
+  updateTileButtons(instance);
+
+  // logMessage("Updating tile fields...");
   updateTileFields(instance);
   
-  console.log("Rendering the instance...");
+  logMessage("Rendering the instance...");
   instance.render(true);
   
-  console.log("Completed handleSaveAndRender");
+  logMessage("Completed handleSaveAndRender");
 }
 
 export async function deleteTileData(instance, order, html) {
@@ -111,7 +117,7 @@ export async function deleteTileData(instance, order, html) {
     return;
   }
   
-  console.log("Before deletion, instance.tiles:", instance.tiles);
+  logMessage("Before deletion, instance.tiles:", instance.tiles);
 
   // Find the tile to be deleted
   const tileToDelete = instance.tiles.find(tile => Number(tile.order) === order);
@@ -121,11 +127,11 @@ export async function deleteTileData(instance, order, html) {
   }
 
   // Log tile to be deleted
-  console.log("Tile to be deleted:", tileToDelete);
+  logMessage("Tile to be deleted:", tileToDelete);
 
   // Remove tile from instance.tiles
   instance.tiles = instance.tiles.filter(tile => Number(tile.order) !== order);
-  console.log("After deletion, instance.tiles:", instance.tiles);
+  logMessage("After deletion, instance.tiles:", instance.tiles);
   
   if (!tileToDelete) {
     console.warn(`Tile with order ${order} not found in instance`);
@@ -137,8 +143,8 @@ export async function deleteTileData(instance, order, html) {
 
   if (tileToDelete) {
     // Remove flags from the tile document
-    const foundTile = findTileByTag(tileToDelete.name);
-    console.log("Tile delete name: ${foundTile}");
+    const foundTile = findAndSwitchToTileByTag(tileToDelete.name);
+    logMessage("Tile delete name: ${foundTile}");
     if (foundTile) {
       await foundTile.document.unsetFlag(NAMESPACE, 'tileName');
       await foundTile.document.unsetFlag(NAMESPACE, 'opacity');
@@ -146,16 +152,16 @@ export async function deleteTileData(instance, order, html) {
       await foundTile.document.unsetFlag(NAMESPACE, 'order');
       await foundTile.document.unsetFlag(NAMESPACE, 'imagePaths');
 
-      console.log("Tile Flags Unset!");
+      logMessage("Tile Flags Unset!");
     }
   }
   // Synchronize the internal state with the updated canvas data
-  console.log("After updating orders, instance.tiles:", instance.tiles);
+  logMessage("After updating orders, instance.tiles:", instance.tiles);
 }
 
 export async function handleDeleteAndSave(instance, order, html) {
   await deleteTileData(instance, order, html);  // Delete the tile field
-  await saveTileData(instance, html);       // Save the updated tile data
+  await collectAndSaveTileData(instance, html);       // Save the updated tile data
   await loadTileData(instance);             // Reload the latest data
   // updateStageButtons(instance);             // Update the UI stage buttons
   // updateTileFields(instance);               // Update the UI tile fields

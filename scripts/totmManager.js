@@ -1,12 +1,9 @@
 // scripts/totmManager.js
-import { NAMESPACE } from './utilities.js';
-import { assignOrderToTiles } from './utilities.js'
-import { generateTileFields, saveTileData, handleSaveAndRender } from './tiles.js';
-import { loadTileData, updateStageButtons, switchToTileByTag, loadTileImages, updateTileFields } from './tiles-utils.js'
-import { addImageToTile, addDirectoryToTile, updateImageTags, updateActiveImageButton } from './images.js';
+import { NAMESPACE, logMessage, updateTileButtons, findAndSwitchToTileByTag, activateTile } from './utilities.js';
+import { loadTileData, loadTileImages, updateTileFields } from './tiles-utils.js'
 import { activateGeneralListeners, activatePathManagementListeners, activateImageSearchBarListeners, activateImagePreviewListeners, activateEffectEventListeners } from './listeners.js';
-import { populateEffectsDropdown, updateCurrentEffects, onTargetChange } from './effects.js';
-import { cycleImages, setActiveImage } from './stage.js';
+import { populateEffectsDropdown, updateEffectsUI, onTargetChange } from './effects.js';
+
 
 export class TotMForm extends FormApplication {
   constructor(...args) {
@@ -29,7 +26,7 @@ export class TotMForm extends FormApplication {
     this._instance.render(true);
   }
 
-  // Optionally, override the close method to reset the singleton instance
+  // Override the close method to reset the singleton instance
   close(options) {
     this.constructor._instance = null;
     return super.close(options);
@@ -46,7 +43,7 @@ export class TotMForm extends FormApplication {
     });
   }
 
-  getData(options) {
+  getData() {
     return {
       // Ensure tiles are sorted by the 'order' property
       tiles: this.tiles ? this.tiles.sort((a, b) => a.order - b.order) : [],
@@ -59,9 +56,9 @@ export class TotMForm extends FormApplication {
     };
   }
 
-  async _updateObject(event, formData) {
+  async _updateObject(formData) {
     // Handle form submission and updating objects
-    console.log("Form submission data:", formData);
+    logMessage("Form submission data:", formData);
   }
 
   activateListeners(html) {
@@ -75,18 +72,73 @@ export class TotMForm extends FormApplication {
     activateEffectEventListeners(this);
   }
 
-
-  // Ensure the render method properly uses the data
   async render(force = false, options = {}) {
+    const tile = options.tile;
+    // Check if this is the first time rendering
     if (!this.rendered) {
-      setTimeout(() => this._initializeTileManager(), 50);
+      logMessage("First-time render: Initializing tile manager.");
+      // Initialize tile manager after a short delay
+      setTimeout(() => {
+        this._initializeTileManager();
+      }, 50);
     }
-    super.render(force, options);
+
+    // Call the parent class's render method
+    await super.render(force, options);
+
+    // Initialize tabs
+    logMessage("Initializing tabs");
     this._initializeTabs();
-    setTimeout(() => this._initializeEffectsManager(), 100);
+
+    // Initialize effects manager after a short delay
+    setTimeout(() => {
+      this._initializeEffectsManager();
+    }, 100);
   }
 
+  async _initializeTileManager() {
+    logMessage("Initializing Tile Manager...");
+
+    logMessage("Loading tile data...");
+    await loadTileData(this);
+
+    logMessage("Tile data loaded:", this.tiles);
+
+    // Retrieve the initial tile tag from settings
+    const initialTag = game.settings.get(NAMESPACE, 'initialTileTag');
+    logMessage("Initial tile tag retrieved from settings:", initialTag);
+
+    // Find the tile by tag using Tagger
+    let initialTile = findAndSwitchToTileByTag(this, initialTag, false);
+    logMessage("Tile found with initial tag:", initialTile);
+
+    // If no tile is found with the specific tag, fallback to the first tile
+    if (!initialTile && this.tiles.length > 0) {
+      initialTile = this.tiles[0];
+      logMessage(`Fallback: Set current tile to first tile with ID ${initialTile.id}`);
+    }
+
+    // Check and activate the initial tile
+    if (initialTile) {
+      logMessage("Activating initial tile:", initialTile);
+      activateTile(this, initialTile);
+      await loadTileImages(this, initialTile); // Ensure 'initialTile' is passed correctly
+    } else {
+      console.warn("No tile found to set as current tile.");
+    }
+
+    logMessage("Updating tile buttons...");
+    updateTileButtons(this);
+
+    logMessage("Updating tile fields...");
+    updateTileFields(this);
+
+    logMessage("Initialization completed.");
+  }
+
+
   async _initializeEffectsManager() {
+
     // Populate dropdown on render
     await populateEffectsDropdown();
 
@@ -100,29 +152,51 @@ export class TotMForm extends FormApplication {
     const initialTarget = document.getElementById('target-dropdown').value;
     onTargetChange({ target: { value: initialTarget } }, this);
 
-    // Ensure the current tile is set and update current effects
+    // Ensure the current tile is set and update effects UI
     if (this.currentTile) {
-      updateCurrentEffects(this.currentTile); // Update current effects on render
+      const imagePaths = await this.currentTile.document.getFlag(NAMESPACE, 'imagePaths');
+      logMessage(`Current image paths for tile ${this.currentTile.id}:`, imagePaths);
+      if (!imagePaths) {
+        console.warn(`No image paths found for tile ${this.currentTile.id}`);
+      }
+      updateEffectsUI(this.currentTile);
     } else {
       console.warn("No current tile selected.");
     }
   }
-  
-  async _initializeTileManager() {
-    console.log("Initializing Tile Manager...");
 
-    console.log("Loading tile data...");
-    await loadTileData(this);
+  // async _initializeTileManager() {
+  //   logMessage("Initializing Tile Manager...");
 
-    console.log("Updating stage buttons...");
-    updateStageButtons(this);
+  //   logMessage("Loading tile data...");
+  //   await loadTileData(this);
 
-    console.log("Updating tile fields...");
-    updateTileFields(this);
-    
-    console.log("Initialization completed.");
-  }
-  
+  //   // Retrieve the initial tile tag from settings
+  //   const initialTag = game.settings.get('totm-manager', 'initialTileTag');
+  //   let initialTile = findAndSwitchToTileByTag(this, initialTag, false);
+
+  //   // If no tile is found with the specific tag, fallback to the first tile
+  //   if (!initialTile && this.tiles.length > 0) {
+  //     initialTile = this.tiles[0];
+  //     logMessage(`Fallback: Set current tile to first tile with ID ${initialTile.id}`);
+  //   }
+
+  //   if (initialTile) {
+  //     activateTile(this, initialTile);
+  //     await loadTileImages(this, initialTile); // Ensure 'initialTile' is passed correctly
+  //   } else {
+  //     console.warn("No tile found to set as current tile.");
+  //   }
+
+  //   logMessage("Updating tile buttons...");
+  //   updateTileButtons(this);
+
+  //   logMessage("Updating tile fields...");
+  //   updateTileFields(this);
+
+  //   logMessage("Initialization completed.");
+  // }
+
   _initializeTabs() {
     if (!this._tabs) {
       this._tabs = new Tabs({
@@ -155,4 +229,4 @@ export class TotMForm extends FormApplication {
       }
     });
   }
-  }
+}
