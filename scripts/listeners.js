@@ -2,7 +2,7 @@
 // // Listener Methods  // //
 /////////////////////////////
 
-import { NAMESPACE, activateTile, findAndSwitchToTileByTag } from './utilities.js';
+import { NAMESPACE, activateTile, findAndSwitchToTileByTag, updateActiveTileButton } from './utilities.js';
 import { addImageToTile, addImageDirectoryToTile, updateImageTags, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
 import { generateTileFields, handleSaveAndRender, deleteTileData } from './tiles.js';
 import { loadTileImages } from './tiles-utils.js'
@@ -45,21 +45,15 @@ export function activateGeneralListeners(instance, html) {
     await handleSaveAndRender(instance, html);  // Ensure the state is saved and re-rendered correctly
   });
 
-  // Active Tile Button
+  // Update Active Tile
   html.find('.stage-buttons-container').on('click', '.tile-button', async event => {
-    // Remove the active class from all buttons
-    html.find('.tile-button').removeClass('active-button');
-
-    // Add the active class to the clicked button
-    $(event.currentTarget).addClass('active-button');
-
-    // Get the index and tile name data
-    const index = $(event.currentTarget).data('index');
     const tileName = event.currentTarget.dataset.tileName;
-
     console.log(`Switching to tile with Name: ${tileName}`);
     await findAndSwitchToTileByTag(instance, tileName);
     instance.render(true);
+
+    // Call updateActiveTileButton after rendering
+    setTimeout(() => updateActiveTileButton(instance), 100);
   });
 
   html.find('.set-image-button').click(async event => {
