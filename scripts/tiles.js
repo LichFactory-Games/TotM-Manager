@@ -99,9 +99,6 @@ export async function handleSaveAndRender(instance, tileData) {
   logMessage("Completed handleSaveAndRender");
 }
 
-
-
-
 export async function deleteTileData(instance, order, html) {
   if (!instance || !instance.tiles) {
     console.error("Instance or instance.tiles is undefined");

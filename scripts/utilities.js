@@ -202,7 +202,7 @@ export function updateTileButtons(instance) {
   });
 }
 
-export async function updateActiveTileButton(instance) {
+export function updateActiveTileButton(instance) {
   logMessage("updateActiveTileButton called");
 
   if (!instance.currentTile || !instance.currentTile.document) {
@@ -210,117 +210,33 @@ export async function updateActiveTileButton(instance) {
     return;
   }
 
-  // Directly retrieve the tile name from the document's flags
-  const tileName = await instance.currentTile.document.getFlag(NAMESPACE, 'tileName');
+  const tileName = instance.currentTile.document.getFlag(NAMESPACE, 'tileName');
 
   if (!tileName) {
     console.warn("Current tile does not have a tileName flag.");
     return;
   }
 
-  // Log the current tile and tileName
   logMessage(`Current tile ID: ${instance.currentTile.id}, Tile name: ${tileName}`);
 
   // Remove the active class from all tile buttons
-  document.querySelectorAll('.tile-button').forEach(button => button.classList.remove('active-button'));
+  $('.tile-button').removeClass('active-button');
   logMessage("Removed active class from all tile buttons");
 
   // Select the button corresponding to the current tile
   const selector = `.tile-button[data-tile-name="${tileName}"]`;
   logMessage("Selecting button with selector: ", selector);
 
-  const activeButton = document.querySelector(selector);
-  if (!activeButton) {
+  const $activeButton = $(selector);
+  if (!$activeButton.length) {
     console.warn("No button found with selector: ", selector);
     return;
   }
 
   // Add the active class to the selected button
-  activeButton.classList.add('active-button');
-  logMessage("Active button updated:", activeButton);
+  $activeButton.addClass('active-button');
+  logMessage("Active button updated:", $activeButton);
 }
-
-
-// export async function updateActiveTileButton(instance) {
-//   console.log("updateActiveTileButton called");
-//   if (!instance.currentTile || !instance.currentTile.document) {
-//     console.warn("No currently active tile or missing document property.");
-//     return;
-//   }
-
-//   // Use Tagger to get the tile's tag
-//   const tileTag = Tagger.getTags(instance.currentTile)[0]; // Assuming the first tag is the tile name
-
-//   if (!tileTag) {
-//     console.warn("Current tile does not have a tag.");
-//     return;
-//   }
-
-//   // Log the current tile and tileTag
-//   console.log(`Current tile ID: ${instance.currentTile.id}, Tile tag: ${tileTag}`);
-
-//   // Remove the active class from all tile buttons
-//   $('.tile-button').removeClass('active-button');
-
-//   // Log to ensure buttons are being targeted
-//   console.log("Removed active class from all tile buttons");
-
-//   // Select the button corresponding to the current tile
-//   const selector = `.tile-button[data-tile-name="${tileTag}"]`;
-//   console.log("Selecting button with selector: ", selector);
-
-//   const button = $(selector);
-//   if (button.length === 0) {
-//     console.warn("No button found with selector: ", selector);
-//     return;
-//   }
-
-//   // Add the active class to the selected button
-//   button.addClass('active-button');
-//   console.log("Button after adding class:", button[0]);
-//   console.log("Added active class to button with selector: ", selector);
-// }
-
-// if (!instance.currentTile || !instance.currentTile.document) {
-//   console.warn("No currently active tile or missing document property.");
-//   return;
-// }
-
-// logMessage("Current tile document:", instance.currentTile.document);
-
-// logMessage("updateTileButtons: Updating active state");
-
-// const tags = Tagger.getTags(instance.currentTile);
-// logMessage(`Tags for current tile: ${tags}`);
-
-// if (!tags || tags.length === 0) {
-//   console.warn("Current tile does not have a tag.");
-//   return;
-// }
-
-// const tileTag = tags[0];
-
-// logMessage(`Current tile ID: ${instance.currentTile.id}, Tile tag: ${tileTag}`);
-
-// document.querySelectorAll('.tile-button').forEach(btn => btn.classList.remove('active-button'));
-// logMessage("Removed active class from all tile buttons");
-
-// const selector = `.tile-button[data-tile-name="${tileTag}"]`;
-// logMessage("Selecting button with selector: ", selector);
-
-// const button = document.querySelector(selector);
-// logMessage("Button found:", button);
-
-// if (!button) {
-//   console.warn("No button found with selector:", selector);
-//   return;
-// }
-
-// button.classList.add('active-button');
-// logMessage("Button after adding class:", button);
-// logMessage("Added active class to button with selector: ", selector);
-
-
 
 /**
  * Assigns a unique order number to each tile on the canvas that has an undefined order.

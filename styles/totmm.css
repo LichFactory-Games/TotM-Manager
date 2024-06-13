@@ -43,7 +43,7 @@
     background-color: #e0e0e0; /* Background color on hover */
 }
 
-.totm-manager .active-button {
+.totm-manager .tile-button.active-button {
     border-color: var(--color-border-highlight);
     border-width: 2px;
 }
