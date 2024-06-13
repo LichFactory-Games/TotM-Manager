@@ -269,6 +269,18 @@ export function getTileFlag(tile, flagName, defaultValue = []) {
   return flag !== undefined ? flag : defaultValue;
 }
 
+////
+
+export function populateDropdown(dropdown, items, valueKey, textKey) {
+  dropdown.innerHTML = '';
+  items.forEach(item => {
+    const option = document.createElement('option');
+    option.value = item[valueKey];
+    option.textContent = item[textKey];
+    dropdown.appendChild(option);
+  });
+}
+
 //////////////////////////
 // TokenMagic & Effects //
 //////////////////////////
@@ -293,14 +305,3 @@ export async function getEffectParams(effectName) {
   return effectParams;
 }
 
-////
-
-export function populateDropdown(dropdown, items, valueKey, textKey) {
-  dropdown.innerHTML = '';
-  items.forEach(item => {
-    const option = document.createElement('option');
-    option.value = item[valueKey];
-    option.textContent = item[textKey];
-    dropdown.appendChild(option);
-  });
-}
