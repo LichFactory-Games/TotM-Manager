@@ -1,5 +1,5 @@
 // scripts/images.js
-import { NAMESPACE } from './utilities.js';
+import { NAMESPACE, updateActiveTileButton } from './utilities.js';
 import { loadTileImages } from './tiles-utils.js';
 
 export async function addImageToTile(instance, tile, imagePath) {
@@ -58,7 +58,7 @@ export function updateImageTags(instance, index, tags) {
   }
 }
 
-export function updateActiveImageButton(instance) {
+export async function updateActiveImageButton(instance) {
   if (!instance.currentTile || !instance.currentTile.document) {
     console.warn("Attempted to update image button with no active tile or missing document.");
     return;
@@ -91,9 +91,12 @@ export function updateActiveImageButton(instance) {
     activeImageButton.addClass('active-button');
     console.log(`TotM - Active image button found and activated: ${imageButtonSelector}`);
     console.log(`TotM - Active image button marked: Index ${imageIndex}`);
+    // setTimeout(() => updateActiveTileButton(instance), 2);
   } else {
     console.warn("No image button found for index:", imageIndex);
   }
+
+  await updateActiveTileButton(instance);
 }
 
 export async function reorderPaths(instance, origin, target) {

@@ -1,4 +1,4 @@
-import { NAMESPACE } from './utilities.js';
+import { NAMESPACE, updateActiveTileButton } from './utilities.js';
 import { applyEffectsToTile, removeEffectsFromTile } from './effects.js';
 import { updateActiveImageButton } from './images.js';
 
@@ -71,12 +71,9 @@ export async function cycleImages(instance, tile, direction) {
   const currentImage = imagePaths[currentIndex];
   try {
     await activateImage(instance, currentImage, currentIndex);
-    // console.log("Cycled to new image at index:", currentIndex, "Path:", currentImage.img);
-
     // Update the instance's current image index and render the instance
     instance.currentImageIndex = currentIndex;
-    instance.render();
-    setTimeout(() => updateActiveImageButton(instance), 10);
+    await updateActiveImageButton(instance);
   } catch (error) {
     console.error("Failed to cycle images:", error);
     ui.notifications.error("Error cycling images. See console for details.");

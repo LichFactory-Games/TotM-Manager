@@ -203,45 +203,84 @@ export function updateTileButtons(instance) {
   });
 }
 
-export function updateActiveTileButton(instance) {
+export async function updateActiveTileButton(instance) {
   console.log("updateActiveTileButton called");
+
   if (!instance.currentTile || !instance.currentTile.document) {
     console.warn("No currently active tile or missing document property.");
     return;
   }
 
-  // Use Tagger to get the tile's tag
-  const tileTag = Tagger.getTags(instance.currentTile)[0]; // Assuming the first tag is the tile name
+  // Directly retrieve the tile name from the document's flags
+  const tileName = instance.currentTile.document.getFlag(NAMESPACE, 'tileName');
 
-  if (!tileTag) {
-    console.warn("Current tile does not have a tag.");
+  if (!tileName) {
+    console.warn("Current tile does not have a tileName flag.");
     return;
   }
 
-  // Log the current tile and tileTag
-  console.log(`Current tile ID: ${instance.currentTile.id}, Tile tag: ${tileTag}`);
+  // Log the current tile and tileName
+  console.log(`Current tile ID: ${instance.currentTile.id}, Tile name: ${tileName}`);
 
   // Remove the active class from all tile buttons
-  $('.tile-button').removeClass('active-button');
-
-  // Log to ensure buttons are being targeted
+  document.querySelectorAll('.tile-button').forEach(button => button.classList.remove('active-button'));
   console.log("Removed active class from all tile buttons");
 
   // Select the button corresponding to the current tile
-  const selector = `.tile-button[data-tile-name="${tileTag}"]`;
+  const selector = `.tile-button[data-tile-name="${tileName}"]`;
   console.log("Selecting button with selector: ", selector);
 
-  const button = $(selector);
-  if (button.length === 0) {
+  const activeButton = document.querySelector(selector);
+  if (!activeButton) {
     console.warn("No button found with selector: ", selector);
     return;
   }
 
   // Add the active class to the selected button
-  button.addClass('active-button');
-  console.log("Button after adding class:", button[0]);
-  console.log("Added active class to button with selector: ", selector);
+  activeButton.classList.add('active-button');
+  console.log("Active button updated:", activeButton);
 }
+
+
+// export async function updateActiveTileButton(instance) {
+//   console.log("updateActiveTileButton called");
+//   if (!instance.currentTile || !instance.currentTile.document) {
+//     console.warn("No currently active tile or missing document property.");
+//     return;
+//   }
+
+//   // Use Tagger to get the tile's tag
+//   const tileTag = Tagger.getTags(instance.currentTile)[0]; // Assuming the first tag is the tile name
+
+//   if (!tileTag) {
+//     console.warn("Current tile does not have a tag.");
+//     return;
+//   }
+
+//   // Log the current tile and tileTag
+//   console.log(`Current tile ID: ${instance.currentTile.id}, Tile tag: ${tileTag}`);
+
+//   // Remove the active class from all tile buttons
+//   $('.tile-button').removeClass('active-button');
+
+//   // Log to ensure buttons are being targeted
+//   console.log("Removed active class from all tile buttons");
+
+//   // Select the button corresponding to the current tile
+//   const selector = `.tile-button[data-tile-name="${tileTag}"]`;
+//   console.log("Selecting button with selector: ", selector);
+
+//   const button = $(selector);
+//   if (button.length === 0) {
+//     console.warn("No button found with selector: ", selector);
+//     return;
+//   }
+
+//   // Add the active class to the selected button
+//   button.addClass('active-button');
+//   console.log("Button after adding class:", button[0]);
+//   console.log("Added active class to button with selector: ", selector);
+// }
 
 // if (!instance.currentTile || !instance.currentTile.document) {
 //   console.warn("No currently active tile or missing document property.");

@@ -11,6 +11,7 @@ export class TotMForm extends FormApplication {
     this.currentActiveTag = null; // Initialize active tag property
     this.selectedTarget = 'tile'; // Default to 'tile' or any other desired default
     this.isInitialized = false;  // Flag for header tile button setup
+    this.tileManagerInitialized = false; // Flag to prevent re-initialization
     this.tiles = [];  // Initialize tiles array
   }
 
@@ -75,21 +76,17 @@ export class TotMForm extends FormApplication {
   async render(force = false, options = {}) {
     const tile = options.tile;
     // Check if this is the first time rendering
-    if (!this.rendered) {
+    if (!this.rendered && !this.tileManagerInitialized) {
       logMessage("First-time render: Initializing tile manager.");
-      // Initialize tile manager after a short delay
-      setTimeout(() => {
-        this._initializeTileManager();
-      }, 50);
+      // Initialize tile manager
+      this.tileManagerInitialized = true; // Set the flag to prevent re-initialization
+      await this._initializeTileManager(); // Ensure this completes before proceeding
     }
-
     // Call the parent class's render method
     await super.render(force, options);
-
     // Initialize tabs
     logMessage("Initializing tabs");
     this._initializeTabs();
-
     // Initialize effects manager after a short delay
     setTimeout(() => {
       this._initializeEffectsManager();
@@ -98,26 +95,20 @@ export class TotMForm extends FormApplication {
 
   async _initializeTileManager() {
     logMessage("Initializing Tile Manager...");
-
     logMessage("Loading tile data...");
     await loadTileData(this);
-
     logMessage("Tile data loaded:", this.tiles);
-
     // Retrieve the initial tile tag from settings
     const initialTag = game.settings.get(NAMESPACE, 'initialTileTag');
     logMessage("Initial tile tag retrieved from settings:", initialTag);
-
     // Find the tile by tag using Tagger
     let initialTile = findAndSwitchToTileByTag(this, initialTag, false);
     logMessage("Tile found with initial tag:", initialTile);
-
     // If no tile is found with the specific tag, fallback to the first tile
     if (!initialTile && this.tiles.length > 0) {
       initialTile = this.tiles[0];
       logMessage(`Fallback: Set current tile to first tile with ID ${initialTile.id}`);
     }
-
     // Check and activate the initial tile
     if (initialTile) {
       logMessage("Activating initial tile:", initialTile);
@@ -126,16 +117,12 @@ export class TotMForm extends FormApplication {
     } else {
       console.warn("No tile found to set as current tile.");
     }
-
     logMessage("Updating tile buttons...");
     updateTileButtons(this);
-
     logMessage("Updating tile fields...");
     updateTileFields(this);
-
     logMessage("Initialization completed.");
   }
-
 
   async _initializeEffectsManager() {
 
@@ -164,38 +151,6 @@ export class TotMForm extends FormApplication {
       console.warn("No current tile selected.");
     }
   }
-
-  // async _initializeTileManager() {
-  //   logMessage("Initializing Tile Manager...");
-
-  //   logMessage("Loading tile data...");
-  //   await loadTileData(this);
-
-  //   // Retrieve the initial tile tag from settings
-  //   const initialTag = game.settings.get('totm-manager', 'initialTileTag');
-  //   let initialTile = findAndSwitchToTileByTag(this, initialTag, false);
-
-  //   // If no tile is found with the specific tag, fallback to the first tile
-  //   if (!initialTile && this.tiles.length > 0) {
-  //     initialTile = this.tiles[0];
-  //     logMessage(`Fallback: Set current tile to first tile with ID ${initialTile.id}`);
-  //   }
-
-  //   if (initialTile) {
-  //     activateTile(this, initialTile);
-  //     await loadTileImages(this, initialTile); // Ensure 'initialTile' is passed correctly
-  //   } else {
-  //     console.warn("No tile found to set as current tile.");
-  //   }
-
-  //   logMessage("Updating tile buttons...");
-  //   updateTileButtons(this);
-
-  //   logMessage("Updating tile fields...");
-  //   updateTileFields(this);
-
-  //   logMessage("Initialization completed.");
-  // }
 
   _initializeTabs() {
     if (!this._tabs) {

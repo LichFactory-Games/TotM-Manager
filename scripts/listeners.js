@@ -2,9 +2,9 @@
 // // Listener Methods  // //
 /////////////////////////////
 
-import { NAMESPACE, activateTile, findAndSwitchToTileByTag, updateActiveTileButton } from './utilities.js';
+import { NAMESPACE, logMessage, activateTile, findAndSwitchToTileByTag, updateActiveTileButton } from './utilities.js';
 import { addImageToTile, addImageDirectoryToTile, updateImageTags, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
-import { generateTileFields, handleSaveAndRender, deleteTileData } from './tiles.js';
+import { generateTileFields, handleSaveAndRender, deleteTileData, collectAndSaveTileData } from './tiles.js';
 import { loadTileImages } from './tiles-utils.js'
 import { updateEffectsUI, onTargetChange } from './effects.js';
 import { ModifyEffectForm } from './modifyEffectForm.js';
@@ -56,26 +56,13 @@ export function activateGeneralListeners(instance, html) {
     if (instance.currentTile) {
       await loadTileImages(instance, instance.currentTile);
       console.log(`Loaded images for tile: ${tileName}`);
-
-      // Call updateActiveTileButton after rendering
-      setTimeout(() => {
-        updateActiveTileButton(instance);
-        console.log(`Updated active tile button for tile: ${tileName}`);
-      }, 100);
+      // Force a repaint before updating the active button
+      await new Promise(requestAnimationFrame);
+      await updateActiveTileButton(instance);
     } else {
       console.warn(`No tile found with the tileName: ${tileName}`);
     }
   });
-
-  // html.find('.stage-buttons-container').on('click', '.tile-button', async event => {
-  //   const tileName = event.currentTarget.dataset.tileName;
-  //   console.log(`Switching to tile with Name: ${tileName}`);
-  //   await findAndSwitchToTileByTag(instance, tileName);
-  //   await loadTileImages(instance, instance.currentTile);
-
-  //   // Call updateActiveTileButton after rendering
-  //   setTimeout(() => updateActiveTileButton(instance), 100);
-  // });
 
   html.find('.set-image-button').click(async event => {
     const index = $(event.currentTarget).data('index');
@@ -110,11 +97,17 @@ export function activateGeneralListeners(instance, html) {
       order: instance.currentTile.document.getFlag(NAMESPACE, 'order')
     };
 
-    // Update the active image button once everything is done
-    updateActiveImageButton(instance);
-    setTimeout(() => updateActiveTileButton(instance), 100);
+    logMessage("Saving data for tile...");
+    await collectAndSaveTileData(instance, tileData);
 
-    await handleSaveAndRender(instance, tileData);
+    // await handleSaveAndRender(instance, tileData);
+
+    // Update the active image button once everything is done
+    // Force a repaint before updating the active button
+    await new Promise(requestAnimationFrame);
+    await updateActiveImageButton(instance);
+    await updateActiveTileButton(instance);
+
   });
 
   html.find('.tag-field').on('input', event => {
@@ -124,12 +117,12 @@ export function activateGeneralListeners(instance, html) {
 
   html.find('.prev-image').click(async () => {
     await cycleImages(instance, instance.currentTile, 'prev');
-    updateActiveImageButton(instance);
+    await updateActiveImageButton(instance);
   });
 
   html.find('.next-image').click(async () => {
     await cycleImages(instance, instance.currentTile, 'next');
-    updateActiveImageButton(instance);
+    await updateActiveImageButton(instance);
   });
 }
 
