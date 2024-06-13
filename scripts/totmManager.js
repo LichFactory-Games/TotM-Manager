@@ -1,5 +1,5 @@
 // scripts/totmManager.js
-import { NAMESPACE, logMessage, updateTileButtons, findAndSwitchToTileByTag, activateTile } from './utilities.js';
+import { NAMESPACE, logMessage, updateTileButtons, findAndSwitchToTileByTag, activateTile, updateActiveTileButton } from './utilities.js';
 import { loadTileData, loadTileImages, updateTileFields } from './tiles-utils.js'
 import { activateGeneralListeners, activatePathManagementListeners, activateImageSearchBarListeners, activateImagePreviewListeners, activateEffectEventListeners } from './listeners.js';
 import { populateEffectsDropdown, updateEffectsUI, onTargetChange } from './effects.js';
@@ -10,7 +10,6 @@ export class TotMForm extends FormApplication {
     super(...args);
     this.currentActiveTag = null; // Initialize active tag property
     this.selectedTarget = 'tile'; // Default to 'tile' or any other desired default
-    this.isInitialized = false;  // Flag for header tile button setup
     this.tileManagerInitialized = false; // Flag to prevent re-initialization
     this.tiles = [];  // Initialize tiles array
   }
@@ -87,8 +86,10 @@ export class TotMForm extends FormApplication {
     // Initialize tabs
     logMessage("Initializing tabs");
     this._initializeTabs();
-    // Initialize effects manager without a delay
-    await this._initializeEffectsManager();
+    // Initialize effects manager
+    setTimeout(() => {
+      this._initializeEffectsManager()
+    }, 100);
   }
 
   async _initializeTileManager() {

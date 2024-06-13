@@ -1,37 +1,5 @@
 import { NAMESPACE, logMessage, getFilteredTiles } from './utilities.js';
 
-// Helper function to collect tile data
-export function collectTileData(container) {
-  const tiles = [];
-  container.find('.tile-field').each(function() {
-    const order = $(this).data('order');
-    const tileName = $(this).find(`input[name="tile-name-${order}"]`).val();
-    const opacity = $(this).find(`input[name="tile-opacity-${order}"]`).val();
-    const tint = $(this).find(`input[name="tile-tint-${order}"]`).val();
-
-    tiles.push({
-      order,
-      name: tileName,
-      opacity,
-      tint
-    });
-  });
-  console.log('Collected tile data:', tiles);
-  return tiles;
-}
-
-// Helper function to collect image paths
-export function collectImagePaths(container) {
-  const pathListItems = container.find('#image-path-list .form-field');
-  return pathListItems.map((_, pathItem) => {
-    const $pathItem = $(pathItem);
-    const img = $pathItem.find('.path-field').data('img');
-    const tags = $pathItem.find('.tag-field').val().split(',').map(tag => tag.trim());
-    const color = $pathItem.find('.color-picker').val();
-    return { img, displayImg: img.split('/').pop(), tags, color };
-  }).get();
-}
-
 // Helper function to save tile flags
 export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
   // Add validation to check if foundTile is an actual tile object

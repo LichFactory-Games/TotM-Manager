@@ -1,6 +1,6 @@
 import { NAMESPACE, updateTileButtons, updateActiveTileButton, logMessage, getFilteredTiles } from './utilities.js';
 import { findAndSwitchToTileByTag } from './utilities.js';
-import { collectTileData, collectImagePaths, saveTileDataToFlags, clearTileFlags }  from './tiles-utils.js';
+import { saveTileDataToFlags, clearTileFlags }  from './tiles-utils.js';
 import { loadTileData, updateTileFields } from './tiles-utils.js';
 
 export function generateTileFields(instance, html, options = { replace: false, count: 1 }) {
