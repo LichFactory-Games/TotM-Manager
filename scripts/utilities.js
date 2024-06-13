@@ -54,25 +54,35 @@ export function adjustColor(hex, amount) {
 //  Tiles & Tags   //
 /////////////////////
 
+// Updated findAndSwitchToTileByTag function
 export function findAndSwitchToTileByTag(instance, tag, switchToTile = true) {
   // Validate the tag
-  if (typeof tag !== 'string') {
-    console.error(`Invalid tag type: ${typeof tag}. Tag must be a string.`);
+  if (typeof tag !== 'string' || tag.trim() === '') {
+    console.error("Invalid tag type:", tag);
     return null;
   }
 
-  const tiles = canvas.tiles.placeables;
+  const tiles = getFilteredTiles();
   logMessage(`TotM - Checking for tiles with tag: ${tag}`);
 
   // Find the tile with the specified tag using Tagger
-  const tileWithTag = tiles.find(t => Tagger.hasTags(t, [tag], { caseInsensitive: true, matchExactly: true }));
-  logMessage(`Tile found with tag ${tag}:`, tileWithTag);
+  const foundTile = tiles.find(tile => {
+    const tileTags = Tagger.getTags(tile);
+    return tileTags.includes(tag);
+  });
 
-  if (switchToTile && tileWithTag) {
-    activateTile(instance, tileWithTag);
+  if (foundTile) {
+    logMessage(`Tile found with tag ${tag}:`, foundTile);
+    if (switchToTile) {
+      activateTile(instance, foundTile);
+    }
+    return foundTile;
+  } else {
+    console.warn(`No tile found with the tag: ${tag}`);
+    return null;
   }
-  return tileWithTag;
 }
+
 
 ////
 
