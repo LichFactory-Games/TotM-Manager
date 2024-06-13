@@ -60,38 +60,122 @@ function generateFields(instance, tileFieldsContainer, count) {
 }
 
 // Save data to tile document
-export async function collectAndSaveTileData(instance, tileData) {
-  logMessage("Saving tile data for tile...");
 
-  // Ensure the tileName is defined and not empty
-  const tileName = tileData.name;
-  if (!tileName || tileName.trim() === '') {
-    console.warn("Skipping tile with empty or undefined tileName.");
-    return;
-  }
+export async function collectAndSaveTileData(instance, html) {
+  logMessage("Saving tile data for tiles...");
 
-  // Log the tile name before using it
-  logMessage(`Processing tile with tileName: ${tileName}`);
+  const container = html.find('#tile-fields-container');
+  const tiles = collectTileData(container);
 
-  // Get filtered tiles to ensure only those with tags are processed
-  const filteredTiles = getFilteredTiles();
+  for (const tileData of tiles) {
+    // Ensure the tileName is defined and not empty
+    let tileName = tileData.name;
 
-  // Find the actual tile by matching the tileName
-  const foundTile = filteredTiles.find(tile => tile.document.getFlag(NAMESPACE, 'tileName') === tileName);
+    if (!tileName || tileName.trim() === '') {
+      // Generate a temporary tileName if it's not provided
+      tileName = `tile-${Date.now()}`;
+      tileData.name = tileName;
+      logMessage(`Generated temporary tileName: ${tileName}`);
+    }
 
-  // Log the found tile before calling saveTileDataToFlags
-  logMessage(`Found tile:`, foundTile);
+    // Log the tile name before using it
+    logMessage(`Processing tile with tileName: ${tileName}`);
 
-  if (foundTile) {
-    await saveTileDataToFlags(tileData, foundTile, instance.imagePaths);
-  } else {
-    console.warn(`No tile found with the tileName: ${tileName}`);
+    // Find the tile by tag
+    const foundTile = findAndSwitchToTileByTag(instance, tileName, false);
+
+    if (foundTile) {
+      // Extract image paths specific to this tile
+      const tileImagePaths = collectImagePaths(container);
+
+      // Log the found tile before calling saveTileDataToFlags
+      logMessage("Found tile:", foundTile);
+      await saveTileDataToFlags(tileData, foundTile, tileImagePaths);
+    } else {
+      console.warn(`No tile found with the tileName: ${tileName}`);
+    }
   }
 }
+
+// export async function collectAndSaveTileData(instance, tileData) {
+//   logMessage("Saving tile data for tile...");
+
+//   // Ensure the tileName is defined and not empty
+//   let tileName = tileData.name;
+
+//   // Check if the tile name is empty or undefined
+//   if (!tileName || tileName.trim() === '') {
+//     const order = tileData.order;
+//     const tileField = document.querySelector(`input[name="tile-name-${order}"]`);
+
+//     if (tileField) {
+//       tileName = tileField.value.trim();
+//       tileData.name = tileName;
+//     }
+
+//     if (!tileName) {
+//       // Generate a temporary tileName if it's still not provided
+//       tileName = `tile-${Date.now()}`;
+//       tileData.name = tileName;
+//       logMessage(`Generated temporary tileName: ${tileName}`);
+//     }
+//   }
+
+//   // Log the tile name before using it
+//   logMessage(`Processing tile with tileName: ${tileName}`);
+
+//   // Set flags first
+//   const foundTile = findAndSwitchToTileByTag(instance, tileName, false);
+
+//   if (foundTile) {
+//     // Log the found tile before calling saveTileDataToFlags
+//     logMessage("Found tile:", foundTile);
+//     await saveTileDataToFlags(tileData, foundTile, instance.imagePaths);
+//   } else {
+//     console.warn(`No tile found with the tileName: ${tileName}`);
+//   }
+// }
+
+export function collectTileData(container) {
+  return container.find('.tile-field').map((index, tileField) => {
+    const $tileField = $(tileField);
+    const order = $tileField.attr('data-order');
+    return {
+      name: $tileField.find(`input[name="tile-name-${order}"]`).val(),
+      opacity: $tileField.find(`input[name="tile-opacity-${order}"]`).val(),
+      tint: $tileField.find(`input[name="tile-tint-${order}"]`).val(),
+      order
+    };
+  }).get();
+}
+
+export function collectImagePaths(container) {
+  const pathListItems = container.find('#image-path-list .form-field');
+  return pathListItems.map((index, pathItem) => {
+    const $pathItem = $(pathItem);
+    const img = $pathItem.find('.path-field').data('img');
+    const tags = $pathItem.find('.tag-field').val().split(',').map(tag => tag.trim());
+    const color = $pathItem.find('.color-picker').val();
+    return { img, displayImg: img.split('/').pop(), tags, color };
+  }).get();
+}
+
+
 
 export async function handleSaveAndRender(instance, tileData) {
   logMessage("Saving data for tile...");
   await collectAndSaveTileData(instance, tileData);
+
+  console.log("Loading tile data...");
+  await loadTileData(instance);
+
+  await collectAndSaveTileData(instance, tileData);
+
+  console.log("Updating stage buttons...");
+  updateTileButtons(instance);
+
+  console.log("Updating tile fields...");
+  updateTileFields(instance);
 
   logMessage("Rendering the instance...");
   instance.render(true);
@@ -131,8 +215,8 @@ export async function deleteTileData(instance, order, html) {
 
   if (tileToDelete) {
     // Remove flags from the tile document
-    const foundTile = findAndSwitchToTileByTag(tileToDelete.name);
-    logMessage("Tile delete name: ${foundTile}");
+    const foundTile = findAndSwitchToTileByTag(instance, tileToDelete.name, false);
+    logMessage(`Tile delete name:`, foundTile);
     if (foundTile) {
       await foundTile.document.unsetFlag(NAMESPACE, 'tileName');
       await foundTile.document.unsetFlag(NAMESPACE, 'opacity');
@@ -148,13 +232,27 @@ export async function deleteTileData(instance, order, html) {
 }
 
 export async function handleDeleteAndSave(instance, order, html) {
-  await deleteTileData(instance, order, html);  // Delete the tile field
-  await collectAndSaveTileData(instance, html);       // Save the updated tile data
-  await loadTileData(instance);             // Reload the latest data
-  // updateStageButtons(instance);             // Update the UI stage buttons
-  // updateTileFields(instance);               // Update the UI tile fields
+  logMessage("Deleting data for tile...");
 
+  // Delete the tile field and update internal state
+  await deleteTileData(instance, order, html);
+
+  // Save the updated tile data
+  logMessage("Saving deletion data for tile...");
+  await collectAndSaveTileData(instance, html);
+  logMessage("Deletion data saved...");
+
+  // Reload the latest data and update UI
+  await loadTileData(instance);
+  logMessage("Loading updated tile data...");
+
+  // Wait for the next animation frame before updating the UI
+  await new Promise(requestAnimationFrame);
+
+  // Update the UI components
+  updateTileButtons(instance);
+  updateTileFields(instance);
+
+  logMessage("Rendering the updated instance...");
+  instance.render(true);
 }
-
-
-

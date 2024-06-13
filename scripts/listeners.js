@@ -4,7 +4,7 @@
 
 import { NAMESPACE, logMessage, activateTile, findAndSwitchToTileByTag, updateActiveTileButton } from './utilities.js';
 import { addImageToTile, addImageDirectoryToTile, updateImageTags, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
-import { generateTileFields, handleSaveAndRender, deleteTileData, collectAndSaveTileData } from './tiles.js';
+import { generateTileFields, handleSaveAndRender, handleDeleteAndSave, collectAndSaveTileData } from './tiles.js';
 import { loadTileImages } from './tiles-utils.js'
 import { updateEffectsUI, onTargetChange } from './effects.js';
 import { ModifyEffectForm } from './modifyEffectForm.js';
@@ -41,8 +41,8 @@ export function activateGeneralListeners(instance, html) {
   html.find('#tile-fields-container').on('click', '.delete-tile', async event => {
     const order = parseInt($(event.currentTarget).closest('.tile-field').data('order'), 10); // Get the order attribute
     console.log(`Deleting tile with order: ${order}`);
-    await deleteTileData(instance, order, html);
-    await handleSaveAndRender(instance, html);  // Ensure the state is saved and re-rendered correctly
+    await handleDeleteAndSave(instance, order, html)
+
   });
 
   // Update Active Tile
