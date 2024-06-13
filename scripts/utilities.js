@@ -164,9 +164,8 @@ export function getFilteredTiles() {
 
 ////
 
-
 export function updateTileButtons(instance) {
-  const stageButtonsContainers = document.querySelectorAll('.stage-buttons-container');
+  const stageButtonsContainers = $('.stage-buttons-container');
 
   if (!stageButtonsContainers.length) {
     console.warn('Stage buttons container not found.');
@@ -175,24 +174,25 @@ export function updateTileButtons(instance) {
 
   logMessage("instance.tiles content:", instance.tiles);
 
-  stageButtonsContainers.forEach(stageButtonsContainer => {
-    const currentButtons = stageButtonsContainer.querySelectorAll('.tile-button');
-    const currentButtonNames = Array.from(currentButtons).map(button => button.dataset.tileName);
+  stageButtonsContainers.each((index, stageButtonsContainer) => {
+    const $stageButtonsContainer = $(stageButtonsContainer);
+    const currentButtons = $stageButtonsContainer.find('.tile-button');
+    const currentButtonNames = currentButtons.map((_, button) => $(button).data('tileName')).get();
     const instanceTileNames = instance.tiles.map(tile => tile.name);
 
     if (JSON.stringify(currentButtonNames) !== JSON.stringify(instanceTileNames)) {
-      stageButtonsContainer.innerHTML = '';
+      $stageButtonsContainer.empty();
       instance.tiles.forEach((tile, index) => {
         logMessage(`Processing tile ${index}:`, tile);
         if (tile.name) {
-          const button = document.createElement('button');
-          button.type = 'button';
-          button.classList.add('tile-button');
-          button.dataset.tileName = tile.name;
-          button.dataset.tileId = tile.id; // Add tile ID to the button dataset
-          button.textContent = tile.name || `Tile ${index + 1}`;
-          stageButtonsContainer.appendChild(button);
-
+          const $button = $('<button>', {
+            type: 'button',
+            class: 'tile-button',
+            'data-tile-name': tile.name,
+            'data-tile-id': tile.id,
+            text: tile.name || `Tile ${index + 1}`
+          });
+          $stageButtonsContainer.append($button);
           logMessage(`Created button for tile: ${tile.name}`);
         } else {
           logMessage(`Tile ${index} does not have a name.`);
