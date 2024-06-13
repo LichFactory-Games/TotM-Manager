@@ -1,4 +1,4 @@
-import { NAMESPACE, updateTileButtons, logMessage } from './utilities.js';
+import { NAMESPACE, updateTileButtons, updateActiveTileButton, logMessage, getFilteredTiles } from './utilities.js';
 import { findAndSwitchToTileByTag } from './utilities.js';
 import { collectTileData, collectImagePaths, saveTileDataToFlags, clearTileFlags }  from './tiles-utils.js';
 import { loadTileData, updateTileFields } from './tiles-utils.js';
@@ -59,57 +59,48 @@ function generateFields(instance, tileFieldsContainer, count) {
   logMessage("Generated tile fields:", instance.tiles)
 }
 
-// Save data to tile document 
-export async function collectAndSaveTileData(instance, html) {
-  logMessage("Saving tile data...");
-  const container = html.find('#tile-fields-container').length ? html.find('#tile-fields-container') : html.find('.add-image-container');
+// Save data to tile document
+export async function collectAndSaveTileData(instance, tileData) {
+  logMessage("Saving tile data for tile...");
 
-  if (container.attr('id') === 'tile-fields-container') {
-    instance.tiles = collectTileData(container);
-  } else {
-    instance.imagePaths = collectImagePaths(container);
+  // Ensure the tileName is defined and not empty
+  const tileName = tileData.name;
+  if (!tileName || tileName.trim() === '') {
+    console.warn("Skipping tile with empty or undefined tileName.");
+    return;
   }
 
-  for (let tile of instance.tiles) {
-    if (tile.name.trim() === '') {
-      console.warn("Skipping tile with empty name.");
-      continue;
-    }
+  // Log the tile name before using it
+  logMessage(`Processing tile with tileName: ${tileName}`);
 
-    // Log the tile name before using it
-    logMessage(`Processing tile with name: ${tile.name}`);
+  // Get filtered tiles to ensure only those with tags are processed
+  const filteredTiles = getFilteredTiles();
 
-    const foundTile = findAndSwitchToTileByTag(instance, tile.name);
+  // Find the actual tile by matching the tileName
+  const foundTile = filteredTiles.find(tile => tile.document.getFlag(NAMESPACE, 'tileName') === tileName);
 
-    // Log the found tile before calling saveTileDataToFlags
-    logMessage(`Found tile:`, foundTile);
+  // Log the found tile before calling saveTileDataToFlags
+  logMessage(`Found tile:`, foundTile);
 
-    if (foundTile) {
-      await saveTileDataToFlags(tile, foundTile, instance.imagePaths);
-    } else {
-      console.warn(`No tile found with the name: ${tile.name}`);
-    }
+  if (foundTile) {
+    await saveTileDataToFlags(tileData, foundTile, instance.imagePaths);
+  } else {
+    console.warn(`No tile found with the tileName: ${tileName}`);
   }
 }
 
-export async function handleSaveAndRender(instance, html) {
-  logMessage("Saving tile data...");
-  await collectAndSaveTileData(instance, html);
-  
-  logMessage("Loading tile data...");
-  await loadTileData(instance);
-  
-  // logMessage("Updating stage buttons...");
-  updateTileButtons(instance);
+export async function handleSaveAndRender(instance, tileData) {
+  logMessage("Saving data for tile...");
+  await collectAndSaveTileData(instance, tileData);
 
-  // logMessage("Updating tile fields...");
-  updateTileFields(instance);
-  
   logMessage("Rendering the instance...");
   instance.render(true);
-  
+
   logMessage("Completed handleSaveAndRender");
 }
+
+
+
 
 export async function deleteTileData(instance, order, html) {
   if (!instance || !instance.tiles) {

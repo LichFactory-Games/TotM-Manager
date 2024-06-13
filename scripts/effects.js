@@ -96,7 +96,7 @@ export function onTargetChange(event, instance) {
       populateImageDropdown(instance);
     } else {
       console.error("Image paths are not populated or empty.");
-      ui.notifications.warn("No images found for the selected tile. Please add images first.");
+      // ui.notifications.warn("No images found for the selected tile. Please add images first.");
     }
   }
 }

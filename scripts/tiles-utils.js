@@ -1,18 +1,23 @@
-import { NAMESPACE, logMessage } from './utilities.js';
-
+import { NAMESPACE, logMessage, getFilteredTiles } from './utilities.js';
 
 // Helper function to collect tile data
 export function collectTileData(container) {
-  return container.find('.tile-field').map((tileField) => {
-    const $tileField = $(tileField);
-    const order = $tileField.attr('data-order');
-    return {
-      name: $tileField.find(`input[name="tile-name-${order}"]`).val(),
-      opacity: $tileField.find(`input[name="tile-opacity-${order}"]`).val(),
-      tint: $tileField.find(`input[name="tile-tint-${order}"]`).val(),
-      order
-    };
-  }).get();
+  const tiles = [];
+  container.find('.tile-field').each(function() {
+    const order = $(this).data('order');
+    const tileName = $(this).find(`input[name="tile-name-${order}"]`).val();
+    const opacity = $(this).find(`input[name="tile-opacity-${order}"]`).val();
+    const tint = $(this).find(`input[name="tile-tint-${order}"]`).val();
+
+    tiles.push({
+      order,
+      name: tileName,
+      opacity,
+      tint
+    });
+  });
+  console.log('Collected tile data:', tiles);
+  return tiles;
 }
 
 // Helper function to collect image paths
@@ -54,12 +59,18 @@ export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
       img: path.img,
       displayImg: path.displayImg,
       tags: path.tags,
-      color: path.color || existingPaths[index]?.color
+      color: path.color || (existingPaths[index] && existingPaths[index].color) || "#000000"
     }));
-    await foundTile.document.setFlag(NAMESPACE, 'imagePaths', pathsToSave);
 
-    const currentImgIndex = await foundTile.document.getFlag(NAMESPACE, 'imgIndex') || 0;
-    await foundTile.document.setFlag(NAMESPACE, 'imgIndex', currentImgIndex >= pathsToSave.length ? pathsToSave.length - 1 : currentImgIndex);
+    await foundTile.document.setFlag(NAMESPACE, 'imagePaths', pathsToSave);
+    logMessage("Image paths saved:", pathsToSave);
+
+    let currentImgIndex = await foundTile.document.getFlag(NAMESPACE, 'imgIndex') || 0;
+    if (currentImgIndex >= pathsToSave.length) {
+      currentImgIndex = pathsToSave.length - 1;
+    }
+    await foundTile.document.setFlag(NAMESPACE, 'imgIndex', currentImgIndex);
+    logMessage("Current image index saved:", currentImgIndex);
   } else {
     logMessage("No image paths provided.");
   }
@@ -122,11 +133,7 @@ export async function loadTileImages(instance, tile) {
     }
   });
   logMessage("TotM - Loaded image paths for tile:", instance.imagePaths);
-
-  // Call the render method to update the UI with loaded images
-  // instance.render(true);
-  // Initial call to update the button state
-  // setTimeout(() => updateTileButtons(instance), 10);  // Delay the update call to ensure DOM has updated
+  instance.render(true);
 }
 
 //// Tile Updating Functions
