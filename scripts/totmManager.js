@@ -87,10 +87,8 @@ export class TotMForm extends FormApplication {
     // Initialize tabs
     logMessage("Initializing tabs");
     this._initializeTabs();
-    // Initialize effects manager after a short delay
-    setTimeout(() => {
-      this._initializeEffectsManager();
-    }, 100);
+    // Initialize effects manager without a delay
+    await this._initializeEffectsManager();
   }
 
   async _initializeTileManager() {
@@ -150,6 +148,7 @@ export class TotMForm extends FormApplication {
     } else {
       console.warn("No current tile selected.");
     }
+    logMessage("Effects Initialization completed.")
   }
 
   _initializeTabs() {

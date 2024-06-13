@@ -120,6 +120,7 @@ export async function loadTileImages(instance, tile) {
 
   // Fetch the image paths stored in the tile's flags
   let loadedPaths = tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+  logMessage("Fetched image paths from tile flags:", loadedPaths);
 
   // Prepare the image paths for display
   instance.imagePaths = loadedPaths.map(path => {
@@ -133,7 +134,9 @@ export async function loadTileImages(instance, tile) {
     }
   });
   logMessage("TotM - Loaded image paths for tile:", instance.imagePaths);
-  instance.render(true);
+  await instance.render(true);
+  logMessage("Instance rendered with new image paths.");
+
 }
 
 //// Tile Updating Functions

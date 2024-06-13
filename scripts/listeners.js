@@ -56,8 +56,10 @@ export function activateGeneralListeners(instance, html) {
     if (instance.currentTile) {
       await loadTileImages(instance, instance.currentTile);
       console.log(`Loaded images for tile: ${tileName}`);
-      // Force a repaint before updating the active button
-      await new Promise(requestAnimationFrame);
+
+      // Ensure the DOM is updated before proceeding
+      await new Promise(resolve => requestAnimationFrame(resolve));
+
       await updateActiveTileButton(instance);
     } else {
       console.warn(`No tile found with the tileName: ${tileName}`);

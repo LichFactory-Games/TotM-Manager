@@ -91,9 +91,8 @@ export async function updateActiveImageButton(instance) {
     activeImageButton.addClass('active-button');
     console.log(`TotM - Active image button found and activated: ${imageButtonSelector}`);
     console.log(`TotM - Active image button marked: Index ${imageIndex}`);
-    // setTimeout(() => updateActiveTileButton(instance), 2);
-  } else {
-    console.warn("No image button found for index:", imageIndex);
+    } else {
+      console.warn("No image button found for index:", imageIndex);
   }
 
   await updateActiveTileButton(instance);

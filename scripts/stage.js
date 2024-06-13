@@ -112,9 +112,7 @@ export function performImageSearch(instance, query) {
 }
 
 export function focusSearchField(instance) {
-  setTimeout(() => {
-    const searchField = instance.element.find('#image-search-bar')[0];
-    if (searchField) searchField.focus();
-  }, 0);
+  const searchField = instance.element.find('#image-search-bar')[0];
+  if (searchField) searchField.focus();
 }
 

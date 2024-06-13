@@ -124,22 +124,21 @@ export async function activateTile(instance, tile) {
     scene: tile.scene
   });
 
-  // Directly set control properties and force refresh
-  setTimeout(() => {
-    console.log("Attempting to control tile:", tile);
-    try {
-      canvas.tiles.releaseAll();
-      tile.control({ releaseOthers: true });
-      tile.refresh();
-      console.log("Tile should now be controlled:", tile);
 
-      instance.currentTile = tile;
-      instance.currentTileId = tile.id;
-      console.log(`Set current tile to ID ${tile.id}`);
-    } catch (e) {
-      console.error("Failed to control the tile:", tile);
-    }
-  }, 100); // Delay of 100ms
+  // Directly set control properties and force refresh
+  console.log("Attempting to control tile:", tile);
+  try {
+    canvas.tiles.releaseAll();
+    tile.control({ releaseOthers: true });
+    tile.refresh();
+    console.log("Tile should now be controlled:", tile);
+
+    instance.currentTile = tile;
+    instance.currentTileId = tile.id;
+    console.log(`Set current tile to ID ${tile.id}`);
+  } catch (e) {
+    console.error("Failed to control the tile:", tile);
+  }
 }
 
 ////
@@ -204,7 +203,7 @@ export function updateTileButtons(instance) {
 }
 
 export async function updateActiveTileButton(instance) {
-  console.log("updateActiveTileButton called");
+  logMessage("updateActiveTileButton called");
 
   if (!instance.currentTile || !instance.currentTile.document) {
     console.warn("No currently active tile or missing document property.");
@@ -212,7 +211,7 @@ export async function updateActiveTileButton(instance) {
   }
 
   // Directly retrieve the tile name from the document's flags
-  const tileName = instance.currentTile.document.getFlag(NAMESPACE, 'tileName');
+  const tileName = await instance.currentTile.document.getFlag(NAMESPACE, 'tileName');
 
   if (!tileName) {
     console.warn("Current tile does not have a tileName flag.");
@@ -220,15 +219,15 @@ export async function updateActiveTileButton(instance) {
   }
 
   // Log the current tile and tileName
-  console.log(`Current tile ID: ${instance.currentTile.id}, Tile name: ${tileName}`);
+  logMessage(`Current tile ID: ${instance.currentTile.id}, Tile name: ${tileName}`);
 
   // Remove the active class from all tile buttons
   document.querySelectorAll('.tile-button').forEach(button => button.classList.remove('active-button'));
-  console.log("Removed active class from all tile buttons");
+  logMessage("Removed active class from all tile buttons");
 
   // Select the button corresponding to the current tile
   const selector = `.tile-button[data-tile-name="${tileName}"]`;
-  console.log("Selecting button with selector: ", selector);
+  logMessage("Selecting button with selector: ", selector);
 
   const activeButton = document.querySelector(selector);
   if (!activeButton) {
@@ -238,7 +237,7 @@ export async function updateActiveTileButton(instance) {
 
   // Add the active class to the selected button
   activeButton.classList.add('active-button');
-  console.log("Active button updated:", activeButton);
+  logMessage("Active button updated:", activeButton);
 }
 
 
