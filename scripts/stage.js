@@ -15,7 +15,19 @@ export async function activateImage(instance, image, index) {
   }
 
   const tile = instance.currentTile;
+  const tileId = tile.id;
+  const tileName = await tile.document.getFlag(NAMESPACE, 'tileName');
   const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+
+  if (!tileName) {
+    console.error("Tile has no name set.");
+    ui.notifications.error("Error setting image. Tile has no name set.");
+    return;
+  }
+
+  // Log current tile information
+  console.log(`Activating image on tile ID: ${tileId}, Name: ${tileName}`);
+  console.log(`Image paths for tile:`, imagePaths);
 
   // Deactivate effects of the previous image
   const previousIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
@@ -23,25 +35,29 @@ export async function activateImage(instance, image, index) {
     const previousImage = imagePaths[previousIndex];
     const previousEffects = previousImage.effects || [];
     await removeEffectsFromTile(tile, previousEffects, false);
+    console.log(`Removed effects from previous image index: ${previousIndex}`);
   }
 
   // Update the tile's texture and flag
+  console.log(`Updating tile ID ${tileId} texture to: ${image.img}`);
   await tile.document.update({ 'texture.src': image.img });
   await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
 
   // Apply tile-wide effects
   const tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
   await applyEffectsToTile(tile, tileEffects, true);
+  console.log(`Applied tile-wide effects to tile ID: ${tileId}`);
 
   // Apply image-specific effects
   const currentImage = imagePaths.find(img => img.img === image.img);
   if (currentImage && currentImage.effects) {
     await applyEffectsToTile(tile, currentImage.effects, false);
+    console.log(`Applied image-specific effects to tile ID: ${tileId}`);
   }
 
   // Render the instance
   instance.render();
-  console.log(`Image ${image.displayImg} activated.`);
+  console.log(`Image ${image.displayImg} activated on tile ID: ${tileId}.`);
 }
 
 export async function cycleImages(instance, tile, direction) {
@@ -64,32 +80,6 @@ export async function cycleImages(instance, tile, direction) {
   } catch (error) {
     console.error("Failed to cycle images:", error);
     ui.notifications.error("Error cycling images. See console for details.");
-  }
-}
-
-export async function setActiveImage(instance, index) {
-  try {
-    // Ensure the current tile is defined
-    if (!instance.currentTile || !instance.currentTile.document) {
-      console.warn("No current tile is selected or missing document property.");
-      return;
-    }
-
-    // Retrieve the image paths from the tile flags
-    const imagePaths = await instance.currentTile.document.getFlag('totm-manager', 'imagePaths') || [];
-
-    // Log the retrieved image paths
-    console.log('Retrieved image paths:', imagePaths);
-
-    // Check if the index is within bounds
-    if (index >= 0 && index < imagePaths.length) {
-      await activateImage(instance, imagePaths[index], index);
-      console.log(`Active image set to index ${index}`);
-    } else {
-      console.warn(`Index ${index} out of bounds for image paths. Image paths length: ${imagePaths.length}`);
-    }
-  } catch (error) {
-    console.error("Error setting active image:", error);
   }
 }
 

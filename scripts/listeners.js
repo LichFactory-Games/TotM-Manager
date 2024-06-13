@@ -8,7 +8,7 @@ import { generateTileFields, handleSaveAndRender, deleteTileData } from './tiles
 import { loadTileImages } from './tiles-utils.js'
 import { updateEffectsUI, onTargetChange } from './effects.js';
 import { ModifyEffectForm } from './modifyEffectForm.js';
-import { performImageSearch, cycleImages, setActiveImage } from './stage.js';
+import { performImageSearch, activateImage, cycleImages } from './stage.js';
 
 
 export function activateGeneralListeners(instance, html) {
@@ -48,20 +48,73 @@ export function activateGeneralListeners(instance, html) {
   // Update Active Tile
   html.find('.stage-buttons-container').on('click', '.tile-button', async event => {
     const tileName = event.currentTarget.dataset.tileName;
-    console.log(`Switching to tile with Name: ${tileName}`);
-    await findAndSwitchToTileByTag(instance, tileName);
-    instance.render(true);
+    console.log(`Clicked tile button with Name: ${tileName}`);
 
-    // Call updateActiveTileButton after rendering
-    setTimeout(() => updateActiveTileButton(instance), 100);
+    await findAndSwitchToTileByTag(instance, tileName);
+    console.log(`Switched to tile: ${tileName}`);
+
+    if (instance.currentTile) {
+      await loadTileImages(instance, instance.currentTile);
+      console.log(`Loaded images for tile: ${tileName}`);
+
+      // Call updateActiveTileButton after rendering
+      setTimeout(() => {
+        updateActiveTileButton(instance);
+        console.log(`Updated active tile button for tile: ${tileName}`);
+      }, 100);
+    } else {
+      console.warn(`No tile found with the tileName: ${tileName}`);
+    }
   });
+
+  // html.find('.stage-buttons-container').on('click', '.tile-button', async event => {
+  //   const tileName = event.currentTarget.dataset.tileName;
+  //   console.log(`Switching to tile with Name: ${tileName}`);
+  //   await findAndSwitchToTileByTag(instance, tileName);
+  //   await loadTileImages(instance, instance.currentTile);
+
+  //   // Call updateActiveTileButton after rendering
+  //   setTimeout(() => updateActiveTileButton(instance), 100);
+  // });
 
   html.find('.set-image-button').click(async event => {
     const index = $(event.currentTarget).data('index');
-    await setActiveImage(instance, index);
-    handleSaveAndRender(instance, html);
-    instance.render(true);
+    console.log(`Switching to image index: ${index}`);
+
+    // Ensure the current tile is defined
+    if (!instance.currentTile || !instance.currentTile.document) {
+      console.warn("No current tile is selected or missing document property.");
+      return;
+    }
+
+    // Retrieve the image paths from the tile flags
+    const imagePaths = await instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+
+    // Log the retrieved image paths
+    console.log('Retrieved image paths:', imagePaths);
+
+    // Check if the index is within bounds
+    if (index >= 0 && index < imagePaths.length) {
+      await activateImage(instance, imagePaths[index], index);
+      console.log(`Active image set to index ${index}`);
+    } else {
+      console.warn(`Index ${index} out of bounds for image paths. Image paths length: ${imagePaths.length}`);
+      return;
+    }
+
+    // Get the current tile data
+    const tileData = {
+      name: instance.currentTile.document.getFlag(NAMESPACE, 'tileName'),
+      opacity: instance.currentTile.document.getFlag(NAMESPACE, 'opacity'),
+      tint: instance.currentTile.document.getFlag(NAMESPACE, 'tint'),
+      order: instance.currentTile.document.getFlag(NAMESPACE, 'order')
+    };
+
+    // Update the active image button once everything is done
     updateActiveImageButton(instance);
+    setTimeout(() => updateActiveTileButton(instance), 100);
+
+    await handleSaveAndRender(instance, tileData);
   });
 
   html.find('.tag-field').on('input', event => {
