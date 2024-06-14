@@ -90,22 +90,7 @@ export function activateGeneralListeners(instance, html) {
       console.warn(`Index ${index} out of bounds for image paths. Image paths length: ${imagePaths.length}`);
       return;
     }
-
-    // Get the current tile data
-    const tileData = {
-      name: instance.currentTile.document.getFlag(NAMESPACE, 'tileName'),
-      opacity: instance.currentTile.document.getFlag(NAMESPACE, 'opacity'),
-      tint: instance.currentTile.document.getFlag(NAMESPACE, 'tint'),
-      order: instance.currentTile.document.getFlag(NAMESPACE, 'order')
-    };
-
-    logMessage("Saving data for tile...");
-    await collectAndSaveTileData(instance, tileData);
-
-    // await handleSaveAndRender(instance, tileData);
-
-    // Update the active image button once everything is done
-    // Force a repaint before updating the active button
+    await collectAndSaveTileData(instance, html);
     await new Promise(requestAnimationFrame);
     await updateActiveImageButton(instance);
     await updateActiveTileButton(instance);

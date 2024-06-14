@@ -1,5 +1,6 @@
 import { NAMESPACE, logMessage, isTokenMagicActive, getTileFlag } from './utilities.js';
 import { getEffectParams, getElementByIdOrWarn, populateDropdown } from './utilities.js';
+import { saveTileDataToFlags } from './tiles-utils.js';
 
 
 ////////////////////////
@@ -103,7 +104,7 @@ export function onTargetChange(event, instance) {
 
 
 
-console.log("effects.js loaded!");
+
 
 ///////////////////////////////////
 // Add & Remove Effect Functions //
@@ -397,3 +398,4 @@ export async function removeEffectsFromTile(tile, effects, isTile) {
 }
 
 
+console.log("effects.js loaded!");

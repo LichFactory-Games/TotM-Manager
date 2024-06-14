@@ -97,45 +97,6 @@ export async function collectAndSaveTileData(instance, html) {
   }
 }
 
-// export async function collectAndSaveTileData(instance, tileData) {
-//   logMessage("Saving tile data for tile...");
-
-//   // Ensure the tileName is defined and not empty
-//   let tileName = tileData.name;
-
-//   // Check if the tile name is empty or undefined
-//   if (!tileName || tileName.trim() === '') {
-//     const order = tileData.order;
-//     const tileField = document.querySelector(`input[name="tile-name-${order}"]`);
-
-//     if (tileField) {
-//       tileName = tileField.value.trim();
-//       tileData.name = tileName;
-//     }
-
-//     if (!tileName) {
-//       // Generate a temporary tileName if it's still not provided
-//       tileName = `tile-${Date.now()}`;
-//       tileData.name = tileName;
-//       logMessage(`Generated temporary tileName: ${tileName}`);
-//     }
-//   }
-
-//   // Log the tile name before using it
-//   logMessage(`Processing tile with tileName: ${tileName}`);
-
-//   // Set flags first
-//   const foundTile = findAndSwitchToTileByTag(instance, tileName, false);
-
-//   if (foundTile) {
-//     // Log the found tile before calling saveTileDataToFlags
-//     logMessage("Found tile:", foundTile);
-//     await saveTileDataToFlags(tileData, foundTile, instance.imagePaths);
-//   } else {
-//     console.warn(`No tile found with the tileName: ${tileName}`);
-//   }
-// }
-
 export function collectTileData(container) {
   return container.find('.tile-field').map((index, tileField) => {
     const $tileField = $(tileField);
@@ -162,14 +123,14 @@ export function collectImagePaths(container) {
 
 
 
-export async function handleSaveAndRender(instance, tileData) {
+export async function handleSaveAndRender(instance, html) {
   logMessage("Saving data for tile...");
-  await collectAndSaveTileData(instance, tileData);
+  await collectAndSaveTileData(instance, html);
 
   console.log("Loading tile data...");
   await loadTileData(instance);
 
-  await collectAndSaveTileData(instance, tileData);
+  await collectAndSaveTileData(instance, html);
 
   console.log("Updating stage buttons...");
   updateTileButtons(instance);
