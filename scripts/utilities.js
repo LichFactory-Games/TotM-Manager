@@ -312,6 +312,7 @@ export async function getEffectParams(effectName) {
     console.error(`No effect parameters found for effect: ${effectName}`);
     return null;
   }
-  return effectParams;
-}
 
+  // Ensure effectParams is an array
+  return Array.isArray(effectParams) ? effectParams : [effectParams];
+}

@@ -103,13 +103,11 @@ export function onTargetChange(event, instance) {
 }
 
 
-
-
-
 ///////////////////////////////////
 // Add & Remove Effect Functions //
 ///////////////////////////////////
 
+// Collect information and save the effect to the relevant target
 export async function addEffect(instance) {
   const targetType = document.getElementById('target-dropdown').value;
   const effectName = document.getElementById('effect-dropdown').value;
@@ -119,7 +117,7 @@ export async function addEffect(instance) {
     const tileId = document.getElementById('tile-dropdown').value;
     const tile = canvas.tiles.get(tileId);
     if (tile) {
-      await saveTileDataToFlags(tile, 'tile', effectParams);
+      await updateEffectsData(tile, effectParams, true, true);
       await applyTokenMagicEffect(tile, effectParams, true);
     } else {
       console.error("No tile found to apply effect.");
@@ -132,7 +130,7 @@ export async function addEffect(instance) {
       const image = imagePaths.find(img => img.img === imageId);
 
       if (image) {
-        await saveTileDataToFlags(tile, 'image', effectParams, imageId);
+        await updateEffectsData(tile, effectParams, true, false, imageId);
 
         // Check if the image is the currently active image
         const currentIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
@@ -148,50 +146,83 @@ export async function addEffect(instance) {
   }
 }
 
+
 //// 
 
-export async function removeEffect(instance) {
-  const targetType = document.getElementById('target-dropdown').value;
-  const effectName = document.getElementById('effect-dropdown').value;
-  const effectParams = await getEffectParams(effectName);
+export async function removeEffect(instance, targetType, effectName) {
+  // Retrieve effect parameters based on effect name
+  const effectParamsArray = await getEffectParams(effectName);
+  if (!effectParamsArray || effectParamsArray.length === 0) {
+    console.error(`No effect parameters found for effect name: ${effectName}`);
+    return;
+  }
+
+  const effectParams = effectParamsArray[0]; // Assuming only one set of parameters
+  logMessage(`Removing effect: ${effectName} with parameters:`, effectParams);
+
+  let tile = canvas.tiles.controlled[0];
+  if (!tile) {
+    console.error("No active tile found to remove effect.");
+    return;
+  }
+
 
   if (targetType === 'tile') {
-    const tileId = document.getElementById('tile-dropdown').value;
-    const tile = canvas.tiles.get(tileId);
-    if (tile) {
-      await updateEffectsData(tile, effectParams, false, true);
-      await removeTokenMagicEffect(tile, effectParams, true);
-    } else {
-      console.error("No tile found to remove effect.");
-    }
+    // Handle tile-wide effects
+    let tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
+    tileEffects = tileEffects.map(effectArray =>
+      effectArray.filter(effect => effect.filterId !== effectParams.filterId)
+    ).filter(effectArray => effectArray.length > 0); // Remove empty arrays
+
+    // Update the tileEffects flag on the tile document
+    await tile.document.setFlag(NAMESPACE, 'tileEffects', tileEffects);
+
   } else if (targetType === 'image') {
-    const imageId = document.getElementById('image-dropdown').value;
-    if (instance.currentTile) {
-      const tile = instance.currentTile;
-      let imagePaths = getTileFlag(tile, 'imagePaths');
-      const image = imagePaths.find(img => img.img === imageId);
-
-      if (image) {
-        await updateEffectsData(tile, effectParams, false, false, imageId);
-
-        // Check if the image is the currently active image
-        const currentIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
-        if (imagePaths[currentIndex]?.img === imageId) {
-          await removeTokenMagicEffect(tile, effectParams, false);
-        }
-      } else {
-        console.error("No image found to remove effect.");
-      }
-    } else {
-      console.error("No tile selected.");
+    // Retrieve the image ID from the effect target name element
+    const imageId = document.querySelector('.effect-item .effect-target-name').textContent;
+    const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths');
+    if (!imagePaths) {
+      console.error("No image paths found on the tile.");
+      return;
     }
+
+    // Find the specific image based on displayImg
+    const image = imagePaths.find(img => img.displayImg === imageId);
+    if (!image) {
+      console.error("No image found to remove effect.");
+      return;
+    }
+
+    // Remove the effect from the nested effects array
+    image.effects = image.effects.map(effectArray =>
+      effectArray.filter(effect => effect.filterId !== effectParams.filterId)
+    ).filter(effectArray => effectArray.length > 0); // Remove empty arrays
+
+    // Update the imagePaths flag on the tile document
+    await tile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
+  }
+
+  if (tile) {
+    logMessage("Tile before effect removal:", tile);
+
+    // Remove effect using TokenMagic
+    await removeTokenMagicEffect(tile, effectParams, targetType === 'tile');
+
+    // Update the tile's effect data
+    await updateEffectsData(tile, effectParams, false, targetType === 'tile');
+
+    // Update the UI to reflect changes
+    updateEffectsUI(instance);
+    logMessage(`Effect ${effectName} removed from ${targetType}.`);
   }
 }
+
+
+
 
 ///////////////////////////
 // Token Magic Functions //
 ///////////////////////////
-
 
 export async function applyTokenMagicEffect(target, effectParams, isTile = true) {
   if (!await isTokenMagicActive()) return;
@@ -223,31 +254,22 @@ export async function applyTokenMagicEffect(target, effectParams, isTile = true)
 
 ////
 
-export async function removeTokenMagicEffect(target, effectName, isTile) {
-  console.log(`Attempting to remove effect: ${effectName} from ${isTile ? 'tile' : 'image'}`);
+export async function removeTokenMagicEffect(target, effectParams, isTile) {
+  const filterId = effectParams.filterId || effectParams.tmFilterId;
+  console.log(`Attempting to remove effect: ${filterId} from ${isTile ? 'tile' : 'image'}`);
 
-  const effectParamsArray = await getEffectParams(effectName);
-  if (!effectParamsArray) {
-    console.error(`Invalid effect parameters provided for effect: ${effectName}`);
-    return;
-  }
-  const effectParams = Array.isArray(effectParamsArray) ? effectParamsArray[0] : effectParamsArray;
-
-  if (!effectParams?.filterId) {
+  if (!filterId) {
     console.error(`Invalid effect parameters provided:`, effectParams);
     return;
   }
 
-  console.log(`Removing effect with parameters:`, effectParams);
-
   if (game.modules.get('tokenmagic')?.active) {
-    TokenMagic.deleteFilters(target, effectParams.filterId);
-    console.log(`Effect ${effectName} removed from ${isTile ? 'tile' : 'image'}`);
+    TokenMagic.deleteFilters(target, filterId);
+    logMessage(`Effect removed from ${isTile ? 'tile' : 'image'}`);
   } else {
     console.warn("TokenMagic module is not active.");
   }
 
-  // Update the effects flag on the target
   await updateEffectsData(target, effectParams, false, isTile, isTile ? null : target.img);
 }
 
@@ -264,6 +286,7 @@ export async function updateEffectsData(target, effectParams, isAdd, isTile = tr
 
   const flag = isTile ? 'tileEffects' : 'imagePaths';
   let effects = await target.document.getFlag(NAMESPACE, flag) || (isTile ? [] : []);
+  logMessage("Current effects before update:", JSON.stringify(effects));
 
   if (isTile) {
     if (isAdd) {
@@ -272,18 +295,20 @@ export async function updateEffectsData(target, effectParams, isAdd, isTile = tr
       effects = effects.filter(effect => effect.filterId !== effectParams.filterId);
     }
     await target.document.setFlag(NAMESPACE, flag, effects);
-    console.log(`Updated effects on tile: ${JSON.stringify(effects)}`);
+    logMessage(`Updated effects on tile: ${JSON.stringify(effects)}`);
   } else {
     const imagePaths = effects.map(imgPath =>
       imgPath.img === imageId
-        ? { ...imgPath, effects: isAdd ? [...(imgPath.effects || []), effectParams] : (imgPath.effects || []).filter(effect => effect.filterId !== effectParams.filterId) }
+        ? { ...imgPath, effects: isAdd ? [...(imgPath.effects || []), effectParams] : (imgPath.effects || []).filter(effect => effect.filterId !==  effectParams.filterId) }
       : imgPath
     );
     await target.document.setFlag(NAMESPACE, flag, imagePaths);
-    console.log(`Updated effects on image: ${JSON.stringify(imagePaths)}`);
+    logMessage(`Updated effects on image: ${JSON.stringify(imagePaths)}`);
   }
+  // Verify flag data after update
+  const updatedEffects = await target.document.getFlag(NAMESPACE, flag);
+  console.log("Updated effects:", JSON.stringify(updatedEffects));
 }
-
 
 /////////////////////////
 //   Effect Lists      //
@@ -302,42 +327,14 @@ function createEffectItem(targetType, targetName, effectName, effectId, tile, im
       <span class="effect-name">${effectName}</span>
       <button class="remove-effect-button" data-effect-id="${effectId}"><i class="fas fa-trash"></i></button>
     `;
-  
-  effectItem.querySelector('.remove-effect-button').addEventListener('click', () => {
-    removeEffect(tile, targetType, effectName, targetName);
-  });
 
   return effectItem;
 }
 
 ////
 
-function removeEffectFromList(effects, effectName) {
-  let removed = false;
-
-  effects.forEach((effect, i) => {
-    if (Array.isArray(effect)) {
-      effect.forEach((nestedEffect, j) => {
-        if (nestedEffect.filterId === effectName || nestedEffect.tmFilterId === effectName) {
-          effect.splice(j, 1);
-          if (effect.length === 0) {
-            effects.splice(i, 1);
-          }
-          removed = true;
-        }
-      });
-    } else if (effect.filterId === effectName || effect.tmFilterId === effectName) {
-      effects.splice(i, 1);
-      removed = true;
-    }
-  });
-  
-  return removed;
-}
-
-////
-
-export function updateEffectsUI(tile) {
+export async function updateEffectsUI(instance) {
+  const tile = canvas.tiles.controlled[0];
   if (!tile) {
     console.error("No tile provided.");
     return;
@@ -351,36 +348,56 @@ export function updateEffectsUI(tile) {
 
   // Helper function to create and append effect items
   const appendEffectItems = (effects, targetType, targetName, tile, image = null) => {
-    effects.forEach((effect, index) => {
-      // Handle nested arrays of effects
-      const effectItems = Array.isArray(effect) ? effect : [effect];
-      effectItems.forEach((nestedEffect, nestedIndex) => {
-        const effectName = nestedEffect.filterId || nestedEffect.tmFilterId || "Unknown Effect!";
-        const effectId = `${targetType}-${index}-${nestedIndex}`;
-        const effectItem = createEffectItem(targetType, targetName, effectName, effectId, tile, image);
-        effectsContainer.appendChild(effectItem);
+    if (effects.length === 0) {
+      return false;  // Indicate no effects were found
+    } else {
+      effects.forEach((effect, index) => {
+        // Handle nested arrays of effects
+        const effectItems = Array.isArray(effect) ? effect : [effect];
+        effectItems.forEach((nestedEffect, nestedIndex) => {
+          const effectName = nestedEffect.filterId || nestedEffect.tmFilterId || "Unknown Effect!";
+          const effectId = `${targetType}-${index}-${nestedIndex}`;
+          const effectItem = createEffectItem(targetType, targetName, effectName, effectId, tile, image);
+          effectsContainer.appendChild(effectItem);
+        });
       });
-    });
+      return true;  // Indicate effects were found
+    }
   };
+
+  // Track if any effects were found
+  let anyEffectsFound = false;
 
   // Get and display tile-wide effects
   const tileEffects = tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
-  appendEffectItems(tileEffects, 'Tile', 'Tile', tile);
+  const foundTileEffects = appendEffectItems(tileEffects, 'Tile', 'Tile', tile);
+  if (foundTileEffects) {
+    anyEffectsFound = true;
+  }
 
   // Get and display image-specific effects
   const imagePaths = tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
   imagePaths.forEach((image, imageIndex) => {
     const imageEffects = image.effects || [];
-    appendEffectItems(imageEffects, 'Image', image.displayImg, tile, image);
+    const foundImageEffects = appendEffectItems(imageEffects, 'Image', image.displayImg, tile, image);
+    if (foundImageEffects) {
+      anyEffectsFound = true;
+    }
   });
 
-  console.log(`Updated current effects for tile ${tile.id}`);
+  // If no effects were found, display a single message
+  if (!anyEffectsFound) {
+    const noEffectsMessage = document.createElement('div');
+    noEffectsMessage.textContent = "No effects found.";
+    effectsContainer.appendChild(noEffectsMessage);
+  }
+
+  logMessage(`Updated current effects for tile ${tile.id}`);
 }
 
 ///////////////////////////////
 // Effect Utility Functions  //
 ///////////////////////////////
-
 
 export async function applyEffectsToTile(tile, effects, isTile) {
   for (const effect of effects) {

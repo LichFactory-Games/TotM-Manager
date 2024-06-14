@@ -123,7 +123,9 @@ export class TotMForm extends FormApplication {
     logMessage("Initialization completed.");
   }
 
-  async _initializeEffectsManager() {
+  async _initializeEffectsManager(tile) {
+
+    logMessage("Initializing Effects Manager...");
 
     // Populate dropdown on render
     await populateEffectsDropdown();
@@ -145,7 +147,7 @@ export class TotMForm extends FormApplication {
       if (!imagePaths) {
         console.warn(`No image paths found for tile ${this.currentTile.id}`);
       }
-      updateEffectsUI(this.currentTile);
+      updateEffectsUI(this);
     } else {
       console.warn("No current tile selected.");
     }

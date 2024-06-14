@@ -53,6 +53,7 @@ export async function clearTileFlags(instance) {
     await tile.document.unsetFlag(NAMESPACE, 'tint');
     await tile.document.unsetFlag(NAMESPACE, 'order');
     await tile.document.unsetFlag(NAMESPACE, 'imagePaths');
+    await tile.document.unsetFlag(NAMESPACE, 'tileEffects');
 
   }
   instance.tiles = []; // Clear the instance's tile data

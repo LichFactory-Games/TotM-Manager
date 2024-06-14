@@ -6,7 +6,7 @@ import { NAMESPACE, logMessage, activateTile, findAndSwitchToTileByTag, updateAc
 import { addImageToTile, addImageDirectoryToTile, updateImageTags, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
 import { generateTileFields, handleSaveAndRender, handleDeleteAndSave, collectAndSaveTileData } from './tiles.js';
 import { loadTileImages } from './tiles-utils.js'
-import { updateEffectsUI, onTargetChange } from './effects.js';
+import { updateEffectsUI, onTargetChange, removeEffect } from './effects.js';
 import { ModifyEffectForm } from './modifyEffectForm.js';
 import { performImageSearch, activateImage, cycleImages } from './stage.js';
 
@@ -270,27 +270,15 @@ export function activateEffectEventListeners(instance) {
     new ModifyEffectForm({ target, effect, instance }).render(true);
   });
 
-  // // Ensure the 'modify-effect-button' exists before attaching the listener
-  // const modifyEffectButton = document.getElementById('modify-effect-button');
-  // if (modifyEffectButton) {
-  //   modifyEffectButton.addEventListener('click', (ev) => {
-  //     ev.preventDefault();
-  //     const target = document.getElementById('target-dropdown').value;
-  //     const effect = document.getElementById('effect-dropdown').value;
-  //     new ModifyEffectForm({ target, effect, instance }).render(true);
-  //   });
-  // } else {
-  //   console.warn("modify-effect-button not found");
-  // }
-
-  // Example: Set current tile when a tile is selected
+  // Set current tile when a tile is selected
   document.getElementById('tile-dropdown').addEventListener('change', async (event) => {
     const tileId = event.target.value;
     const tile = canvas.tiles.get(tileId);
     if (tile) {
       instance.currentTile = tile;
       await loadTileImages(instance, tile);
-      updateEffectsUI(tile); // Update the current effects list when a tile is selected
+      // Update the current effects list when a tile is selected
+      updateEffectsUI(tile, instance);
     } else {
       console.error("No tile found with the selected ID.");
     }
@@ -300,9 +288,23 @@ export function activateEffectEventListeners(instance) {
   document.querySelector('.tabs').addEventListener('click', (event) => {
     if (event.target.dataset.tab === 'effects') {
       if (instance.currentTile) {
-        updateEffectsUI(instance.currentTile);
+        updateEffectsUI(tile, instance);
 
       }
+    }
+  });
+
+
+  // Event listener for the remove effect button
+  document.getElementById('current-effects-container').addEventListener('click', function(event) {
+    if (event.target.closest('.remove-effect-button')) {
+      const removeButton = event.target.closest('.remove-effect-button');
+      const effectItem = removeButton.closest('.effect-item');
+      const targetType = effectItem.querySelector('.effect-target-type i').classList.contains('fa-square') ? 'tile' : 'image';
+      const effectName = effectItem.querySelector('.effect-name').textContent;
+
+      // Call the removeEffect function with the correct context
+      removeEffect(instance, targetType, effectName);
     }
   });
 }

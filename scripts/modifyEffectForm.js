@@ -50,34 +50,33 @@ export class ModifyEffectForm extends FormApplication {
         });
     }
 
-async _updateObject(event, formData) {
-  console.log("Form submission data:", formData);
+  async _updateObject(event, formData) {
+    console.log("Form submission data:", formData);
 
-  try {
-    const effectParams = JSON.parse(formData.effectParams);
-    console.log("Parsed effect parameters:", effectParams);
+    try {
+      // Parse effect parameters from the form data
+      const effectParams = JSON.parse(formData.effectParams);
+      console.log("Parsed effect parameters:", effectParams);
 
-    const targetType = this.data.target;
-    const instance = this.data.instance;
-    const effectName = this.data.effect;
-    const tileId = document.getElementById('tile-dropdown').value;
+      const targetType = this.data.target;
+      const instance = this.data.instance;
+      const effectName = this.data.effect;
+      const tileId = document.getElementById('tile-dropdown').value;
 
-    if (targetType === 'tile' || targetType === 'image') {
-      const imageId = targetType === 'image' ? document.getElementById('image-dropdown').value : null;
-      await addEffect(instance, targetType, effectName, effectParams, tileId, imageId);
+      if (targetType === 'tile' || targetType === 'image') {
+        const imageId = targetType === 'image' ? document.getElementById('image-dropdown').value : null;
+        await addEffect(instance, targetType, effectName, effectParams, tileId, imageId);
 
-      // Update current effects list
-      const tile = canvas.tiles.get(tileId);
-      updateEffectsUI(tile);
-    } else {
-      console.error("Invalid target type.");
+        // Update current effects list
+        const tile = canvas.tiles.get(tileId);
+        await updateEffectsUI(tile); // Ensure this is awaited
+      } else {
+        console.error("Invalid target type.");
+      }
+
+      this.close();
+    } catch (error) {
+      console.error("Error parsing or applying effect parameters:", error);
     }
-
-    this.close();
-  } catch (error) {
-    console.error("Error parsing or applying effect parameters:", error);
   }
-}
-
-
 }
