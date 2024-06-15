@@ -2,6 +2,7 @@
 import { NAMESPACE, logMessage, updateTileButtons, findAndSwitchToTileByTag, activateTile, updateActiveTileButton } from './utilities.js';
 import { loadTileData, loadTileImages, updateTileFields } from './tiles-utils.js'
 import { activateGeneralListeners, activatePathManagementListeners, activateImageSearchBarListeners, activateImagePreviewListeners, activateEffectEventListeners } from './listeners.js';
+import { updateActiveImageButton } from './images.js'
 import { populateEffectsDropdown, updateEffectsUI, onTargetChange } from './effects.js';
 
 
@@ -12,6 +13,8 @@ export class TotMForm extends FormApplication {
     this.selectedTarget = 'tile'; // Default to 'tile' or any other desired default
     this.tileManagerInitialized = false; // Flag to prevent re-initialization
     this.tiles = [];  // Initialize tiles array
+    this.currentTile = null // Track current tile
+    this.currentImageIndex = null // Track current image (if any)
   }
 
   //// Make a singleton instance so only one totm window can be open at a time
@@ -73,23 +76,28 @@ export class TotMForm extends FormApplication {
   }
 
   async render(force = false, options = {}) {
-    const tile = options.tile;
+    // Call the parent class's render method
+    await super.render(force, options);
+
+    // Initialize tabs
+    // Delay initialization until DOM is ready
+    logMessage("Initializing tabs");
+    await new Promise(requestAnimationFrame);
+    this._initializeTabs();
+
     // Check if this is the first time rendering
     if (!this.rendered && !this.tileManagerInitialized) {
       logMessage("First-time render: Initializing tile manager.");
       // Initialize tile manager
-      this.tileManagerInitialized = true; // Set the flag to prevent re-initialization
-      await this._initializeTileManager(); // Ensure this completes before proceeding
+      // Set the flag to prevent re-initialization
+      this.tileManagerInitialized = true;
+      await new Promise(requestAnimationFrame);
+      await this._initializeTileManager();
     }
-    // Call the parent class's render method
-    await super.render(force, options);
-    // Initialize tabs
-    logMessage("Initializing tabs");
-    this._initializeTabs();
+
     // Initialize effects manager
-    setTimeout(() => {
-      this._initializeEffectsManager()
-    }, 100);
+    await new Promise(requestAnimationFrame);
+    await this._initializeEffectsManager();
   }
 
   async _initializeTileManager() {
@@ -112,7 +120,9 @@ export class TotMForm extends FormApplication {
     if (initialTile) {
       logMessage("Activating initial tile:", initialTile);
       activateTile(this, initialTile);
+      this.currentTile = initialTile; // Set the current tile
       await loadTileImages(this, initialTile); // Ensure 'initialTile' is passed correctly
+      logMessage('*Load tile images for initial tile.');
     } else {
       console.warn("No tile found to set as current tile.");
     }
@@ -120,6 +130,17 @@ export class TotMForm extends FormApplication {
     updateTileButtons(this);
     logMessage("Updating tile fields...");
     updateTileFields(this);
+    await new Promise(requestAnimationFrame);
+    await updateActiveTileButton(this);
+    logMessage('*Update active tile button.');
+    if (this.currentTile) {
+      const imgIndex = await this.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
+      if (imgIndex !== undefined && imgIndex >= 0) {
+        this.currentImageIndex = imgIndex;
+        await updateActiveImageButton(this, imgIndex);
+        logMessage('*Update active image button.');
+      }
+    }
     logMessage("Initialization completed.");
   }
 
