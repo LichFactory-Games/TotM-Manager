@@ -106,10 +106,9 @@
 
 /* Style for active image button */
 .totm-manager .set-image-button.active-button i {
-    color: green;
+    color: var(--color-border-highlight);
     transform: translateY(0);
 }
-
 
 .totm-manager input[type="color" i] {
     -webkit-appearance: none;
