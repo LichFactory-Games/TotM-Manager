@@ -1,5 +1,5 @@
 // scripts/hooks.js
-import { assignOrderToTiles } from "./utilities.js";
+import { NAMESPACE, assignOrderToTiles, findTileById } from "./utilities.js";
 import { TotMForm } from "./totmManager.js";
 import { saveTileDataToFlags } from "./tiles-utils.js";
 
@@ -7,14 +7,23 @@ import { saveTileDataToFlags } from "./tiles-utils.js";
 const moduleId = 'totm-manager';
 
 export function initializeHooks() {
+
   // Register keybinding from settings
   game.keybindings.register(moduleId, 'openManager', {
-    name: 'Open TotM Manager',
-    hint: 'Opens the Theatre of the Mind Manager window.',
+    name: 'Open/Close TotM Manager',
+    hint: 'Toggles the Theatre of the Mind Manager window.',
     editable: [{ key: 'KeyT', modifiers: ['Control'] }], // Set default keybinding
     onDown: () => {
       console.log("TotM Manager: Keybinding triggered");
-      TotMForm.renderSingleton(); // Render the singleton instance
+
+      // Check if the singleton instance is rendered
+      if (TotMForm._instance && TotMForm._instance.rendered) {
+        // If the instance is rendered, close it (hide it)
+        TotMForm._instance.close();
+      } else {
+        // If the instance is not rendered, render it
+        TotMForm.renderSingleton();
+      }
       return true;
     },
     restricted: true
@@ -89,9 +98,6 @@ export function initializeHooks() {
     console.log("Theatre of the Mind Manager | renderSidebarTab hook");
   });
 
-  Hooks.on('closeTotMForm', (app, html) => {
-    saveTileDataToFlags(app, html);
-  });
 
   Hooks.on('createTile', (tile, options, userId) => {
   console.log('Tile created, assigning order...');

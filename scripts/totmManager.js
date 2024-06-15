@@ -13,7 +13,7 @@ export class TotMForm extends FormApplication {
     this.selectedTarget = 'tile'; // Default to 'tile' or any other desired default
     this.tileManagerInitialized = false; // Flag to prevent re-initialization
     this.tiles = [];  // Initialize tiles array
-    this.currentTile = null // Track current tile
+    this.currentTile = canvas.tiles.controlled[0] || null // Track current tile
     this.currentImageIndex = null // Track current image (if any)
   }
 
@@ -26,12 +26,20 @@ export class TotMForm extends FormApplication {
     if (!this._instance) {
       this._instance = new this();
     }
-    this._instance.render(true);
+
+    if (this._instance.element.is(':visible')) {
+      this._instance.element.hide();
+    } else {
+      this._instance.currentTile = canvas.tiles.controlled[0] || this._instance.currentTile; // Ensure current tile is set on reopening
+      this._instance.render(true);
+    }
   }
 
-  // Override the close method to reset the singleton instance
-  close(options) {
-    this.constructor._instance = null;
+  // Override the close method to hide the window instead of closing it
+  close(options = {}) {
+    console.log("Hiding TotM Manager window");
+    this.element.hide();
+    // Remove the line that sets the rendered state
     return super.close(options);
   }
 
@@ -98,24 +106,32 @@ export class TotMForm extends FormApplication {
     // Initialize effects manager
     await new Promise(requestAnimationFrame);
     await this._initializeEffectsManager();
+
+    // Update active buttons
+    await this._updateButtons();
   }
 
   async _initializeTileManager() {
     logMessage("Initializing Tile Manager...");
+
     logMessage("Loading tile data...");
     await loadTileData(this);
     logMessage("Tile data loaded:", this.tiles);
+
     // Retrieve the initial tile tag from settings
     const initialTag = game.settings.get(NAMESPACE, 'initialTileTag');
     logMessage("Initial tile tag retrieved from settings:", initialTag);
+
     // Find the tile by tag using Tagger
     let initialTile = findAndSwitchToTileByTag(this, initialTag, false);
     logMessage("Tile found with initial tag:", initialTile);
+
     // If no tile is found with the specific tag, fallback to the first tile
     if (!initialTile && this.tiles.length > 0) {
       initialTile = this.tiles[0];
       logMessage(`Fallback: Set current tile to first tile with ID ${initialTile.id}`);
     }
+
     // Check and activate the initial tile
     if (initialTile) {
       logMessage("Activating initial tile:", initialTile);
@@ -126,6 +142,8 @@ export class TotMForm extends FormApplication {
     } else {
       console.warn("No tile found to set as current tile.");
     }
+
+    // Update buttons & fields
     logMessage("Updating tile buttons...");
     updateTileButtons(this);
     logMessage("Updating tile fields...");
@@ -141,6 +159,7 @@ export class TotMForm extends FormApplication {
         logMessage('*Update active image button.');
       }
     }
+
     logMessage("Initialization completed.");
   }
 
@@ -173,6 +192,19 @@ export class TotMForm extends FormApplication {
       console.warn("No current tile selected.");
     }
     logMessage("Effects Initialization completed.")
+  }
+
+  async _updateButtons() {
+    // Update the active tile button
+    await updateActiveTileButton(this);
+    // Update the active image button
+    if (this.currentTile) {
+      const imgIndex = await this.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
+      if (imgIndex !== undefined && imgIndex >= 0) {
+        this.currentImageIndex = imgIndex;
+        await updateActiveImageButton(this, imgIndex);
+      }
+    }
   }
 
   _initializeTabs() {
