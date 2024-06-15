@@ -54,6 +54,16 @@ export function adjustColor(hex, amount) {
 //  Tiles & Tags   //
 /////////////////////
 
+/**
+ * Finds a tile on the canvas by its ID.
+ * @param {string} tileId - The ID of the tile to find.
+ * @returns {Tile|null} - The found tile or null if not found.
+ */
+export function findTileById(tileId) {
+  return canvas.tiles.placeables.find(t => t.id === tileId) || null;
+}
+
+
 // Updated findAndSwitchToTileByTag function
 export function findAndSwitchToTileByTag(instance, tag, switchToTile = true) {
   // Validate the tag
@@ -91,6 +101,8 @@ export async function activateTile(instance, tile) {
     console.error("No tile provided.");
     return;
   }
+
+  instance.currentTile = tile;
 
   const filteredTiles = getFilteredTiles();
   if (!filteredTiles.includes(tile)) {
