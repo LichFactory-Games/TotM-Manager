@@ -92,21 +92,16 @@ export function activateGeneralListeners(instance, html) {
     }
     await collectAndSaveTileData(instance, html);
     await new Promise(requestAnimationFrame);
-    await updateActiveImageButton(instance);
+    await updateActiveImageButton(instance, index); // Pass the index here
     await updateActiveTileButton(instance);
-
-  });
-
-  html.find('.tag-field').on('input', event => {
-    const index = $(event.currentTarget).data('index');
-    updateImageTags(instance, index, $(event.currentTarget).val());
   });
 
   html.find('.prev-image').click(async () => {
     await cycleImages(instance, instance.currentTile, 'prev');
     await collectAndSaveTileData(instance, html);
     await new Promise(requestAnimationFrame);
-    await updateActiveImageButton(instance);
+    const currentIndex = await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
+    await updateActiveImageButton(instance, currentIndex); // Pass the currentIndex here
     await updateActiveTileButton(instance);
   });
 
@@ -114,9 +109,16 @@ export function activateGeneralListeners(instance, html) {
     await cycleImages(instance, instance.currentTile, 'next');
     await collectAndSaveTileData(instance, html);
     await new Promise(requestAnimationFrame);
-    await updateActiveImageButton(instance);
+    const currentIndex = await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
+    await updateActiveImageButton(instance, currentIndex); // Pass the currentIndex here
     await updateActiveTileButton(instance);
   });
+
+  html.find('.tag-field').on('input', event => {
+    const index = $(event.currentTarget).data('index');
+    updateImageTags(instance, index, $(event.currentTarget).val());
+  });
+
 }
 
 export function activatePathManagementListeners(instance, html) {

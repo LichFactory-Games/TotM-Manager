@@ -94,7 +94,7 @@
 /* Activate Image icon/button */
 .totm-manager .set-image-button i {
     border: none;
-    font-size: 1.35em;
+    font-size: 1.45em;
     align-items: center;
     justify-content: center;
     color: #666;
@@ -103,6 +103,13 @@
     cursor: pointer; /* Pointer cursor on hover */
     padding: 0;
 }
+
+/* Style for active image button */
+.totm-manager .set-image-button.active-button i {
+    color: green;
+    transform: translateY(0);
+}
+
 
 .totm-manager input[type="color" i] {
     -webkit-appearance: none;

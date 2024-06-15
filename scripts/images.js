@@ -1,5 +1,5 @@
 // scripts/images.js
-import { NAMESPACE, updateActiveTileButton } from './utilities.js';
+import { NAMESPACE, updateActiveTileButton, logMessage } from './utilities.js';
 import { loadTileImages } from './tiles-utils.js';
 
 export async function addImageToTile(instance, tile, imagePath) {
@@ -58,22 +58,22 @@ export function updateImageTags(instance, index, tags) {
   }
 }
 
-export async function updateActiveImageButton(instance) {
+export async function updateActiveImageButton(instance, activeIndex) {
   if (!instance.currentTile || !instance.currentTile.document) {
     console.warn("Attempted to update image button with no active tile or missing document.");
     return;
   }
 
-  const imagePaths = instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths');
-  console.log("Image paths:", imagePaths);
+  const imagePaths = await instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths');
+  logMessage("Image paths:", imagePaths);
 
   if (!imagePaths || imagePaths.length === 0) {
     console.warn("No image paths available for the current tile:", instance.currentTile.id);
     return;
   }
 
-  const imageIndex = instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
-  console.log("Image index:", imageIndex);
+  const imageIndex = activeIndex !== undefined ? activeIndex : await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
+  logMessage("Image index:", imageIndex);
 
   if (imageIndex === undefined || imageIndex < 0 || imageIndex >= imagePaths.length) {
     console.warn(`Image index is out of bounds or undefined: ${imageIndex}`);
@@ -81,18 +81,18 @@ export async function updateActiveImageButton(instance) {
   }
 
   const imageButtonSelector = `.set-image-button[data-index="${imageIndex}"]`;
-  console.log("Image button selector:", imageButtonSelector);
+  logMessage("Image button selector:", imageButtonSelector);
 
   const activeImageButton = instance.element.find(imageButtonSelector);
-  console.log("Active image button element:", activeImageButton);
+  logMessage("Active image button element:", activeImageButton);
 
   instance.element.find('.set-image-button').removeClass('active-button');
   if (activeImageButton.length) {
     activeImageButton.addClass('active-button');
-    console.log(`TotM - Active image button found and activated: ${imageButtonSelector}`);
-    console.log(`TotM - Active image button marked: Index ${imageIndex}`);
-    } else {
-      console.warn("No image button found for index:", imageIndex);
+    logMessage(`TotM - Active image button found and activated: ${imageButtonSelector}`);
+    logMessage(`TotM - Active image button marked: Index ${imageIndex}`);
+  } else {
+    console.warn("No image button found for index:", imageIndex);
   }
 
   await updateActiveTileButton(instance);

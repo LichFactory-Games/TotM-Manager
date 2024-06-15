@@ -55,6 +55,9 @@ export async function activateImage(instance, image, index) {
     console.log(`Applied image-specific effects to tile ID: ${tileId}`);
   }
 
+  // Update active image button
+  await updateActiveImageButton(instance, index);
+
   // Render the instance
   instance.render();
   console.log(`Image ${image.displayImg} activated on tile ID: ${tileId}.`);
@@ -73,7 +76,7 @@ export async function cycleImages(instance, tile, direction) {
     await activateImage(instance, currentImage, currentIndex);
     // Update the instance's current image index and render the instance
     instance.currentImageIndex = currentIndex;
-    await updateActiveImageButton(instance);
+    await updateActiveImageButton(instance, currentIndex);
   } catch (error) {
     console.error("Failed to cycle images:", error);
     ui.notifications.error("Error cycling images. See console for details.");
