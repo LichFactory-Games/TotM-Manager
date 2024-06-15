@@ -104,12 +104,18 @@ export function activateGeneralListeners(instance, html) {
 
   html.find('.prev-image').click(async () => {
     await cycleImages(instance, instance.currentTile, 'prev');
+    await collectAndSaveTileData(instance, html);
+    await new Promise(requestAnimationFrame);
     await updateActiveImageButton(instance);
+    await updateActiveTileButton(instance);
   });
 
   html.find('.next-image').click(async () => {
     await cycleImages(instance, instance.currentTile, 'next');
+    await collectAndSaveTileData(instance, html);
+    await new Promise(requestAnimationFrame);
     await updateActiveImageButton(instance);
+    await updateActiveTileButton(instance);
   });
 }
 
