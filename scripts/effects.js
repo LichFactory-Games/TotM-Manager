@@ -395,6 +395,8 @@ export async function updateEffectsUI(instance) {
   logMessage(`Updated current effects for tile ${tile.id}`);
 }
 
+
+
 ///////////////////////////////
 // Effect Utility Functions  //
 ///////////////////////////////

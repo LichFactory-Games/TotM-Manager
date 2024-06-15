@@ -306,7 +306,7 @@ export function activateEffectEventListeners(instance) {
     if (event.target.closest('.remove-effect-button')) {
       const removeButton = event.target.closest('.remove-effect-button');
       const effectItem = removeButton.closest('.effect-item');
-      const targetType = effectItem.querySelector('.effect-target-type i').classList.contains('fa-square') ? 'tile' : 'image';
+      const targetType = effectItem.querySelector('.effect-target-type i').classList.contains('fa-cubes') ? 'tile' : 'image';
       const effectName = effectItem.querySelector('.effect-name').textContent;
 
       // Call the removeEffect function with the correct context

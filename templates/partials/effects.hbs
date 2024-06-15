@@ -30,7 +30,7 @@
     {{#each effects as |effect index|}}
     <div class="effect-item" data-order="{{effect.order}}">
       <span id="current-target" class="effect-target-type" data-index="{{index}}">
-        {{{ifThen (eq effect.targetType 'Tile') '<i class="fas fa-square"></i>' '<i class="fas fa-image"></i>'}}}
+        {{{ifThen (eq effect.targetType 'Tile') '<i class="fas fa-cubes"></i>' '<i class="fas fa-image"></i>'}}}
       </span>
       <span id="current-name" class="effect-target-name" data-index="{{index}}">{{effect.targetName}}</span>
       <span id-"current-effect" class="effect-name" data-index="{{index}}">{{effect.name}}</span>

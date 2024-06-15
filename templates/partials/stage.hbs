@@ -35,7 +35,8 @@
         <img id="preview-img-{{index}}" src="{{path.img}}" style="display: none; position: absolute; right: 100%; width: auto; max-width: 300px; height: auto;" alt="Image preview">
         
         <input type="text" id="tags-input-{{index}}" name="tags{{index}}" value="{{path.tags}}" placeholder="Enter tags, comma-separated" class="tag-field" style="flex-grow: 1; min-width: 100px; max-width: none; margin-right: 10px; padding: 0 10px; height: 25px; line-height: 25px; display: inline-block; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">
-        <button type="button" class="set-image-button" data-index="{{index}}" style="display: flex; align-items: center; justify-content: center; width: 25px; height: 25px; font-size: 18px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; padding: 3; padding-top: 3px; margin-right: 5px;">*</button>
+        <a class="set-image-button" style="margin-right: 12px;" data-index="{{index}}"><i class="fas fa-circle-play"></i></a>
+        <button type="button" class="set-image-button" style="display: none;"></button>
         {{! <input type="color" class="color-picker" value="{{#if this.color}\}{{this.color}\}{{else}\}#000000{{/if}\}" data-index="{{@index}\}" style="display: flex; background: {{this.color}\}; align-items: center; justify-content: center; min-width: 25px; height: 25px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; padding: 3; padding-top: 3px;"> }}
       </li>
       {{/each}}

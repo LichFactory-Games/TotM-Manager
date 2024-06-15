@@ -11,13 +11,20 @@
     padding: 10px 15px 5px 15px; /* Adjust padding as needed */
     cursor: pointer;
     text-align: center;
-    position: relative; /* Required for the underline positioning */
+    margin-right: 8px; /* Space between icon and text */
+
 }
 
 .totm-manager .tabs .item.active {
-    background-color: var(--color-selected); /* Foundry VTT's selected color */
-    border-bottom: 2px solid var(--color-underline-header); /* Optional: highlight the border */
-    margin-bottom: -2px; /* Adjust to counter the border-bottom height */
+    font-weight: bold;
+    color: var(--color-text-dark-primary);
+    /* border-bottom: 2px solid var(--color-text-light-heading); /\* Underline the active tab *\/ */
+    /* margin-bottom: -2px; /\* Adjust to counter the border-bottom height *\/ */
+}
+
+.totm-manager .tabs .item.active i {
+    color: var(--color-text-dark-header);
+
 }
 
 .totm-manager .tabs .item:not(.active):hover {
@@ -82,6 +89,19 @@
 /* Adjust the position when the button is active */
 .totm-manager button:has(i):active {
     transform: translateY(0);
+}
+
+/* Activate Image icon/button */
+.totm-manager .set-image-button i {
+    border: none;
+    font-size: 1.35em;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    text-decoration: none;
+    background-color: inherit;
+    cursor: pointer; /* Pointer cursor on hover */
+    padding: 0;
 }
 
 .totm-manager input[type="color" i] {
