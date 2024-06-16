@@ -5,7 +5,7 @@
 import { NAMESPACE, logMessage, activateTile, findAndSwitchToTileByTag, updateActiveTileButton } from './utilities.js';
 import { addImageToTile, addImageDirectoryToTile, updateImageTags, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
 import { generateTileFields, handleSaveAndRender, handleDeleteAndSave, collectAndSaveTileData } from './tiles.js';
-import { loadTileImages } from './tiles-utils.js'
+import { loadTileImages, toggleTileVisibility } from './tiles-utils.js'
 import { updateEffectsUI, onTargetChange, removeEffect } from './effects.js';
 import { ModifyEffectForm } from './modifyEffectForm.js';
 import { performImageSearch, activateImage, cycleImages } from './stage.js';
@@ -119,6 +119,23 @@ export function activateGeneralListeners(instance, html) {
     updateImageTags(instance, index, $(event.currentTarget).val());
   });
 
+  // Event listener for the hide/reveal button
+  html.find('.hide-reveal-tile').click(async () => {
+    const tileDropdown = document.getElementById('tile-dropdown');
+    if (tileDropdown) {
+      const selectedTileId = tileDropdown.value;
+      if (selectedTileId) {
+        await toggleTileVisibility(selectedTileId);
+        await new Promise(requestAnimationFrame);
+        await updateActiveImageButton(instance, currentIndex);
+        await updateActiveTileButton(instance);
+      } else {
+        console.warn("No tile selected for visibility toggle.");
+      }
+    } else {
+      console.warn("Tile dropdown not found.");
+    }
+  });
 }
 
 export function activatePathManagementListeners(instance, html) {

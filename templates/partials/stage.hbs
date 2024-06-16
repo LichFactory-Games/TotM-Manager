@@ -37,7 +37,6 @@
         <input type="text" id="tags-input-{{index}}" name="tags{{index}}" value="{{path.tags}}" placeholder="Enter tags, comma-separated" class="tag-field" style="flex-grow: 1; min-width: 100px; max-width: none; margin-right: 10px; padding: 0 10px; height: 25px; line-height: 25px; display: inline-block; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">
         <a class="set-image-button" style="margin-right: 12px;" data-index="{{index}}"><i class="fas fa-circle-play"></i></a>
         <button type="button" class="set-image-button" style="display: none;"></button>
-        {{! <input type="color" class="color-picker" value="{{#if this.color}\}{{this.color}\}{{else}\}#000000{{/if}\}" data-index="{{@index}\}" style="display: flex; background: {{this.color}\}; align-items: center; justify-content: center; min-width: 25px; height: 25px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; padding: 3; padding-top: 3px;"> }}
       </li>
       {{/each}}
     </ul>
@@ -50,4 +49,13 @@
   <button type="button" class="save-paths" style="color: green">Save Changes</button>
 </div>
 
-
+<div class="form-group" style="margin-top: 10px; display: flex; align-items: center; height: 3em;">
+        <button type="button" class="delete-all-paths"><i class="fas fa-trash"></i> All</button>
+  <button type="button" class="delete-image"><i class="fas fa-trash"></i></button>
+  <select id="delete-image-dropdown" style="margin-left: 10px;">
+    {{#each paths}}
+    <option value="{{this.img}}" data-img="{{this.img}}">{{this.displayImg}}</option>
+    {{/each}}
+  </select>
+  <img id="delete-image-preview" src="" alt="Image preview" style="height: 3em; object-fit: contain; width: auto; display: none; border: 1px solid #ccc; border-radius: 4px; margin-left: 10px;">
+</div>

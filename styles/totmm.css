@@ -318,6 +318,12 @@
     width: 100%;
 }
 
+.hr-dropdown-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
 .section-header {
     margin-top: 20px;  /* Increase the space above the header */
     margin-bottom: 20px;  /* Increase the space below the header */

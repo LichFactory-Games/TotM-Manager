@@ -140,3 +140,19 @@ export  function updateTileFields(instance) {
     tileFieldsContainer.appendChild(tileField);
   });
 }
+
+
+export async function toggleTileVisibility(tileId) {
+  const tile = canvas.tiles.get(tileId);
+  if (tile) {
+    const isHidden = tile.document.hidden; // Directly check the hidden property
+    const newVisibility = !isHidden;
+    await tile.document.update({ hidden: newVisibility });
+    console.log(`Tile ${tileId} visibility toggled to: ${newVisibility}`);
+
+    // Force a re-draw of the tile layer
+    await canvas.tiles.draw();
+  } else {
+    console.error(`Tile with ID ${tileId} not found.`);
+  }
+}

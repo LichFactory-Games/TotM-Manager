@@ -1,9 +1,9 @@
 // scripts/totmManager.js
-import { NAMESPACE, logMessage, updateTileButtons, findAndSwitchToTileByTag, activateTile, updateActiveTileButton } from './utilities.js';
+import { NAMESPACE, logMessage, updateTileButtons, findAndSwitchToTileByTag, activateTile, updateActiveTileButton, populateEffectsDropdown } from './utilities.js';
 import { loadTileData, loadTileImages, updateTileFields } from './tiles-utils.js'
 import { activateGeneralListeners, activatePathManagementListeners, activateImageSearchBarListeners, activateImagePreviewListeners, activateEffectEventListeners } from './listeners.js';
 import { updateActiveImageButton } from './images.js'
-import { populateEffectsDropdown, updateEffectsUI, onTargetChange } from './effects.js';
+import { updateEffectsUI, onTargetChange } from './effects.js';
 
 
 export class TotMForm extends FormApplication {
