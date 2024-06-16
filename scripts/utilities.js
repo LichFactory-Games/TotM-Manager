@@ -312,9 +312,12 @@ export async function populateEffectsDropdown() {
   logMessage("Dropdown populated with presets.");
 }
 
-export function populateTileDropdown(tiles, currentTileId) {
-  const tileDropdown = getElementByIdOrWarn('tile-dropdown', 'Tile dropdown');
-  if (!tileDropdown) return;
+export async function populateTileDropdown(tiles, currentTileId, container = document) {
+  const tileDropdown = container.querySelector('#tile-dropdown');
+  if (!tileDropdown) {
+    console.warn('Tile dropdown not found within the specified container.');
+    return;
+  }
 
   const filteredTiles = tiles.filter(tile => tile.document.getFlag(NAMESPACE, 'tileName'));
   const tileOptions = filteredTiles.map(tile => ({
@@ -328,7 +331,7 @@ export function populateTileDropdown(tiles, currentTileId) {
     tileDropdown.value = currentTileId;
   }
 
-  console.log("Tile dropdown populated with tiles:", filteredTiles);
+  logMessage("Tile dropdown populated with tiles:", filteredTiles);
 }
 
 export async function populateImageDropdown(instance) {
