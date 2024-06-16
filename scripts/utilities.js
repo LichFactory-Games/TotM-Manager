@@ -291,6 +291,70 @@ export function getTileFlag(tile, flagName, defaultValue = []) {
   return flag !== undefined ? flag : defaultValue;
 }
 
+////////////////////////
+// Populate Dropdowns //
+////////////////////////
+
+export async function populateEffectsDropdown() {
+  const presets = TokenMagic.getPresets();
+  logMessage("TokenMagic presets: ", presets);
+
+  if (!presets || presets.length === 0) {
+    console.warn("No presets found or Token Magic module is not active.");
+    return;
+  }
+
+  const dropdown = getElementByIdOrWarn('effect-dropdown', 'Dropdown');
+  if (!dropdown) return;
+
+  logMessage("Populating dropdown with presets...");
+  populateDropdown(dropdown, presets, 'name', 'name');
+  logMessage("Dropdown populated with presets.");
+}
+
+export function populateTileDropdown(tiles, currentTileId) {
+  const tileDropdown = getElementByIdOrWarn('tile-dropdown', 'Tile dropdown');
+  if (!tileDropdown) return;
+
+  const filteredTiles = tiles.filter(tile => tile.document.getFlag(NAMESPACE, 'tileName'));
+  const tileOptions = filteredTiles.map(tile => ({
+    value: tile.id,
+    text: tile.document.getFlag(NAMESPACE, 'tileName')
+  }));
+
+  populateDropdown(tileDropdown, tileOptions, 'value', 'text');
+
+  if (currentTileId) {
+    tileDropdown.value = currentTileId;
+  }
+
+  console.log("Tile dropdown populated with tiles:", filteredTiles);
+}
+
+export async function populateImageDropdown(instance) {
+  console.log("Populating image dropdown...");
+  const imagePaths = instance.imagePaths;
+  if (!imagePaths || imagePaths.length === 0) {
+    console.error("Image paths are not defined or empty.");
+    ui.notifications.warn("No images found for the selected tile. Please add images first.");
+    return;
+  }
+
+  const dropdown = getElementByIdOrWarn('image-dropdown', 'Image dropdown');
+  if (!dropdown) return;
+
+  console.log("Image paths: ", imagePaths);
+  const imageOptions = imagePaths.map(image => ({
+    value: image.img,
+    text: image.displayImg
+  }));
+
+  populateDropdown(dropdown, imageOptions, 'value', 'text');
+  console.log("Image dropdown populated.");
+}
+
+
+
 ////
 
 export function populateDropdown(dropdown, items, valueKey, textKey) {
