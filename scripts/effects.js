@@ -269,7 +269,7 @@ function createEffectItem(targetType, targetName, effectName, effectId, tile, im
   effectItem.classList.add('effect-item');
   effectItem.innerHTML = `
       <span class="effect-target-type">
-        ${targetType === 'Tile' ? '<i class="fas fa-square"></i>' : '<i class="fas fa-image"></i>'}
+        ${targetType === 'Tile' ? '<i class="fas fa-cubes"></i>' : '<i class="fas fa-image"></i>'}
       </span>
       <span class="effect-target-name">${targetType === 'Tile' ? tileName : targetName}</span>
       <span class="effect-name">${effectName}</span>

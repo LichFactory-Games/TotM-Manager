@@ -322,7 +322,7 @@ export function activateEffectEventListeners(instance) {
 
   // Event listener for the remove effect button
   document.getElementById('current-effects-container').addEventListener('click', function(event) {
-    if (event.target.closest('.remove-effect-button')) {
+    if (event.target.closest('.effect-item')) {
       const removeButton = event.target.closest('.remove-effect-button');
       const effectItem = removeButton.closest('.effect-item');
       const targetType = effectItem.querySelector('.effect-target-type i').classList.contains('fa-cubes') ? 'tile' : 'image';
