@@ -24,6 +24,13 @@ export function onTargetChange(event, instance) {
     imageSelection.style.display = 'none';
     const tiles = canvas.tiles.placeables;
     console.log(`Tiles available:`, tiles);
+
+    const container = document.querySelector('.dropdown-container');
+    if (container) {
+      populateTileDropdown(tiles, instance.currentTile?.id, container);
+    } else {
+      console.warn('Container with class "dropdown-container" not found.');
+    }
     populateTileDropdown(tiles, instance.currentTile?.id);
   } else if (target === 'image') {
     tileSelection.style.display = 'none';
