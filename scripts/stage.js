@@ -94,17 +94,26 @@ export async function cycleImages(instance, tile, direction) {
 ////////////////////
 
 export function performImageSearch(instance, query) {
+  if (!instance.imagePaths || !Array.isArray(instance.imagePaths)) {
+    console.error("Image paths not found or not an array.");
+    return;
+  }
+
   const lowerCaseQuery = query.toLowerCase();
-  const results = instance.imagePaths.filter(image =>
-    image.displayImg.toLowerCase().includes(lowerCaseQuery) ||
-    image.tags.some(tag => tag.toLowerCase().includes(lowerCaseQuery))
-  );
+
+  const results = instance.imagePaths.filter(image => {
+    const displayNameMatch = image.displayImg.toLowerCase().includes(lowerCaseQuery);
+    const tagsMatch = Array.isArray(image.tags) && image.tags.some(tag => tag.toLowerCase().includes(lowerCaseQuery));
+
+    return displayNameMatch || tagsMatch;
+  });
+
   logMessage('Search results:', results);
   displaySearchResults(instance, results);
 }
 
- function displaySearchResults(instance, results) {
-  const imageSize = game.settings.get('totm-manager', 'imageSize');
+function displaySearchResults(instance, results) {
+  const imageSize = game.settings.get(NAMESPACE, 'imageSize');
   const resultsContainer = instance.element.find('#search-results')[0];
   resultsContainer.innerHTML = '';
 
