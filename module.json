@@ -42,6 +42,7 @@
     "scripts/tiles.js",
     "scripts/images.js",
     "scripts/effects.js",
+    "scripts/featureControl.js",
     "scripts/listeners.js",
     "scripts/totmManager.js",
     "scripts/modifyEffectForm.js",

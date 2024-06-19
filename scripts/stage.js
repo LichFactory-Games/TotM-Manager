@@ -1,7 +1,7 @@
-import { NAMESPACE, updateActiveTileButton } from './utilities.js';
+import { NAMESPACE, logMessage } from './utilities.js';
 import { applyEffectsToTile, removeEffectsFromTile } from './effects.js';
 import { updateActiveImageButton } from './images.js';
-
+import { controlFeaturesBasedOnTags } from './featureControl.js';
 
 ////////////////////
 // Image Actions  //
@@ -26,8 +26,8 @@ export async function activateImage(instance, image, index) {
   }
 
   // Log current tile information
-  console.log(`Activating image on tile ID: ${tileId}, Name: ${tileName}`);
-  console.log(`Image paths for tile:`, imagePaths);
+  logMessage(`Activating image on tile ID: ${tileId}, Name: ${tileName}`);
+  logMessage(`Image paths for tile:`, imagePaths);
 
   // Deactivate effects of the previous image
   const previousIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
@@ -35,24 +35,30 @@ export async function activateImage(instance, image, index) {
     const previousImage = imagePaths[previousIndex];
     const previousEffects = previousImage.effects || [];
     await removeEffectsFromTile(tile, previousEffects, false);
-    console.log(`Removed effects from previous image index: ${previousIndex}`);
+    logMessage(`Removed effects from previous image index: ${previousIndex}`);
   }
 
   // Update the tile's texture and flag
-  console.log(`Updating tile ID ${tileId} texture to: ${image.img}`);
+  logMessage(`Updating tile ID ${tileId} texture to: ${image.img}`);
   await tile.document.update({ 'texture.src': image.img });
   await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
 
   // Apply tile-wide effects
   const tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
   await applyEffectsToTile(tile, tileEffects, true);
-  console.log(`Applied tile-wide effects to tile ID: ${tileId}`);
+  logMessage(`Applied tile-wide effects to tile ID: ${tileId}`);
 
   // Apply image-specific effects
   const currentImage = imagePaths.find(img => img.img === image.img);
   if (currentImage && currentImage.effects) {
     await applyEffectsToTile(tile, currentImage.effects, false);
-    console.log(`Applied image-specific effects to tile ID: ${tileId}`);
+    logMessage(`Applied image-specific effects to tile ID: ${tileId}`);
+  }
+
+  // Control features based on tags
+  if (currentImage) {
+    await controlFeaturesBasedOnTags(tile, index);
+    logMessage(`Applied image tags to control features to tile: ${tileId}`);
   }
 
   // Update active image button
@@ -60,7 +66,7 @@ export async function activateImage(instance, image, index) {
 
   // Render the instance
   instance.render();
-  console.log(`Image ${image.displayImg} activated on tile ID: ${tileId}.`);
+  logMessage(`Image ${image.displayImg} activated on tile ID: ${tileId}.`);
 }
 
 export async function cycleImages(instance, tile, direction) {
@@ -93,7 +99,7 @@ export function performImageSearch(instance, query) {
     image.displayImg.toLowerCase().includes(lowerCaseQuery) ||
     image.tags.some(tag => tag.toLowerCase().includes(lowerCaseQuery))
   );
-  console.log('TotM - Search results:', results);
+  logMessage('Search results:', results);
   displaySearchResults(instance, results);
 }
 
