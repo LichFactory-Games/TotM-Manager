@@ -3,7 +3,7 @@
 /////////////////////////////
 
 import { NAMESPACE, logMessage, activateTile, findAndSwitchToTileByTag, updateActiveTileButton } from './utilities.js';
-import { addImageToTile, addImageDirectoryToTile, updateImageTags, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
+import { addImageToTile, addImageDirectoryToTile, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
 import { generateTileFields, handleSaveAndRender, handleDeleteAndSave, collectAndSaveTileData } from './tiles.js';
 import { loadTileImages, toggleTileVisibility } from './tiles-utils.js'
 import { updateEffectsUI, onTargetChange, removeEffect } from './effects.js';
@@ -82,6 +82,8 @@ export function activateGeneralListeners(instance, html) {
     // Log the retrieved image paths
     console.log('Retrieved image paths:', imagePaths);
 
+    await collectAndSaveTileData(instance, html);
+
     // Check if the index is within bounds
     if (index >= 0 && index < imagePaths.length) {
       await activateImage(instance, imagePaths[index], index);
@@ -90,15 +92,15 @@ export function activateGeneralListeners(instance, html) {
       console.warn(`Index ${index} out of bounds for image paths. Image paths length: ${imagePaths.length}`);
       return;
     }
-    await collectAndSaveTileData(instance, html);
+
     await new Promise(requestAnimationFrame);
     await updateActiveImageButton(instance, index); // Pass the index here
     await updateActiveTileButton(instance);
   });
 
   html.find('.prev-image').click(async () => {
-    await cycleImages(instance, instance.currentTile, 'prev');
     await collectAndSaveTileData(instance, html);
+    await cycleImages(instance, instance.currentTile, 'prev');
     await new Promise(requestAnimationFrame);
     const currentIndex = await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
     await updateActiveImageButton(instance, currentIndex); // Pass the currentIndex here
@@ -106,17 +108,12 @@ export function activateGeneralListeners(instance, html) {
   });
 
   html.find('.next-image').click(async () => {
-    await cycleImages(instance, instance.currentTile, 'next');
     await collectAndSaveTileData(instance, html);
+    await cycleImages(instance, instance.currentTile, 'next');
     await new Promise(requestAnimationFrame);
     const currentIndex = await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
     await updateActiveImageButton(instance, currentIndex); // Pass the currentIndex here
     await updateActiveTileButton(instance);
-  });
-
-  html.find('.tag-field').on('input', event => {
-    const index = $(event.currentTarget).data('index');
-    updateImageTags(instance, index, $(event.currentTarget).val());
   });
 
   // Event listener for the hide/reveal button

@@ -50,14 +50,6 @@ export async function addImageDirectoryToTile(instance, tile, directoryPath) {
   }
 }
 
-export function updateImageTags(instance, index, tags) {
-  const imagePaths = instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
-  if (imagePaths.length > index) {
-    imagePaths[index].tags = tags.split(',').map(tag => tag.trim());
-    instance.currentTile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
-  }
-}
-
 export async function updateActiveImageButton(instance, activeIndex) {
   if (!instance.currentTile || !instance.currentTile.document) {
     console.warn("Attempted to update image button with no active tile or missing document.");
