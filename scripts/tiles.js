@@ -59,51 +59,47 @@ function generateFields(instance, tileFieldsContainer, count) {
   logMessage("Generated tile fields:", instance.tiles)
 }
 
-// Collect tile data from HTML form
+// Collect data for tile flags and save
 export async function collectAndSaveTileData(instance, html) {
-  logMessage("Saving tile data for tiles...");
+  logMessage("Saving tile data for tile...");
 
   const tileContainer = html.find('#tile-fields-container');
-  const imageContainers = html.find('.tile-image-container'); // Assume each tile has its own image container
+  const imageContainer = html.find('#image-path-list');
 
-  // Collect tile data
-  logMessage("Collecting tile data...");
+  // Collect tile data and image paths
+  logMessage("Collecting tile and image data...");
   const tiles = collectTileData(tileContainer);
   logMessage("Collected tiles:", tiles);
 
-  // Ensure each tile gets its own set of image paths
-  tiles.forEach((tile, index) => {
-    const imageContainer = $(imageContainers[index]);
-    const imagePaths = collectImagePaths(imageContainer);
-    tile.imagePaths = imagePaths;
-    logMessage(`Assigned image paths to tile ${tile.name}:`, tile.imagePaths);
-  });
+  // Assume instance.currentTile contains the active tile
+  const activeTile = instance.currentTile;
 
-  // Save tile data
-  for (const tileData of tiles) {
-    let tileName = tileData.name;
-
-    if (!tileName || tileName.trim() === '') {
-      tileName = `tile-${Date.now()}`;
-      tileData.name = tileName;
-      logMessage(`Generated temporary tile name: ${tileName}`);
-    }
-
-    logMessage(`Processing tile with name: ${tileName}`);
-
-    const foundTile = findAndSwitchToTileByTag(instance, tileName, false);
-
-    if (foundTile) {
-      const tileImagePaths = tileData.imagePaths;
-      logMessage("Data passed to saveTileDataToFlags:");
-      logMessage("tileData:", tileData);
-      logMessage("foundTile:", foundTile);
-      logMessage("tileImagePaths:", tileImagePaths);
-      await saveTileDataToFlags(tileData, foundTile, tileImagePaths);
-    } else {
-      console.warn(`No tile found with the name: ${tileName}`);
-    }
+  if (!activeTile) {
+    console.warn("No active tile found.");
+    return;
   }
+
+  logMessage(`Active tile found: ${activeTile.document.flags[NAMESPACE].tileName}`);
+
+  // Collect image paths only for the active tile
+  const imagePaths = collectImagePaths(imageContainer);
+  logMessage("Collected image paths:", imagePaths);
+
+  // Find the corresponding tile data
+  const tileData = tiles.find(tile => tile.name === activeTile.document.flags[NAMESPACE].tileName);
+
+  if (tileData) {
+    // Assign the collected image paths to tileData
+    tileData.imagePaths = imagePaths.map(path => ({ ...path }));  // Deep clone the imagePaths array
+    logMessage(`Assigned image paths to tile ${tileData.name}:`, tileData.imagePaths);
+  } else {
+    console.warn(`No tile data found for the active tile: ${activeTile.document.flags[NAMESPACE].tileName}`);
+    return;
+  }
+
+  // Save data for the active tile
+  logMessage(`Processing tile with name: ${tileData.name}`);
+  await saveTileDataToFlags(tileData, activeTile, tileData.imagePaths);
 }
 
 export function collectTileData(container) {
@@ -130,7 +126,7 @@ export function collectImagePaths(container) {
   const pathListItems = container.find('li.form-field');
 
   // Log to verify the selection
-  console.log("Collected path list items:", pathListItems);
+  logMessage("Collected path list items:", pathListItems);
 
   return pathListItems.map((index, pathItem) => {
     const $pathItem = $(pathItem);
@@ -138,10 +134,10 @@ export function collectImagePaths(container) {
     const tags = $pathItem.find('.tag-field').val().split(',').map(tag => tag.trim());
 
     // Log each image path object being collected
-    console.log("Collected image path data:");
-    console.log("img:", img);
-    console.log("displayImg:", img.split('/').pop());
-    console.log("tags:", tags);
+    logMessage("Collected image path data:");
+    logMessage("img:", img);
+    logMessage("displayImg:", img.split('/').pop());
+    logMessage("tags:", tags);
 
     return { img, displayImg: img.split('/').pop(), tags };
   }).get();
