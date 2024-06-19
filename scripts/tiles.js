@@ -59,7 +59,7 @@ function generateFields(instance, tileFieldsContainer, count) {
   logMessage("Generated tile fields:", instance.tiles)
 }
 
-// Save data to tile document
+// Collect tile data from HTML form
 export async function collectAndSaveTileData(instance, html) {
   logMessage("Saving tile data for tiles...");
 
@@ -67,8 +67,11 @@ export async function collectAndSaveTileData(instance, html) {
   const imageContainer = html.find('#image-path-list');
 
   // Collect tile data and image paths
+  logMessage("Collected Tile & Image data:");
   const tiles = collectTileData(tileContainer);
+  logMessage("tiles:", tiles);
   const imagePaths = collectImagePaths(imageContainer);
+  logMessage("images:", imagePaths);
 
   // Assign image paths to the corresponding tiles
   tiles.forEach(tile => {
@@ -91,8 +94,10 @@ export async function collectAndSaveTileData(instance, html) {
 
     if (foundTile) {
       const tileImagePaths = tileData.imagePaths;
-
+      logMessage("Data passed to saveTileDataToFlags:");
+      logMessage("tileData: ", tileData);
       logMessage("Found tile:", foundTile);
+      logMessage("tile data image paths: ", tileImagePaths);
       await saveTileDataToFlags(tileData, foundTile, tileImagePaths);
     } else {
       console.warn(`No tile found with the tileName: ${tileName}`);
@@ -120,11 +125,22 @@ export function collectTileData(container) {
 }
 
 export function collectImagePaths(container) {
-  const pathListItems = container.find('#image-path-list .form-field');
+  // Correctly selecting the list items within the specified container
+  const pathListItems = container.find('li.form-field');
+
+  // Log to verify the selection
+  console.log("Collected path list items:", pathListItems);
+
   return pathListItems.map((index, pathItem) => {
     const $pathItem = $(pathItem);
     const img = $pathItem.find('.path-field').data('img');
     const tags = $pathItem.find('.tag-field').val().split(',').map(tag => tag.trim());
+
+    // Log each image path object being collected
+    console.log("Collected image path data:");
+    console.log("img:", img);
+    console.log("displayImg:", img.split('/').pop());
+    console.log("tags:", tags);
 
     return { img, displayImg: img.split('/').pop(), tags };
   }).get();

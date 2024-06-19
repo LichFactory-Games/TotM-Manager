@@ -2,6 +2,12 @@ import { NAMESPACE, logMessage, getFilteredTiles } from './utilities.js';
 
 // Helper function to save tile flags
 export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
+  // Log the arguments
+  logMessage("Arguments received in saveTileDataToFlags:");
+  logMessage("tile:", tile);
+  logMessage("foundTile:", foundTile);
+  logMessage("imagePaths:", imagePaths);
+
   // Add validation to check if foundTile is an actual tile object
   if (!tile || !foundTile || !foundTile.document) {
     console.error("Invalid tile or foundTile:", { tile, foundTile });
@@ -23,6 +29,7 @@ export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
 
   if (imagePaths && imagePaths.length > 0) {
     const existingPaths = await foundTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+    logMessage("Save Flags -- existing image paths", existingPaths);
     const pathsToSave = imagePaths.map((path, index) => ({
       img: path.img,
       displayImg: path.displayImg,
