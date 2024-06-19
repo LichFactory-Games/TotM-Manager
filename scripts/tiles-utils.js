@@ -28,8 +28,7 @@ export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
   });
 
   if (imagePaths && imagePaths.length > 0) {
-    const existingPaths = await foundTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
-    logMessage("Save Flags -- existing image paths", existingPaths);
+
     const pathsToSave = imagePaths.map((path, index) => ({
       img: path.img,
       displayImg: path.displayImg,

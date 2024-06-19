@@ -64,18 +64,19 @@ export async function collectAndSaveTileData(instance, html) {
   logMessage("Saving tile data for tiles...");
 
   const tileContainer = html.find('#tile-fields-container');
-  const imageContainer = html.find('#image-path-list');
+  const imageContainers = html.find('.tile-image-container'); // Assume each tile has its own image container
 
-  // Collect tile data and image paths
-  logMessage("Collected Tile & Image data:");
+  // Collect tile data
+  logMessage("Collecting tile data...");
   const tiles = collectTileData(tileContainer);
-  logMessage("tiles:", tiles);
-  const imagePaths = collectImagePaths(imageContainer);
-  logMessage("images:", imagePaths);
+  logMessage("Collected tiles:", tiles);
 
-  // Assign image paths to the corresponding tiles
-  tiles.forEach(tile => {
+  // Ensure each tile gets its own set of image paths
+  tiles.forEach((tile, index) => {
+    const imageContainer = $(imageContainers[index]);
+    const imagePaths = collectImagePaths(imageContainer);
     tile.imagePaths = imagePaths;
+    logMessage(`Assigned image paths to tile ${tile.name}:`, tile.imagePaths);
   });
 
   // Save tile data
@@ -85,22 +86,22 @@ export async function collectAndSaveTileData(instance, html) {
     if (!tileName || tileName.trim() === '') {
       tileName = `tile-${Date.now()}`;
       tileData.name = tileName;
-      logMessage(`Generated temporary tileName: ${tileName}`);
+      logMessage(`Generated temporary tile name: ${tileName}`);
     }
 
-    logMessage(`Processing tile with tileName: ${tileName}`);
+    logMessage(`Processing tile with name: ${tileName}`);
 
     const foundTile = findAndSwitchToTileByTag(instance, tileName, false);
 
     if (foundTile) {
       const tileImagePaths = tileData.imagePaths;
       logMessage("Data passed to saveTileDataToFlags:");
-      logMessage("tileData: ", tileData);
-      logMessage("Found tile:", foundTile);
-      logMessage("tile data image paths: ", tileImagePaths);
+      logMessage("tileData:", tileData);
+      logMessage("foundTile:", foundTile);
+      logMessage("tileImagePaths:", tileImagePaths);
       await saveTileDataToFlags(tileData, foundTile, tileImagePaths);
     } else {
-      console.warn(`No tile found with the tileName: ${tileName}`);
+      console.warn(`No tile found with the name: ${tileName}`);
     }
   }
 }
@@ -152,8 +153,6 @@ export async function handleSaveAndRender(instance, html) {
 
   console.log("Loading tile data...");
   await loadTileData(instance);
-
-  await collectAndSaveTileData(instance, html);
 
   console.log("Updating stage buttons...");
   updateTileButtons(instance);
