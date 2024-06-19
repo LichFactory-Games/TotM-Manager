@@ -60,35 +60,38 @@ function generateFields(instance, tileFieldsContainer, count) {
 }
 
 // Save data to tile document
-
 export async function collectAndSaveTileData(instance, html) {
   logMessage("Saving tile data for tiles...");
 
-  const container = html.find('#tile-fields-container');
-  const tiles = collectTileData(container);
+  const tileContainer = html.find('#tile-fields-container');
+  const imageContainer = html.find('#image-path-list');
 
+  // Collect tile data and image paths
+  const tiles = collectTileData(tileContainer);
+  const imagePaths = collectImagePaths(imageContainer);
+
+  // Assign image paths to the corresponding tiles
+  tiles.forEach(tile => {
+    tile.imagePaths = imagePaths;
+  });
+
+  // Save tile data
   for (const tileData of tiles) {
-    // Ensure the tileName is defined and not empty
     let tileName = tileData.name;
 
     if (!tileName || tileName.trim() === '') {
-      // Generate a temporary tileName if it's not provided
       tileName = `tile-${Date.now()}`;
       tileData.name = tileName;
       logMessage(`Generated temporary tileName: ${tileName}`);
     }
 
-    // Log the tile name before using it
     logMessage(`Processing tile with tileName: ${tileName}`);
 
-    // Find the tile by tag
     const foundTile = findAndSwitchToTileByTag(instance, tileName, false);
 
     if (foundTile) {
-      // Extract image paths specific to this tile
-      const tileImagePaths = collectImagePaths(container);
+      const tileImagePaths = tileData.imagePaths;
 
-      // Log the found tile before calling saveTileDataToFlags
       logMessage("Found tile:", foundTile);
       await saveTileDataToFlags(tileData, foundTile, tileImagePaths);
     } else {
@@ -98,14 +101,20 @@ export async function collectAndSaveTileData(instance, html) {
 }
 
 export function collectTileData(container) {
-  return container.find('.tile-field').map((index, tileField) => {
-    const $tileField = $(tileField);
-    const order = $tileField.attr('data-order');
+  const tileElements = container.find('.tile-field');
+  return tileElements.map((index, element) => {
+    const $element = $(element);
+    const name = $element.find('input[name^="tile-name"]').val();
+    const opacity = parseFloat($element.find('input[name^="tile-opacity"]').val()) || 1;
+    const tint = $element.find('input[name^="tile-tint"]').val() || '';
+    const order = parseInt($element.attr('data-order'), 10);
+
     return {
-      name: $tileField.find(`input[name="tile-name-${order}"]`).val(),
-      opacity: $tileField.find(`input[name="tile-opacity-${order}"]`).val(),
-      tint: $tileField.find(`input[name="tile-tint-${order}"]`).val(),
-      order
+      name,
+      opacity,
+      tint,
+      order,
+      imagePaths: []  // Initialize imagePaths for later merge
     };
   }).get();
 }
@@ -116,6 +125,7 @@ export function collectImagePaths(container) {
     const $pathItem = $(pathItem);
     const img = $pathItem.find('.path-field').data('img');
     const tags = $pathItem.find('.tag-field').val().split(',').map(tag => tag.trim());
+
     return { img, displayImg: img.split('/').pop(), tags };
   }).get();
 }
