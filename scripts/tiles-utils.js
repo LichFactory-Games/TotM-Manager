@@ -26,8 +26,7 @@ export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
     const pathsToSave = imagePaths.map((path, index) => ({
       img: path.img,
       displayImg: path.displayImg,
-      tags: path.tags,
-      color: path.color || (existingPaths[index] && existingPaths[index].color) || "#000000"
+      tags: path.tags
     }));
 
     await foundTile.document.setFlag(NAMESPACE, 'imagePaths', pathsToSave);

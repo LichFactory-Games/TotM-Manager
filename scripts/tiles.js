@@ -116,12 +116,9 @@ export function collectImagePaths(container) {
     const $pathItem = $(pathItem);
     const img = $pathItem.find('.path-field').data('img');
     const tags = $pathItem.find('.tag-field').val().split(',').map(tag => tag.trim());
-    const color = $pathItem.find('.color-picker').val();
-    return { img, displayImg: img.split('/').pop(), tags, color };
+    return { img, displayImg: img.split('/').pop(), tags };
   }).get();
 }
-
-
 
 export async function handleSaveAndRender(instance, html) {
   logMessage("Saving data for tile...");
