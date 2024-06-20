@@ -117,15 +117,29 @@ export function activateGeneralListeners(instance, html) {
   });
 
   // Event listener for the hide/reveal button
+  // Hide/show value
+
+  // html.find('.hr-dropdown-container').addEventListener('change', async (event) => {
+  //   if (event.target.closest('.hr-dropdown-container') && event.target.matches('#tile-dropdown')) {
+  //     // Set the const name to the selected value
+  //     const name = event.target.value;
+  //     console.log(`Selected Tile ID: ${name}`);
+  //     await toggleTileVisibility(name, instance);
+
+  //   } else {
+  //     console.error("No tile found with the selected ID.");
+  //   }
+  // });
+
   html.find('.hide-reveal-tile').click(async () => {
     const tileDropdown = document.getElementById('tile-dropdown');
     if (tileDropdown) {
       const selectedTileId = tileDropdown.value;
       if (selectedTileId) {
         await toggleTileVisibility(selectedTileId);
-        await new Promise(requestAnimationFrame);
-        await updateActiveImageButton(instance, currentIndex);
-        await updateActiveTileButton(instance);
+        // await new Promise(requestAnimationFrame);
+        // await updateActiveImageButton(instance, currentIndex);
+        // await updateActiveTileButton(instance);
       } else {
         console.warn("No tile selected for visibility toggle.");
       }
@@ -293,18 +307,35 @@ export function activateEffectEventListeners(instance) {
   });
 
   // Set current tile when a tile is selected
-  document.getElementById('tile-dropdown').addEventListener('change', async (event) => {
-    const tileId = event.target.value;
-    const tile = canvas.tiles.get(tileId);
-    if (tile) {
-      instance.currentTile = tile;
-      await loadTileImages(instance, tile);
-      // Update the current effects list when a tile is selected
-      updateEffectsUI(tile, instance);
-    } else {
-      console.error("No tile found with the selected ID.");
+  document.getElementById('tile-selection').addEventListener('change', async (event) => {
+    // Check if the clicked element is within the 'tile-selection' container and is a 'tile-dropdown'
+    if (event.target.closest('#tile-selection') && event.target.matches('#tile-dropdown')) {
+      const tileId = event.target.value;
+      const tile = canvas.tiles.get(tileId);
+      if (tile) {
+        instance.currentTile = tile;
+        await loadTileImages(instance, tile);
+        // Update the current effects list when a tile is selected
+        updateEffectsUI(tile, instance);
+      } else {
+        console.error("No tile found with the selected ID.");
+      }
     }
   });
+
+
+  // document.getElementById('tile-dropdown').addEventListener('change', async (event) => {
+  //   const tileId = event.target.value;
+  //   const tile = canvas.tiles.get(tileId);
+  //   if (tile) {
+  //     instance.currentTile = tile;
+  //     await loadTileImages(instance, tile);
+  //     // Update the current effects list when a tile is selected
+  //     updateEffectsUI(tile, instance);
+  //   } else {
+  //     console.error("No tile found with the selected ID.");
+  //   }
+  // });
 
   // Event listener for switching to effects tab
   document.querySelector('.tabs').addEventListener('click', (event) => {

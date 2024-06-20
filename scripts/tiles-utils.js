@@ -1,4 +1,4 @@
-import { NAMESPACE, logMessage, getFilteredTiles } from './utilities.js';
+import { NAMESPACE, logMessage, findTileById } from './utilities.js';
 
 // Helper function to save tile flags
 export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
@@ -146,9 +146,8 @@ export  function updateTileFields(instance) {
   });
 }
 
-
 export async function toggleTileVisibility(tileId) {
-  const tile = canvas.tiles.get(tileId);
+  const tile = findTileById(tileId)
   if (tile) {
     const isHidden = tile.document.hidden; // Directly check the hidden property
     const newVisibility = !isHidden;
