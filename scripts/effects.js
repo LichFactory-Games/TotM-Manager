@@ -56,34 +56,34 @@ export function onTargetChange(event, instance) {
 ///////////////////////////////////
 
 // Collect information and save the effect to the relevant target
-export async function addEffect(instance) {
-  const targetType = document.getElementById('target-dropdown').value;
-  const effectName = document.getElementById('effect-dropdown').value;
-  const effectParams = await getEffectParams(effectName);
+export async function addEffect(instance, targetType, effectName, effectParams, tileId, imageId) {
+  console.log(`Target Type: ${targetType}`);
+  console.log(`Effect Name: ${effectName}`);
+  console.log(`Effect Params:`, effectParams);
 
   if (targetType === 'tile') {
-    const tileId = document.getElementById('tile-dropdown').value;
     const tile = canvas.tiles.get(tileId);
     if (tile) {
       await updateEffectsData(tile, effectParams, true, true);
       await applyTokenMagicEffect(tile, effectParams, true);
+      console.log(`Effect applied to tile: ${tileId}`);
     } else {
       console.error("No tile found to apply effect.");
     }
   } else if (targetType === 'image') {
-    const imageId = document.getElementById('image-dropdown').value;
     if (instance.currentTile) {
       const tile = instance.currentTile;
-      let imagePaths = getTileFlag(tile, 'imagePaths');
+      let imagePaths = tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
       const image = imagePaths.find(img => img.img === imageId);
 
       if (image) {
         await updateEffectsData(tile, effectParams, true, false, imageId);
+        console.log(`Effect applied to image: ${imageId} on tile: ${tile.id}`);
 
-        // Check if the image is the currently active image
         const currentIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
         if (imagePaths[currentIndex]?.img === imageId) {
           await applyTokenMagicEffect(tile, effectParams, false);
+          console.log(`Effect applied to currently active image: ${imageId}`);
         }
       } else {
         console.error("No image found to apply effect.");
@@ -94,18 +94,17 @@ export async function addEffect(instance) {
   }
 }
 
-
-//// 
+////
 
 export async function removeEffect(instance, targetType, effectName) {
   // Retrieve effect parameters based on effect name
   const effectParamsArray = await getEffectParams(effectName);
-  if (!effectParamsArray || effectParamsArray.length === 0) {
+  if (!effectParamsArray) {
     console.error(`No effect parameters found for effect name: ${effectName}`);
     return;
   }
 
-  const effectParams = effectParamsArray[0]; // Assuming only one set of parameters
+  const effectParams = effectParamsArray; // Assuming getEffectParams returns a single object
   logMessage(`Removing effect: ${effectName} with parameters:`, effectParams);
 
   let tile = canvas.tiles.controlled[0];
@@ -113,7 +112,6 @@ export async function removeEffect(instance, targetType, effectName) {
     console.error("No active tile found to remove effect.");
     return;
   }
-
 
   if (targetType === 'tile') {
     // Handle tile-wide effects
@@ -165,9 +163,6 @@ export async function removeEffect(instance, targetType, effectName) {
   }
 }
 
-
-
-
 ///////////////////////////
 // Token Magic Functions //
 ///////////////////////////
@@ -203,6 +198,7 @@ export async function applyTokenMagicEffect(target, effectParams, isTile = true)
 ////
 
 export async function removeTokenMagicEffect(target, effectParams, isTile) {
+  console.log(effectParams);
   const filterId = effectParams.filterId || effectParams.tmFilterId;
   console.log(`Attempting to remove effect: ${filterId} from ${isTile ? 'tile' : 'image'}`);
 
@@ -234,25 +230,49 @@ export async function updateEffectsData(target, effectParams, isAdd, isTile = tr
 
   const flag = isTile ? 'tileEffects' : 'imagePaths';
   let effects = await target.document.getFlag(NAMESPACE, flag) || (isTile ? [] : []);
-  logMessage("Current effects before update:", JSON.stringify(effects));
+  console.log("Current effects before update:", JSON.stringify(effects));
 
   if (isTile) {
     if (isAdd) {
-      effects.push(effectParams);
+      const existingEffectIndex = effects.findIndex(effect => effect.filterId === effectParams.filterId);
+      if (existingEffectIndex !== -1) {
+        // Update the existing effect
+        effects[existingEffectIndex] = effectParams;
+      } else {
+        // Add new effect
+        effects.push(effectParams);
+      }
     } else {
+      // Remove the effect
       effects = effects.filter(effect => effect.filterId !== effectParams.filterId);
     }
     await target.document.setFlag(NAMESPACE, flag, effects);
-    logMessage(`Updated effects on tile: ${JSON.stringify(effects)}`);
+    console.log(`Updated effects on tile: ${JSON.stringify(effects)}`);
   } else {
-    const imagePaths = effects.map(imgPath =>
-      imgPath.img === imageId
-        ? { ...imgPath, effects: isAdd ? [...(imgPath.effects || []), effectParams] : (imgPath.effects || []).filter(effect => effect.filterId !==  effectParams.filterId) }
-      : imgPath
-    );
+    const imagePaths = effects.map(imgPath => {
+      if (imgPath.img === imageId) {
+        let updatedEffects = imgPath.effects || [];
+        if (isAdd) {
+          const existingEffectIndex = updatedEffects.findIndex(effect => effect.filterId === effectParams.filterId);
+          if (existingEffectIndex !== -1) {
+            // Update the existing effect
+            updatedEffects[existingEffectIndex] = effectParams;
+          } else {
+            // Add new effect
+            updatedEffects.push(effectParams);
+          }
+        } else {
+          // Remove the effect
+          updatedEffects = updatedEffects.filter(effect => effect.filterId !== effectParams.filterId);
+        }
+        return { ...imgPath, effects: updatedEffects };
+      }
+      return imgPath;
+    });
     await target.document.setFlag(NAMESPACE, flag, imagePaths);
-    logMessage(`Updated effects on image: ${JSON.stringify(imagePaths)}`);
+    console.log(`Updated effects on image: ${JSON.stringify(imagePaths)}`);
   }
+
   // Verify flag data after update
   const updatedEffects = await target.document.getFlag(NAMESPACE, flag);
   console.log("Updated effects:", JSON.stringify(updatedEffects));

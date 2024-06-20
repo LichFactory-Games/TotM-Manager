@@ -384,26 +384,45 @@ export async function isTokenMagicActive() {
 
 ////
 
-export async function getEffectParams(effectName, image = null) {
+export async function getEffectParams(effectName) {
   let effectParams = null;
 
-  // If an image is provided, check for effect parameters in its flag
-  if (image && image.effects) {
-    const effect = image.effects.find(e => e.filterId === effectName || e.tmFilterId === effectName);
-    if (effect) {
-      effectParams = effect;
+  // Get the active tile
+  const tile = canvas.tiles.controlled[0];
+  if (!tile) {
+    console.error("No active tile found.");
+    return null; // Change to return null to indicate no params found
+  }
+
+  // Get the image index from the tile flags
+  const imgIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
+  const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+
+  // Check if the image path at the current index has effects
+  if (imgIndex !== undefined && imagePaths[imgIndex]) {
+    const currentImage = imagePaths[imgIndex];
+    const effect = (currentImage.effects || []).flat();
+    if (effect.length > 0) {
+      effectParams = effect.find(e => e.filterId === effectName || e.tmFilterId === effectName);
     }
   }
 
-  // If no effect parameters found in image flag, use TokenMagic preset
+  // Check for tile effects if no image effects are found
+  if (!effectParams) {
+    const tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects');
+    if (tileEffects) {
+      effectParams = tileEffects.find(e => e.filterId === effectName || e.tmFilterId === effectName);
+    }
+  }
+
+  // If no effect parameters found in image or tile flag, use TokenMagic preset
   if (!effectParams) {
     effectParams = TokenMagic.getPreset(effectName);
     if (!effectParams) {
       console.error(`No effect parameters found for effect: ${effectName}`);
-      return [];
+      return null; // Change to return null to indicate no params found
     }
   }
 
-  // Ensure effectParams is an array
-  return Array.isArray(effectParams) ? effectParams : [effectParams];
+  return effectParams;
 }
