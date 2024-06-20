@@ -1,5 +1,6 @@
-import { applyTokenMagicEffect, updateEffectsUI, removeTokenMagicEffect, addEffect, removeEffect } from './effects.js';
-import { getImageById } from './images.js';
+import { adjustColor, decimalToHex, hexToDecimal } from './utilities.js';
+import { updateEffectsUI, addEffect  } from './effects.js';
+
 
 export class ModifyEffectForm extends FormApplication {
     constructor(data, options) {
@@ -10,13 +11,13 @@ export class ModifyEffectForm extends FormApplication {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
-            title: "Modify Effect",
-            template: "modules/totm-manager/templates/modify-effect-window.hbs",
-            width: 400,
-            height: 600,
-            resizable: true,
-        });
+      return mergeObject(super.defaultOptions, {
+        title: "Modify Effect",
+        template: "modules/totm-manager/templates/modify-effect-window.hbs",
+        width: 350,
+        height: 500,
+        resizable: true,
+      });
     }
 
     getData(options) {
@@ -30,25 +31,53 @@ export class ModifyEffectForm extends FormApplication {
         };
     }
 
-    activateListeners(html) {
-        super.activateListeners(html);
+  activateListeners(html) {
+    super.activateListeners(html);
 
-        // Add event listener for color picker change
-        html.find('input[type="color"]').change(ev => {
-            const color = ev.target.value;
-            const numericalColor = parseInt(color.slice(1), 16);
-            html.find('input[name="numericalColor"]').val(numericalColor);
-        });
+    const colorPicker = html.find('input[type="color"]')[0];
+    const numericalColorInput = html.find('input[name="numericalColor"]');
+    const animatedColorVal1Input = html.find('input[name="animatedColorVal1"]');
+    const animatedColorVal2Input = html.find('input[name="animatedColorVal2"]');
 
-        // Add event listener for form submission
-        html.find('form').submit(ev => {
-            ev.preventDefault();
-            const formData = new FormData(ev.target);
-            const effectParams = JSON.parse(formData.get('effectParams'));
-            effectParams.color = parseInt(formData.get('numericalColor'));
-            this._updateObject(ev, { effectParams: JSON.stringify(effectParams) });
-        });
+    // Initialize the color picker with the current color
+    if (this.effectParams.color) {
+      const initialColor = decimalToHex(this.effectParams.color);
+      colorPicker.value = initialColor;
+    } else {
+      colorPicker.value = '#ffffff'; // Default to white if no color is set
     }
+
+    // Add event listener for color picker change
+    colorPicker.addEventListener('change', (ev) => {
+      const color = ev.target.value; // Get the hex color value as a string
+      const numericalColor = hexToDecimal(color); // Convert hex string to decimal number
+      const lighterColor = adjustColor(color, 40);
+      const darkerColor =  adjustColor(color, -40);
+
+      // Update the fields with the numerical color
+      numericalColorInput.val(numericalColor);
+      animatedColorVal1Input.val(lighterColor);
+      animatedColorVal2Input.val(darkerColor);
+
+      console.log("Color selected:", numericalColor);
+    });
+
+    // Add event listener for form submission
+    html.find('form').submit(ev => {
+      ev.preventDefault();
+      const formData = new FormData(ev.target);
+      const effectParams = JSON.parse(formData.get('effectParams'));
+      effectParams.color = parseInt(formData.get('numericalColor'));
+      this._updateObject(ev, { effectParams: JSON.stringify(effectParams) });
+    });
+  }
+
+  initializeColorPicker(colorPicker, initialColor) {
+    colorPicker.value = initialColor;
+    // Optionally, trigger the change event to update the JSON structure initially
+    const event = new Event('change');
+    colorPicker.dispatchEvent(event);
+  }
 
   async _updateObject(event, formData) {
     console.log("Form submission data:", formData);

@@ -35,10 +35,14 @@ export function getElementByIdOrWarn(id, type) {
 //////////////////////
 
 export function hexToDecimal(hex) {
-  if (hex.indexOf('#') === 0) {
+  if (hex.startsWith('#')) {
     hex = hex.slice(1); // Remove the '#' character
   }
   return parseInt(hex, 16);
+}
+
+export function decimalToHex(decimal) {
+  return `#${decimal.toString(16).padStart(6, '0')}`;
 }
 
 export function adjustColor(hex, amount) {
@@ -46,8 +50,9 @@ export function adjustColor(hex, amount) {
   let r = Math.max(0, Math.min(255, ((color >> 16) & 0xFF) + amount));
   let g = Math.max(0, Math.min(255, ((color >> 8) & 0xFF) + amount));
   let b = Math.max(0, Math.min(255, (color & 0xFF) + amount));
-  // Convert back to hex string
-  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+  // Combine adjusted RGB values back into a single decimal value
+  let adjustedColor = (r << 16) + (g << 8) + b;
+  return adjustedColor;
 }
 
 /////////////////////
@@ -387,18 +392,15 @@ export async function isTokenMagicActive() {
 export async function getEffectParams(effectName) {
   let effectParams = null;
 
-  // Get the active tile
   const tile = canvas.tiles.controlled[0];
   if (!tile) {
     console.error("No active tile found.");
-    return null; // Change to return null to indicate no params found
+    return []; // Return an empty array
   }
 
-  // Get the image index from the tile flags
   const imgIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
   const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
 
-  // Check if the image path at the current index has effects
   if (imgIndex !== undefined && imagePaths[imgIndex]) {
     const currentImage = imagePaths[imgIndex];
     const effect = (currentImage.effects || []).flat();
@@ -407,7 +409,6 @@ export async function getEffectParams(effectName) {
     }
   }
 
-  // Check for tile effects if no image effects are found
   if (!effectParams) {
     const tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects');
     if (tileEffects) {
@@ -415,14 +416,13 @@ export async function getEffectParams(effectName) {
     }
   }
 
-  // If no effect parameters found in image or tile flag, use TokenMagic preset
   if (!effectParams) {
     effectParams = TokenMagic.getPreset(effectName);
     if (!effectParams) {
       console.error(`No effect parameters found for effect: ${effectName}`);
-      return null; // Change to return null to indicate no params found
+      return []; // Return an empty array
     }
   }
 
-  return effectParams;
+  return Array.isArray(effectParams) ? effectParams : [effectParams];
 }

@@ -1,42 +1,111 @@
 <style>
-  
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 10px;
+
+ .form-effect label {
+   gap: 10px;
+ }
+
+ #effectParams {
+   margin-bottom: 10px;
+ }
+
+ .form-values,
+ .form-colors {
+   display: flex;
+   gap: 5px;
+   margin-bottom: 10px;
+   width: calc(100% - 2px);
+   }
+
+ #colorLabel {
+   align-items: center;
+   justify-content: center;
+   padding-top: 5px;
+ }
+
+ .form-values label {
+   align-items: center;
+   justify-content: center;
+ }
+
+ .form-buttons {
+   margin-top: 5px;
+ }
+
+ input[type="color" i] {
+   -webkit-appearance: none;
+   -moz-appearance: none;
+   appearance: none;
+   background: transparent;
+   border: none;
+   border-radius: 3px;
+   cursor: pointer;
+   padding: 0;
+   align-items: center;
+   justify-content: center;
+ }
+
+ .color-picker {
+   -webkit-appearance: none;
+   -moz-appearance: none;
+   appearance: none;
+   background: transparent;
+   border: none;
+   border-radius: 3px;
+   cursor: pointer;
+   padding: 0;
+   align-items: center;
+   justify-content: center;
+
+ }
+
+.color-picker::-webkit-color-swatch-wrapper {
+    padding: 0;
+}
+.color-picker::-webkit-color-swatch {
+  border: none;
+  padding: 0;
 }
 
-.form-fields {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-fields label {
-  margin-top: 5px;
-}
-
-.form-fields input {
-  margin-top: 2px;
-}
-
-  </style>
+</style>
 
 
-  <!-- modules/totm-manager/templates/modify-effect-window.hbs -->
-  <form>
+<!-- modules/totm-manager/templates/modify-effect-window.hbs -->
+<form class="form-effect">
   <div class="form-group">
-    <label>Effect Parameters (JSON):</label>
-    <textarea name="effectParams" rows="10" cols="50">{{effectParams}}</textarea>
+    <!-- <label for="effectParams">Effect Parameters (JSON):</label> -->
+    <textarea id="effectParams" name="effectParams" rows="20" cols="50">{{effectParams}}</textarea>
   </div>
+  <div class="form-colors">
+    <label id="colorLabel" for="colorPicker">Color: </label>
+    <input type="color" id="colorPicker" name="colorPicker">
+    <label for="numericalColor"></label>
+    <input type="text" id="numericalColor" name="numericalColor" readonly>
+  </div>
+  <div class="form-values">
+    <label for="animatedColorVal1">Color Var1: </label>
+    <input type="text" id="animatedColorVal1" name="animatedColorVal1" readonly>
 
-  <div class="form-group">
-    <label>Pick a Color:</label>
-    <input type="color" name="colorPicker">
-    <input type="field" name="numericalColor">
+    <label for="animatedColorVal2">Color Var2: </label>
+    <input type="text" id="animatedColorVal2" name="animatedColorVal2" readonly>
   </div>
-  
   <div class="form-buttons">
-    <button type="submit">Apply</button>
+    <button type="submit">Save</button>
   </div>
 </form>
 
+ <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const textarea = document.getElementById("effectParams");
+
+        function adjustHeight() {
+            textarea.style.height = "auto"; // Reset the height to auto to shrink if necessary
+            textarea.style.height = (textarea.scrollHeight) + "px"; // Set the height to match the scroll height
+        }
+
+        // Adjust the height initially
+        adjustHeight();
+
+        // Adjust the height whenever the content changes
+        textarea.addEventListener("input", adjustHeight);
+    });
+    </script>

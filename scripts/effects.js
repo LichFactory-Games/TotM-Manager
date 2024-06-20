@@ -229,52 +229,53 @@ export async function removeTokenMagicEffect(target, effectParams, isTile) {
   // Log the input arguments
   logMessage("Arguments received:", { target, effectParams, isTile });
 
-  // Log the effect parameters
-  logMessage("Effect Parameters:", effectParams);
+  // Ensure effectParams is an array of objects
+  const effectParamsArray = Array.isArray(effectParams) ? effectParams : [effectParams];
 
-  // Determine the filter ID
-  const filterId = effectParams[0].filterId || effectParams[0].tmFilterId;
-  logMessage(`Filter ID determined: ${filterId}`);
+  for (const effectParam of effectParamsArray) {
+    // Determine the filter ID
+    const filterId = effectParam.filterId || effectParam.tmFilterId;
+    logMessage(`Filter ID determined: ${filterId}`);
 
-  // Log the attempt to remove the effect
-  logMessage(`Attempting to remove effect: ${filterId} from ${isTile ? 'tile' : 'image'}`);
+    // Log the attempt to remove the effect
+    logMessage(`Attempting to remove effect: ${filterId} from ${isTile ? 'tile' : 'image'}`);
 
-  // Check if the filter ID is valid
-  if (!filterId) {
-    logMessage(`Invalid effect parameters provided:`, effectParams);
-    return;
-  }
-
-  // Check if the TokenMagic module is active
-  if (game.modules.get('tokenmagic')?.active) {
-    // Remove the filter using TokenMagic
-    TokenMagic.deleteFilters(target, filterId);
-    logMessage(`Effect removed from ${isTile ? 'tile' : 'image'}`);
-  } else {
-    logMessage("TokenMagic module is not active.");
-  }
-
-  // Retrieve and log the current TokenMagic filters
-  let tokenMagicFilters = await target.document.getFlag('tokenmagic', 'filters') || [];
-  logMessage("TokenMagic filters before update:", tokenMagicFilters);
-
-  // Update the TokenMagic filters by removing the specified filter
-  tokenMagicFilters = tokenMagicFilters.map(filter => {
-    if (filter.tmFilters && Array.isArray(filter.tmFilters)) {
-      filter.tmFilters = filter.tmFilters.filter(e => e.filterId !== filterId && e.tmFilterId !== filterId);
+    // Check if the filter ID is valid
+    if (!filterId) {
+      logMessage(`Invalid effect parameters provided:`, effectParam);
+      continue;
     }
-    return filter;
-  });
 
-  // Log the updated TokenMagic filters
-  logMessage("TokenMagic filters after update:", tokenMagicFilters);
-  await target.document.setFlag('tokenmagic', 'filters', tokenMagicFilters);
+    // Check if the TokenMagic module is active
+    if (game.modules.get('tokenmagic')?.active) {
+      // Remove the filter using TokenMagic
+      TokenMagic.deleteFilters(target, filterId);
+      logMessage(`Effect removed from ${isTile ? 'tile' : 'image'}`);
+    } else {
+      logMessage("TokenMagic module is not active.");
+    }
 
-  // Update the effects data in the totm-manager namespace and log the update
-  await updateEffectsData(target, effectParams, false, isTile, isTile ? null : target.img);
-  logMessage(`Updated effects data for ${isTile ? 'tile' : 'image'}`);
+    // Retrieve and log the current TokenMagic filters
+    let tokenMagicFilters = await target.document.getFlag('tokenmagic', 'filters') || [];
+    logMessage("TokenMagic filters before update:", tokenMagicFilters);
+
+    // Update the TokenMagic filters by removing the specified filter
+    tokenMagicFilters = tokenMagicFilters.map(filter => {
+      if (filter.tmFilters && Array.isArray(filter.tmFilters)) {
+        filter.tmFilters = filter.tmFilters.filter(e => e.filterId !== filterId && e.tmFilterId !== filterId);
+      }
+      return filter;
+    });
+
+    // Log the updated TokenMagic filters
+    logMessage("TokenMagic filters after update:", tokenMagicFilters);
+    await target.document.setFlag('tokenmagic', 'filters', tokenMagicFilters);
+
+    // Update the effects data in the totm-manager namespace and log the update
+    await updateEffectsData(target, effectParam, false, isTile, isTile ? null : target.img);
+    logMessage(`Updated effects data for ${isTile ? 'tile' : 'image'}`);
+  }
 }
-
 
 //////////////////////////////
 // Update effects function  //
@@ -431,9 +432,17 @@ export async function updateEffectsUI(instance) {
 export async function applyEffectsToTile(tile, effects, isTile, image = null) {
   logMessage(`Applying effects to ${isTile ? 'tile' : 'image'}: ${tile.id}`, effects);
   for (const effect of effects) {
-    const effectParamsArray = await getEffectParams(effect.filterId || effect.tmFilterId, image);
-    for (const effectParams of effectParamsArray) {
-      await applyTokenMagicEffect(tile, effectParams, isTile);
+    try {
+      const effectParamsArray = await getEffectParams(effect.filterId || effect.tmFilterId, image);
+      if (!Array.isArray(effectParamsArray)) {
+        console.error("Effect parameters array is not valid:", effectParamsArray);
+        continue;
+      }
+      for (const effectParams of effectParamsArray) {
+        await applyTokenMagicEffect(tile, effectParams, isTile);
+      }
+    } catch (error) {
+      console.error("Error applying effect:", error);
     }
   }
 }
@@ -443,11 +452,20 @@ export async function applyEffectsToTile(tile, effects, isTile, image = null) {
 export async function removeEffectsFromTile(tile, effects, isTile, image = null) {
   logMessage(`Removing effects from ${isTile ? 'tile' : 'image'}: ${tile.id}`, effects);
   for (const effect of effects) {
-    const effectParamsArray = await getEffectParams(effect.filterId || effect.tmFilterId, image);
-    for (const effectParams of effectParamsArray) {
-      await removeTokenMagicEffect(tile, effectParams, isTile);
+    try {
+      const effectParamsArray = await getEffectParams(effect.filterId || effect.tmFilterId, image);
+      if (!Array.isArray(effectParamsArray)) {
+        console.error("Effect parameters array is not valid:", effectParamsArray);
+        continue;
+      }
+      for (const effectParams of effectParamsArray) {
+        await removeTokenMagicEffect(tile, effectParams, isTile);
+      }
+    } catch (error) {
+      console.error("Error removing effect:", error);
     }
   }
 }
+
 
 logMessage("effects.js loaded!");
