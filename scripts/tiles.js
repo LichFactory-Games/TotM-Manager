@@ -61,46 +61,41 @@ function generateFields(instance, tileFieldsContainer, count) {
 
 // Collect data for tile flags and save
 export async function collectAndSaveTileData(instance, html) {
-  logMessage("Saving tile data for tile...");
+  logMessage("Saving tile data for tiles...");
 
-  const tileContainer = html.find('#tile-fields-container');
-  const imageContainer = html.find('#image-path-list');
+  const container = html.find('#tile-fields-container');
+  const tiles = collectTileData(container);
 
-  // Collect tile data and image paths
-  logMessage("Collecting tile and image data...");
-  const tiles = collectTileData(tileContainer);
-  logMessage("Collected tiles:", tiles);
+  for (const tileData of tiles) {
+    // Ensure the tileName is defined and not empty
+    let tileName = tileData.name;
 
-  // Assume instance.currentTile contains the active tile
-  const activeTile = instance.currentTile;
+    if (!tileName || tileName.trim() === '') {
+      // Generate a temporary tileName if it's not provided
+      tileName = `tile-${Date.now()}`;
+      tileData.name = tileName;
+      logMessage(`Generated temporary tileName: ${tileName}`);
+    }
 
-  if (!activeTile) {
-    console.warn("No active tile found.");
-    return;
+    // Log the tile name before using it
+    logMessage(`Processing tile with tileName: ${tileName}`);
+
+    // Find the tile by tag
+    const foundTile = findAndSwitchToTileByTag(instance, tileName, false);
+
+    if (foundTile) {
+      // Extract image paths specific to this tile
+      const tileImagePaths = collectImagePaths(container);
+
+      // Log the found tile before calling saveTileDataToFlags
+      logMessage("Found tile:", foundTile);
+      await saveTileDataToFlags(tileData, foundTile, tileImagePaths);
+    } else {
+      console.warn(`No tile found with the tileName: ${tileName}`);
+    }
   }
-
-  logMessage(`Active tile found: ${activeTile.document.flags[NAMESPACE].tileName}`);
-
-  // Collect image paths only for the active tile
-  const imagePaths = collectImagePaths(imageContainer);
-  logMessage("Collected image paths:", imagePaths);
-
-  // Find the corresponding tile data
-  const tileData = tiles.find(tile => tile.name === activeTile.document.flags[NAMESPACE].tileName);
-
-  if (tileData) {
-    // Assign the collected image paths to tileData
-    tileData.imagePaths = imagePaths.map(path => ({ ...path }));  // Deep clone the imagePaths array
-    logMessage(`Assigned image paths to tile ${tileData.name}:`, tileData.imagePaths);
-  } else {
-    console.warn(`No tile data found for the active tile: ${activeTile.document.flags[NAMESPACE].tileName}`);
-    return;
-  }
-
-  // Save data for the active tile
-  logMessage(`Processing tile with name: ${tileData.name}`);
-  await saveTileDataToFlags(tileData, activeTile, tileData.imagePaths);
 }
+
 
 export function collectTileData(container) {
   const tileElements = container.find('.tile-field');
