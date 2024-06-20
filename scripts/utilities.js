@@ -384,12 +384,24 @@ export async function isTokenMagicActive() {
 
 ////
 
-export async function getEffectParams(effectName) {
-  // Assuming TokenMagic.getPreset is the function to get effect presets
-  const effectParams = TokenMagic.getPreset(effectName);
+export async function getEffectParams(effectName, image = null) {
+  let effectParams = null;
+
+  // If an image is provided, check for effect parameters in its flag
+  if (image && image.effects) {
+    const effect = image.effects.find(e => e.filterId === effectName || e.tmFilterId === effectName);
+    if (effect) {
+      effectParams = effect;
+    }
+  }
+
+  // If no effect parameters found in image flag, use TokenMagic preset
   if (!effectParams) {
-    console.error(`No effect parameters found for effect: ${effectName}`);
-    return null;
+    effectParams = TokenMagic.getPreset(effectName);
+    if (!effectParams) {
+      console.error(`No effect parameters found for effect: ${effectName}`);
+      return [];
+    }
   }
 
   // Ensure effectParams is an array

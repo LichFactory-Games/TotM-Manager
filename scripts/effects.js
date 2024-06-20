@@ -349,20 +349,26 @@ export async function updateEffectsUI(instance) {
 // Effect Utility Functions  //
 ///////////////////////////////
 
-export async function applyEffectsToTile(tile, effects, isTile) {
+export async function applyEffectsToTile(tile, effects, isTile, image = null) {
+  logMessage(`Applying effects to ${isTile ? 'tile' : 'image'}: ${tile.id}`, effects);
   for (const effect of effects) {
-    const effectParams = await getEffectParams(effect.filterId || effect.tmFilterId);
-    await applyTokenMagicEffect(tile, effectParams, isTile);
+    const effectParamsArray = await getEffectParams(effect.filterId || effect.tmFilterId, image);
+    for (const effectParams of effectParamsArray) {
+      await applyTokenMagicEffect(tile, effectParams, isTile);
+    }
   }
 }
 
 ////
 
-export async function removeEffectsFromTile(tile, effects, isTile) {
+export async function removeEffectsFromTile(tile, effects, isTile, image = null) {
+  logMessage(`Removing effects from ${isTile ? 'tile' : 'image'}: ${tile.id}`, effects);
   for (const effect of effects) {
-    await removeTokenMagicEffect(tile, effect.filterId || effect.tmFilterId, isTile);
+    const effectParamsArray = await getEffectParams(effect.filterId || effect.tmFilterId, image);
+    for (const effectParams of effectParamsArray) {
+      await removeTokenMagicEffect(tile, effectParams, isTile);
+    }
   }
 }
 
-
-console.log("effects.js loaded!");
+logMessage("effects.js loaded!");
