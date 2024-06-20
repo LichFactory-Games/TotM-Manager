@@ -97,68 +97,96 @@ export async function addEffect(instance, targetType, effectName, effectParams, 
 ////
 
 export async function removeEffect(instance, targetType, effectName) {
+  logMessage("removeEffect called with arguments:", { instance, targetType, effectName });
+
   // Retrieve effect parameters based on effect name
-  const effectParamsArray = await getEffectParams(effectName);
-  if (!effectParamsArray) {
+  const effectParams = await getEffectParams(effectName);
+  if (!effectParams) {
     console.error(`No effect parameters found for effect name: ${effectName}`);
+    logMessage("No effect parameters found for effect name:", effectName);
     return;
   }
 
-  const effectParams = effectParamsArray; // Assuming getEffectParams returns a single object
-  logMessage(`Removing effect: ${effectName} with parameters:`, effectParams);
+  // Ensure effectParams is in array format
+  const effectParamsArray = Array.isArray(effectParams) ? effectParams : [effectParams];
+  logMessage(`Removing effect: ${effectName} with parameters:`, effectParamsArray);
 
   let tile = canvas.tiles.controlled[0];
   if (!tile) {
     console.error("No active tile found to remove effect.");
+    logMessage("No active tile found to remove effect.");
     return;
   }
+  logMessage("Tile found for removal:", tile);
 
+  let imageId = null;
   if (targetType === 'tile') {
     // Handle tile-wide effects
     let tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
-    tileEffects = tileEffects.map(effectArray =>
-      effectArray.filter(effect => effect.filterId !== effectParams.filterId)
-    ).filter(effectArray => effectArray.length > 0); // Remove empty arrays
+    logMessage("Tile effects before removal:", tileEffects);
+
+    tileEffects = tileEffects.filter(effect => effect.filterId !== effectParamsArray[0].filterId);
+    logMessage("Tile effects after removal:", tileEffects);
 
     // Update the tileEffects flag on the tile document
     await tile.document.setFlag(NAMESPACE, 'tileEffects', tileEffects);
+    logMessage("Tile effects flag updated.");
 
   } else if (targetType === 'image') {
     // Retrieve the image ID from the effect target name element
-    const imageId = document.querySelector('.effect-item .effect-target-name').textContent;
+    imageId = document.querySelector('.effect-item .effect-target-name').textContent;
+    logMessage("Image ID for effect removal:", imageId);
+
     const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths');
     if (!imagePaths) {
       console.error("No image paths found on the tile.");
+      logMessage("No image paths found on the tile.");
       return;
     }
+    logMessage("Image paths found on the tile:", imagePaths);
 
     // Find the specific image based on displayImg
     const image = imagePaths.find(img => img.displayImg === imageId);
     if (!image) {
       console.error("No image found to remove effect.");
+      logMessage("No image found to remove effect.");
       return;
     }
+    logMessage("Image found for effect removal:", image);
 
     // Remove the effect from the nested effects array
-    image.effects = image.effects.map(effectArray =>
-      effectArray.filter(effect => effect.filterId !== effectParams.filterId)
-    ).filter(effectArray => effectArray.length > 0); // Remove empty arrays
+    image.effects = image.effects.map(effectArray => {
+      if (Array.isArray(effectArray)) {
+        return effectArray.filter(effect => effect.filterId !== effectParamsArray[0].filterId);
+      }
+      return effectArray;
+    }).filter(effectArray => effectArray.length > 0);
+
+    logMessage("Image effects after removal:", image.effects);
+
+    // Remove empty effect arrays
+    if (image.effects.length === 0) {
+      delete image.effects;
+    }
 
     // Update the imagePaths flag on the tile document
     await tile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
+    logMessage("Image paths flag updated.");
   }
 
   if (tile) {
-    logMessage("Tile before effect removal:", tile);
+    logMessage("Tile before effect removal using TokenMagic:", tile);
 
     // Remove effect using TokenMagic
-    await removeTokenMagicEffect(tile, effectParams, targetType === 'tile');
+    await removeTokenMagicEffect(tile, effectParamsArray, targetType === 'tile');
+    logMessage("Effect removed using TokenMagic.");
 
     // Update the tile's effect data
-    await updateEffectsData(tile, effectParams, false, targetType === 'tile');
+    await updateEffectsData(tile, effectParamsArray, false, targetType === 'tile', imageId);
+    logMessage("Tile's effect data updated.");
 
     // Update the UI to reflect changes
-    updateEffectsUI(instance);
+    await updateEffectsUI(instance);
     logMessage(`Effect ${effectName} removed from ${targetType}.`);
   }
 }
@@ -198,23 +226,53 @@ export async function applyTokenMagicEffect(target, effectParams, isTile = true)
 ////
 
 export async function removeTokenMagicEffect(target, effectParams, isTile) {
-  console.log(effectParams);
-  const filterId = effectParams.filterId || effectParams.tmFilterId;
-  console.log(`Attempting to remove effect: ${filterId} from ${isTile ? 'tile' : 'image'}`);
+  // Log the input arguments
+  logMessage("Arguments received:", { target, effectParams, isTile });
 
+  // Log the effect parameters
+  logMessage("Effect Parameters:", effectParams);
+
+  // Determine the filter ID
+  const filterId = effectParams[0].filterId || effectParams[0].tmFilterId;
+  logMessage(`Filter ID determined: ${filterId}`);
+
+  // Log the attempt to remove the effect
+  logMessage(`Attempting to remove effect: ${filterId} from ${isTile ? 'tile' : 'image'}`);
+
+  // Check if the filter ID is valid
   if (!filterId) {
-    console.error(`Invalid effect parameters provided:`, effectParams);
+    logMessage(`Invalid effect parameters provided:`, effectParams);
     return;
   }
 
+  // Check if the TokenMagic module is active
   if (game.modules.get('tokenmagic')?.active) {
+    // Remove the filter using TokenMagic
     TokenMagic.deleteFilters(target, filterId);
     logMessage(`Effect removed from ${isTile ? 'tile' : 'image'}`);
   } else {
-    console.warn("TokenMagic module is not active.");
+    logMessage("TokenMagic module is not active.");
   }
 
+  // Retrieve and log the current TokenMagic filters
+  let tokenMagicFilters = await target.document.getFlag('tokenmagic', 'filters') || [];
+  logMessage("TokenMagic filters before update:", tokenMagicFilters);
+
+  // Update the TokenMagic filters by removing the specified filter
+  tokenMagicFilters = tokenMagicFilters.map(filter => {
+    if (filter.tmFilters && Array.isArray(filter.tmFilters)) {
+      filter.tmFilters = filter.tmFilters.filter(e => e.filterId !== filterId && e.tmFilterId !== filterId);
+    }
+    return filter;
+  });
+
+  // Log the updated TokenMagic filters
+  logMessage("TokenMagic filters after update:", tokenMagicFilters);
+  await target.document.setFlag('tokenmagic', 'filters', tokenMagicFilters);
+
+  // Update the effects data in the totm-manager namespace and log the update
   await updateEffectsData(target, effectParams, false, isTile, isTile ? null : target.img);
+  logMessage(`Updated effects data for ${isTile ? 'tile' : 'image'}`);
 }
 
 
@@ -222,7 +280,7 @@ export async function removeTokenMagicEffect(target, effectParams, isTile) {
 // Update effects function  //
 //////////////////////////////
 
-export async function updateEffectsData(target, effectParams, isAdd, isTile = true, imageId = null) {
+async function updateEffectsData(target, effectParams, isAdd, isTile = true, imageId = null) {
   if (!target) {
     console.error("No target provided for updating effects.");
     return;
@@ -230,52 +288,53 @@ export async function updateEffectsData(target, effectParams, isAdd, isTile = tr
 
   const flag = isTile ? 'tileEffects' : 'imagePaths';
   let effects = await target.document.getFlag(NAMESPACE, flag) || (isTile ? [] : []);
+
   console.log("Current effects before update:", JSON.stringify(effects));
 
   if (isTile) {
-    if (isAdd) {
-      const existingEffectIndex = effects.findIndex(effect => effect.filterId === effectParams.filterId);
-      if (existingEffectIndex !== -1) {
-        // Update the existing effect
-        effects[existingEffectIndex] = effectParams;
-      } else {
-        // Add new effect
-        effects.push(effectParams);
-      }
-    } else {
-      // Remove the effect
-      effects = effects.filter(effect => effect.filterId !== effectParams.filterId);
-    }
-    await target.document.setFlag(NAMESPACE, flag, effects);
-    console.log(`Updated effects on tile: ${JSON.stringify(effects)}`);
+    effects = modifyEffectsArray(effects, effectParams, isAdd);
   } else {
-    const imagePaths = effects.map(imgPath => {
-      if (imgPath.img === imageId) {
-        let updatedEffects = imgPath.effects || [];
-        if (isAdd) {
-          const existingEffectIndex = updatedEffects.findIndex(effect => effect.filterId === effectParams.filterId);
-          if (existingEffectIndex !== -1) {
-            // Update the existing effect
-            updatedEffects[existingEffectIndex] = effectParams;
-          } else {
-            // Add new effect
-            updatedEffects.push(effectParams);
-          }
-        } else {
-          // Remove the effect
-          updatedEffects = updatedEffects.filter(effect => effect.filterId !== effectParams.filterId);
-        }
-        return { ...imgPath, effects: updatedEffects };
-      }
-      return imgPath;
-    });
-    await target.document.setFlag(NAMESPACE, flag, imagePaths);
-    console.log(`Updated effects on image: ${JSON.stringify(imagePaths)}`);
+    effects = modifyImageEffectsArray(effects, imageId, effectParams, isAdd);
   }
 
-  // Verify flag data after update
+  await target.document.setFlag(NAMESPACE, flag, effects);
+
   const updatedEffects = await target.document.getFlag(NAMESPACE, flag);
   console.log("Updated effects:", JSON.stringify(updatedEffects));
+}
+
+function modifyEffectsArray(effects, effectParams, isAdd) {
+  if (isAdd) {
+    const existingEffectIndex = effects.findIndex(effect => effect.filterId === effectParams[0].filterId);
+    if (existingEffectIndex !== -1) {
+      effects[existingEffectIndex] = effectParams[0];
+    } else {
+      effects.push(effectParams[0]);
+    }
+  } else {
+    effects = effects.filter(effect => effect.filterId !== effectParams[0].filterId);
+  }
+  return effects;
+}
+
+function modifyImageEffectsArray(effects, imageId, effectParams, isAdd) {
+  return effects.map(imgPath => {
+    if (imgPath.img === imageId) {
+      let updatedEffects = imgPath.effects || [];
+      if (isAdd) {
+        const existingEffectIndex = updatedEffects.findIndex(effect => effect.filterId === effectParams[0].filterId);
+        if (existingEffectIndex !== -1) {
+          updatedEffects[existingEffectIndex] = effectParams[0];
+        } else {
+          updatedEffects.push(effectParams[0]);
+        }
+      } else {
+        updatedEffects = updatedEffects.filter(effect => effect.filterId !== effectParams[0].filterId);
+      }
+      return { ...imgPath, effects: updatedEffects };
+    }
+    return imgPath;
+  });
 }
 
 /////////////////////////
