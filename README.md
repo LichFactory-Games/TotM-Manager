@@ -1,3 +1,7 @@
+
+*NOTE*: *A big revision is coming, including an interface redesign (now with multiple tabs!) and many more options to add effects and tiles.* 
+
+
 Theater of the mind Manager (TotM Manager) is designed to help you, the GM, manage visual and thematic elements for theater of the mind style play in Foundry VTT.
 
 The module is in its early stages, but it allows you to 
