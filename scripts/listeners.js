@@ -276,8 +276,9 @@ export function activateImagePreviewListeners(instance, html) {
         display: 'block',
         width: `${previewImageSize}px`,
         height: 'auto',
-        left: 'auto',
-        right: '100%' // Align to the left of the hovered item
+        top: '0', // Align to the top of the viewport
+        left: 'auto', // Align to the left of the viewport
+        right: '100%'
       });
     } else {
       // Enough space on the right, place the image on the right
@@ -285,8 +286,10 @@ export function activateImagePreviewListeners(instance, html) {
         display: 'block',
         width: `${previewImageSize}px`,
         height: 'auto',
-        left: '100%', // Align to the right of the hovered item
-        right: 'auto'
+        top: '0', // Align to the top of the viewport
+        left: '100%',
+        right: 'auto' // Align to the right of the viewport
+
       });
     }
   });
