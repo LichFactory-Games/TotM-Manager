@@ -1,7 +1,7 @@
 import { NAMESPACE, updateTileButtons, updateActiveTileButton, logMessage, getFilteredTiles } from './utilities.js';
 import { findAndSwitchToTileByTag } from './utilities.js';
-import { saveTileDataToFlags, clearTileFlags }  from './tiles-utils.js';
-import { loadTileData, updateTileFields } from './tiles-utils.js';
+import { saveTileDataToFlags, clearTileFlags, saveImageDataToFlags }  from './tiles-utils.js';
+import { loadTileData, updateTileFields, updateTileProperties } from './tiles-utils.js';
 
 export function generateTileFields(instance, html, options = { replace: false, count: 1 }) {
   logMessage("Generating tile fields...");
@@ -84,18 +84,34 @@ export async function collectAndSaveTileData(instance, html) {
     const foundTile = findAndSwitchToTileByTag(instance, tileName, false);
 
     if (foundTile) {
-      // Extract image paths specific to this tile
-      const tileImagePaths = collectImagePaths(container);
-
-      // Log the found tile before calling saveTileDataToFlags
       logMessage("Found tile:", foundTile);
-      await saveTileDataToFlags(tileData, foundTile, tileImagePaths);
+      // Save tile properties under totm-manager flag
+      await saveTileDataToFlags(tileData, foundTile);
+
+      // Update tile properties on canvas
+      await updateTileProperties(foundTile, tileData);
     } else {
       console.warn(`No tile found with the tileName: ${tileName}`);
     }
   }
 }
 
+export async function collectAndSaveImageData(instance, html) {
+  // Get the current tile from instance
+  const foundTile = instance.currentTile;
+  if (!foundTile) {
+    console.warn("No current tile found.");
+    return;
+  } else {
+    logMessage("Found tile for image paths:", foundTile);
+  }
+  // Collect image paths from the 'stage' tab
+  const container = $('#image-path-list').closest('.form-group');
+  const imagePaths = collectImagePaths(container);
+
+  // Save image path information to the tile's flags
+  await saveImageDataToFlags(instance.currentTile, foundTile, imagePaths);
+}
 
 export function collectTileData(container) {
   const tileElements = container.find('.tile-field');
@@ -139,9 +155,6 @@ export function collectImagePaths(container) {
 }
 
 export async function handleSaveAndRender(instance, html) {
-  logMessage("Saving data for tile...");
-  await collectAndSaveTileData(instance, html);
-
   console.log("Loading tile data...");
   await loadTileData(instance);
 
@@ -162,7 +175,7 @@ export async function deleteTileData(instance, order, html) {
     console.error("Instance or instance.tiles is undefined");
     return;
   }
-  
+
   logMessage("Before deletion, instance.tiles:", instance.tiles);
 
   // Find the tile to be deleted
@@ -178,7 +191,7 @@ export async function deleteTileData(instance, order, html) {
   // Remove tile from instance.tiles
   instance.tiles = instance.tiles.filter(tile => Number(tile.order) !== order);
   logMessage("After deletion, instance.tiles:", instance.tiles);
-  
+
   if (!tileToDelete) {
     console.warn(`Tile with order ${order} not found in instance`);
     return;

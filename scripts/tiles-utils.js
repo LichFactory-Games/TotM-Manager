@@ -1,12 +1,11 @@
 import { NAMESPACE, logMessage, findTileById } from './utilities.js';
 
 // Helper function to save tile flags
-export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
+export async function saveTileDataToFlags(tile, foundTile) {
   // Log the arguments
   logMessage("Arguments received in saveTileDataToFlags:");
   logMessage("tile:", tile);
   logMessage("foundTile:", foundTile);
-  logMessage("imagePaths:", imagePaths);
 
   // Add validation to check if foundTile is an actual tile object
   if (!tile || !foundTile || !foundTile.document) {
@@ -27,8 +26,16 @@ export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
     order: tile.order
   });
 
-  if (imagePaths && imagePaths.length > 0) {
+}
 
+export async function saveImageDataToFlags(tile, foundTile, imagePaths) {
+  // Log the arguments
+  logMessage("Arguments received in saveImageDataToFlags:");
+  logMessage("tile:", tile);
+  logMessage("foundTile:", foundTile);
+  logMessage("imagePaths:", imagePaths);
+
+  if (imagePaths && imagePaths.length > 0) {
     const pathsToSave = imagePaths.map((path, index) => ({
       img: path.img,
       displayImg: path.displayImg,
@@ -86,32 +93,64 @@ export async function loadTileData(instance) {
 }
 
 export async function loadTileImages(instance, tile) {
-  if (!tile || !tile.document) {
-    console.error("No tile provided or tile is undefined.");
-    ui.notifications.warn("No tile provided or tile is undefined.");
-    return;
-  }
-
-  // Fetch the image paths stored in the tile's flags
-  let loadedPaths = tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
-  logMessage("Fetched image paths from tile flags:", loadedPaths);
-
-  // Prepare the image paths for display
-  instance.imagePaths = loadedPaths.map(path => {
-    let displayPath; // This will hold the filename for display purposes
-    if (typeof path === 'string') {  // Handle legacy or incorrectly saved paths
-      displayPath = path.split('/').pop(); // Extract filename from the full path
-      return { img: path, displayImg: displayPath, tags: [] };
-    } else {
-      displayPath = path.img.split('/').pop(); // Ensure to handle object structured paths
-      return { ...path, displayImg: displayPath };
+  try {
+    if (!tile || !tile.document) {
+      throw new Error("No tile provided or tile is undefined.");
     }
-  });
-  logMessage("TotM - Loaded image paths for tile:", instance.imagePaths);
-  await instance.render(true);
-  logMessage("Instance rendered with new image paths.");
 
+    // Fetch the image paths stored in the tile's flags
+    let loadedPaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+    logMessage("Fetched image paths from tile flags:", loadedPaths);
+
+    if (!Array.isArray(loadedPaths)) {
+      throw new Error("Image paths retrieved are not in an array format.");
+    }
+
+    // Prepare the image paths for display
+    instance.imagePaths = loadedPaths.map(path => {
+      let displayPath; // This will hold the filename for display purposes
+
+      if (typeof path === 'string') {  // Handle legacy or incorrectly saved paths
+        displayPath = path.split('/').pop(); // Extract filename from the full path
+        return { img: path, displayImg: displayPath, tags: [] };
+      } else if (path && typeof path === 'object' && path.img) {
+        displayPath = path.img.split('/').pop(); // Ensure to handle object structured paths
+        return { ...path, displayImg: displayPath };
+      } else {
+        throw new Error("Invalid path format detected in image paths.");
+      }
+    });
+
+    logMessage("TotM - Loaded image paths for tile:", instance.imagePaths);
+
+    try {
+      await instance.render(true);
+      logMessage("Instance rendered with new image paths.");
+    } catch (renderError) {
+      console.error("Error rendering instance with new image paths:", renderError);
+      ui.notifications.error("Failed to render instance with new image paths.");
+    }
+
+  } catch (error) {
+    console.error("Error loading tile images:", error);
+    ui.notifications.error("Failed to load tile images. See console for details.");
+  }
 }
+
+//// Tile Property Updating
+export async function updateTileProperties(foundTile, tileData) {
+  logMessage("Updating tile properties for tile:", foundTile);
+  logMessage("Tile data:", tileData);
+
+  // Update the tile document with the correct properties
+  await foundTile.document.update({
+    'texture.tint': tileData.tint,
+    'alpha': tileData.opacity
+  });
+
+  logMessage(`Updated tile ${tileData.name} with opacity: ${tileData.opacity} and tint: ${tileData.tint}`);
+}
+
 
 //// Tile Updating Functions
 

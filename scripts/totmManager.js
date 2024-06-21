@@ -122,14 +122,38 @@ export class TotMForm extends FormApplication {
     const initialTag = game.settings.get(NAMESPACE, 'initialTileTag');
     logMessage("Initial tile tag retrieved from settings:", initialTag);
 
-    // Find the tile by tag using Tagger
-    let initialTile = findAndSwitchToTileByTag(this, initialTag, false);
-    logMessage("Tile found with initial tag:", initialTile);
+    let initialTile = null;
 
-    // If no tile is found with the specific tag, fallback to the first tile
-    if (!initialTile && this.tiles.length > 0) {
-      initialTile = this.tiles[0];
-      logMessage(`Fallback: Set current tile to first tile with ID ${initialTile.id}`);
+    // Check if the initial tag is not null or empty
+    if (initialTag) {
+      // Find the tile by tag using Tagger
+      initialTile = findAndSwitchToTileByTag(this, initialTag, false);
+      logMessage("Tile found with initial tag:", initialTile);
+    }
+
+    // Fallback to the first tile with any name flag if no tile found by tag
+    if (!initialTag) {
+      // Ensure there are tiles on the canvas
+      if (canvas.tiles.placeables.length > 0) {
+
+        // Activate the tiles layer
+        canvas.tiles.activate();
+
+        // Select the first tile
+        let firstTile = canvas.tiles.placeables[0];
+        let result = firstTile.control();
+
+        if (result) {
+          const tileName = await firstTile.document.getFlag(NAMESPACE, 'tileName'); // Await if getFlag is async
+          logMessage(`Selected the first tile with ID: ${firstTile.id} and name: ${tileName}`);
+          initialTile = firstTile;
+          logMessage(`Fallback: Set current tile to tilename: ${tileName} and ID ${initialTile.id}`);
+        } else {
+          logMessage("Fallback: No tile found with any name flag.");
+        }
+      } else {
+        logMessage("No tiles found on the canvas.");
+      }
     }
 
     // Check and activate the initial tile
@@ -146,11 +170,14 @@ export class TotMForm extends FormApplication {
     // Update buttons & fields
     logMessage("Updating tile buttons...");
     updateTileButtons(this);
+
     logMessage("Updating tile fields...");
     updateTileFields(this);
+
     await new Promise(requestAnimationFrame);
     await updateActiveTileButton(this);
     logMessage('*Update active tile button.');
+
     if (this.currentTile) {
       const imgIndex = await this.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
       if (imgIndex !== undefined && imgIndex >= 0) {
