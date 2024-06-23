@@ -81,6 +81,10 @@ export class TotMForm extends FormApplication {
     activateImageSearchBarListeners(this, html);
     activateImagePreviewListeners(this, html);
     activateEffectEventListeners(this);
+    // Add event listener for the refresh button
+    html.find('#refresh-manager').click(() => {
+      this.refreshManagerData(); // Make sure `instance` is correctly referenced
+    });
   }
 
   async render(force = false, options = {}) {
@@ -265,5 +269,31 @@ export class TotMForm extends FormApplication {
         button.classList.remove('active');
       }
     });
+  }
+
+  // Refresh manager for scene changes
+  async refreshManagerData() {
+    logMessage("Refreshing Theatre of the Mind Manager data...");
+
+    // Delay initialization until DOM is ready
+    logMessage("Initializing tabs");
+    await new Promise(requestAnimationFrame);
+    this._initializeTabs();
+
+    // Initialize tile manager
+    await new Promise(requestAnimationFrame);
+    await this._initializeTileManager();
+
+    // Initialize effects manager
+    await new Promise(requestAnimationFrame);
+    await this._initializeEffectsManager();
+
+    // Update active buttons
+    await this._updateButtons();
+
+    logMessage("Rendering the instance...");
+    this.render(true);
+
+    logMessage("Theatre of the Mind Manager data refresh complete.");
   }
 }

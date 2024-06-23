@@ -90,6 +90,12 @@ export function initializeHooks() {
     }
   });
 
+  Hooks.on('canvasReady', () => {
+    if (TotMForm._instance) {
+      TotMForm._instance.refreshManagerData(); // Make sure `instance` is correctly referenced
+    }
+  });
+
   Hooks.on("renderChatLog", (app, html, data) => {
     console.log("Theatre of the Mind Manager | renderChatLog hook");
   });
