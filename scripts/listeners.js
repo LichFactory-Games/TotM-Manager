@@ -5,13 +5,14 @@
 import { NAMESPACE, logMessage, activateTile, findAndSwitchToTileByTag, updateActiveTileButton } from './utilities.js';
 import { addImageToTile, addImageDirectoryToTile, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
 import { generateTileFields, handleSaveAndRender, handleDeleteAndSave, collectAndSaveTileData, collectAndSaveImageData } from './tiles.js';
-import { loadTileImages, toggleTileVisibility } from './tiles-utils.js'
+import { loadTileImages, toggleTileVisibility, openTileConfigForControlledTile } from './tiles-utils.js'
 import { updateEffectsUI, onTargetChange, removeEffect } from './effects.js';
 import { ModifyEffectForm } from './modifyEffectForm.js';
 import { performImageSearch, activateImage, cycleImages } from './stage.js';
 
 
 export function activateGeneralListeners(instance, html) {
+  // Add image to tile
   html.find('.add-image').click(() => {
     new FilePicker({
       type: "image",
@@ -20,6 +21,7 @@ export function activateGeneralListeners(instance, html) {
     }).browse();
   });
 
+  // Add image folder to tile
   html.find('.add-folder').click(() => {
     new FilePicker({
       type: "folder",
@@ -27,23 +29,30 @@ export function activateGeneralListeners(instance, html) {
     }).browse();
   });
 
+  // Save all tile image data
   html.find('.save-paths').click(async () =>   {
     logMessage("Saving images for tile...");
     await collectAndSaveImageData(instance, html);
     await handleSaveAndRender(instance, html);
   });
 
+  // Save all tile data
   html.find('#save-tiles').click(async () => {
     logMessage("Saving data for tile...");
     await collectAndSaveTileData(instance, html);
     handleSaveAndRender(instance, html);
   });
 
-
+  // Generate tiles
   html.find('#generate-tiles').click(async () => {
     const replace = html.find('#replace-tiles').is(':checked');
     const count = parseInt(html.find('#tile-count').val(), 10);
     await generateTileFields(instance, html, { replace, count });
+  });
+
+  // Open active tile window
+  html.find('#open-tile-config').click(() => {
+    openTileConfigForControlledTile();
   });
 
   // Event listener for delete button
@@ -75,6 +84,7 @@ export function activateGeneralListeners(instance, html) {
     }
   });
 
+  // Activate image
   html.find('.set-image-button').click(async event => {
     const index = $(event.currentTarget).data('index');
     console.log(`Switching to image index: ${index}`);
@@ -107,6 +117,7 @@ export function activateGeneralListeners(instance, html) {
     await updateActiveTileButton(instance);
   });
 
+  // Cycle image buttons
   html.find('.prev-image').click(async () => {
     await collectAndSaveImageData(instance, html);
     await cycleImages(instance, instance.currentTile, 'prev');
@@ -124,21 +135,6 @@ export function activateGeneralListeners(instance, html) {
     await updateActiveImageButton(instance, currentIndex); // Pass the currentIndex here
     await updateActiveTileButton(instance);
   });
-
-  // Event listener for the hide/reveal button
-  // Hide/show value
-
-  // html.find('.hr-dropdown-container').addEventListener('change', async (event) => {
-  //   if (event.target.closest('.hr-dropdown-container') && event.target.matches('#tile-dropdown')) {
-  //     // Set the const name to the selected value
-  //     const name = event.target.value;
-  //     console.log(`Selected Tile ID: ${name}`);
-  //     await toggleTileVisibility(name, instance);
-
-  //   } else {
-  //     console.error("No tile found with the selected ID.");
-  //   }
-  // });
 
   html.find('.hide-reveal-tile').click(async () => {
     const tileDropdown = document.getElementById('tile-dropdown');
@@ -335,30 +331,14 @@ export function activateEffectEventListeners(instance) {
     }
   });
 
-
-  // document.getElementById('tile-dropdown').addEventListener('change', async (event) => {
-  //   const tileId = event.target.value;
-  //   const tile = canvas.tiles.get(tileId);
-  //   if (tile) {
-  //     instance.currentTile = tile;
-  //     await loadTileImages(instance, tile);
-  //     // Update the current effects list when a tile is selected
-  //     updateEffectsUI(tile, instance);
-  //   } else {
-  //     console.error("No tile found with the selected ID.");
-  //   }
-  // });
-
   // Event listener for switching to effects tab
   document.querySelector('.tabs').addEventListener('click', (event) => {
     if (event.target.dataset.tab === 'effects') {
       if (instance.currentTile) {
         updateEffectsUI(tile, instance);
-
       }
     }
   });
-
 
   // Event listener for the remove effect button
   document.getElementById('current-effects-container').addEventListener('click', function(event) {

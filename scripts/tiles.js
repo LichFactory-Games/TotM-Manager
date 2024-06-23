@@ -41,9 +41,9 @@ function generateFields(instance, tileFieldsContainer, count) {
       <div class="tile-field" data-order="${order}" style="display: flex; align-items: center; margin-bottom: 10px;">
         <span class="handle" data-order="handle-${order}" style="cursor: move; margin-right: 5px;">&#9776;</span>
         <input type="text" name="tile-name-${order}" placeholder="Tile Name" style="margin-right: 10px;">
-        <input type="range" name="tile-opacity-${order}" min="0" max="1" step="0.01" style="margin-right: 10px;">
-        <input type="color" name="tile-tint-${order}" style="margin-right: 10px;">
-        <button type="button" class="delete-tile" data-order="${order}"><i class="fas fa-trash"></i></button>
+        <input type="range" name="tile-opacity-${order}" min="0.01" max="1" step="0.01" value="1" style="margin-right: 10px;">
+        <input type="color" name="tile-tint-${order}" value="#ffffff" style="margin-right: 10px;">
+<button type="button" class="delete-tile" data-order="${order}"><i class="fas fa-trash"></i></button>
       </div>
     `);
 
@@ -53,7 +53,7 @@ function generateFields(instance, tileFieldsContainer, count) {
     const tileId = `tile-${order}-${Date.now()}`;
 
     // Add a new tile to the tiles array with the generated ID
-    instance.tiles.push({ id: tileId, name: '', opacity: 1, tint: '', order });
+    instance.tiles.push({ id: tileId, name: '', opacity: 1, tint: '#ffffff', order });
   }
 
   logMessage("Generated tile fields:", instance.tiles)
@@ -119,7 +119,7 @@ export function collectTileData(container) {
     const $element = $(element);
     const name = $element.find('input[name^="tile-name"]').val();
     const opacity = parseFloat($element.find('input[name^="tile-opacity"]').val()) || 1;
-    const tint = $element.find('input[name^="tile-tint"]').val() || '';
+    const tint = $element.find('input[name^="tile-tint"]').val() || '#ffffff';
     const order = parseInt($element.attr('data-order'), 10);
 
     return {

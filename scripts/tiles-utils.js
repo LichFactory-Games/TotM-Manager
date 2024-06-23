@@ -76,7 +76,7 @@ export async function loadTileData(instance) {
   instance.tiles = canvas.tiles.placeables.map(tile => {
     const name = tile.document.getFlag(NAMESPACE, 'tileName') || '';
     const opacity = tile.document.getFlag(NAMESPACE, 'opacity') || 1;
-    const tint = tile.document.getFlag(NAMESPACE, 'tint') || '';
+    const tint = tile.document.getFlag(NAMESPACE, 'tint') || '#ffffff';
     const order = Number(tile.document.getFlag(NAMESPACE, 'order'));
     const imagePaths = tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
     const effects = tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
@@ -176,8 +176,8 @@ export  function updateTileFields(instance) {
     tileField.innerHTML = `
       <span class="handle" data-order="${tile.order}" style="cursor: move; margin-right: 5px;">&#9776;</span>
       <input type="text" name="tile-name-${tile.order}" placeholder="Tile Name" value="${tile.name}" style="margin-right: 10px;">
-      <input type="range" name="tile-opacity-${tile.order}" min="0" max="1" step="0.01" value="${tile.opacity}" style="margin-right: 10px;">
-      <input type="color" name="tile-tint-${tile.order}" value="${tile.tint}" style="margin-right: 10px;">
+      <input type="range" name="tile-opacity-${tile.order}" min="0.01" max="1" step="0.01" value="${tile.opacity}" style="margin-right: 10px;">
+      <input type="color" name="tile-tint-${tile.order}" value="${tile.tint || '#ffffff'}" style="margin-right: 10px;">
       <button type="button" class="delete-tile" data-order="${tile.order}"><i class="fas fa-trash"></i></button>
     `;
 
@@ -198,4 +198,17 @@ export async function toggleTileVisibility(tileId) {
   } else {
     console.error(`Tile with ID ${tileId} not found.`);
   }
+}
+
+// Function to open the configuration window for the first controlled tile
+export function openTileConfigForControlledTile() {
+  const controlledTiles = canvas.tiles.controlled;
+
+  if (controlledTiles.length === 0) {
+    console.warn("No controlled tiles found.");
+    return;
+  }
+
+  const tile = controlledTiles[0]; // Get the first controlled tile
+  new TileConfig(tile.document).render(true);
 }

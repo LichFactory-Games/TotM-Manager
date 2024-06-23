@@ -6,8 +6,9 @@ The module allows you to:
 
 1. Add individual images or directories of images to a tile
 2. Preview and switch between images on a tile
-3. Select between tiles via tags (and the [Tagger](https://github.com/fantasycalendar/FoundryVTT-Tagger) module)
-4. Add effects to a tile (via [Token Magic](https://github.com/Feu-Secret/Tokenmagic))
+3. Link specific light configurations, playlists, or macros to specific images or tiles
+4. Select between tiles via tags (and the [Tagger](https://github.com/fantasycalendar/FoundryVTT-Tagger) module)
+5. Add effects to a tile (via [Token Magic](https://github.com/Feu-Secret/Tokenmagic))
 
 A sample template for use with the TotM Manager is included in a compendium. If you like, you may import the TotM Template from the compendium for your own use. It comes with three tiles, and three "frames" for those image tiles, pretagged and ready for use. But you can also just create your own configuration of tiles and set tags for use with those tiles.
 
