@@ -1,5 +1,5 @@
 // scripts/totmManager.js
-import { NAMESPACE, logMessage, updateTileButtons, findAndSwitchToTileByTag, activateTile, updateActiveTileButton, populateEffectsDropdown } from './utilities.js';
+import { NAMESPACE, logMessage, getElementByIdOrWarn, updateTileButtons, findAndSwitchToTileByTag, activateTile, updateActiveTileButton, populateEffectsDropdown } from './utilities.js';
 import { loadTileData, loadTileImages, updateTileFields } from './tiles-utils.js'
 import { activateGeneralListeners, activatePathManagementListeners, activateImageSearchBarListeners, activateImagePreviewListeners, activateEffectEventListeners } from './listeners.js';
 import { updateActiveImageButton } from './images.js'
@@ -201,15 +201,22 @@ export class TotMForm extends FormApplication {
     // Populate dropdown on render
     await populateEffectsDropdown();
 
+    // Delay the initialization until the next animation frame to ensure the DOM is ready
+    await new Promise(requestAnimationFrame);
+
     // Set the target dropdown to the last selected target
-    const targetDropdown = document.getElementById('target-dropdown');
-    if (this.selectedTarget) {
-      targetDropdown.value = this.selectedTarget;
+    const targetDropdown = getElementByIdOrWarn('target-dropdown');
+    if (targetDropdown) {
+      if (this.selectedTarget) {
+        targetDropdown.value = this.selectedTarget;
+      }
     }
 
     // Trigger onTargetChange for the initial target value
-    const initialTarget = document.getElementById('target-dropdown').value;
-    onTargetChange({ target: { value: initialTarget } }, this);
+    const initialTarget = targetDropdown ? targetDropdown.value : null;
+    if (initialTarget) {
+      onTargetChange({ target: { value: initialTarget } }, this);
+    }
 
     // Ensure the current tile is set and update effects UI
     if (this.currentTile) {
