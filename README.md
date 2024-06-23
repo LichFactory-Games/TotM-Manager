@@ -19,7 +19,7 @@ As mentioned above, the module has three dependencies for proper functioning -- 
 
 Here you can see an example of a scene set using three tiles and the TotM Manager.
 
-<img src="../image-assets/totmm-sample.gif?raw=true" alt="TotM Sample" width="800">
+<img src="../image-assets/totmm-overview.gif?raw=true" alt="TotM Overview" width="800">
 
 ## How To Use TotM Manager
 
