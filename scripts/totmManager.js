@@ -187,7 +187,7 @@ export class TotMForm extends FormApplication {
       }
     }
 
-    logMessage("Initialization completed.");
+    logMessage("Tile initialization completed.");
   }
 
   async _initializeEffectsManager(tile) {
