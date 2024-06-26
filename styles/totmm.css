@@ -1,0 +1,374 @@
+/* Target the TotM Manager window */
+#totm-manager.window-app {
+    display: block;
+}
+
+.totm-manager .tabs {
+    margin-bottom: 10px; /* Adjust as needed for spacing */
+}
+
+.totm-manager .tabs .item {
+    padding: 10px 15px 5px 15px; /* Adjust padding as needed */
+    cursor: pointer;
+    text-align: center;
+    margin-right: 8px; /* Space between icon and text */
+
+}
+
+.totm-manager .tabs .item.active {
+    font-weight: bold;
+    color: var(--color-text-dark-primary);
+    /* border-bottom: 2px solid var(--color-text-light-heading); /\* Underline the active tab *\/ */
+    /* margin-bottom: -2px; /\* Adjust to counter the border-bottom height *\/ */
+}
+
+.totm-manager .tabs .item.active i {
+    color: var(--color-text-dark-header);
+
+}
+
+.totm-manager .tabs .item:not(.active):hover {
+    background-color: var(--color-background-hover); /* Optional: hover effect */
+}
+
+.totm-manager .stage-buttons-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Create responsive grid columns */
+    gap: 5px; /* Space between buttons */
+}
+
+.totm-manager .tile-button {
+    text-align: center; /* Center the text inside buttons */
+    border-radius: 4px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+}
+
+.totm-manager .tile-button:only-child {
+    width: 100%; /* Make the single button fill the container */
+}
+.totm-manager .tile-button:hover {
+    background-color: #e0e0e0; /* Background color on hover */
+}
+
+.totm-manager .tile-button.active-button {
+    border-color: var(--color-border-highlight);
+    border-width: 2px;
+}
+
+/* Target buttons within .totm-manager that contain an <i> element */
+.totm-manager button:has(i) {
+    transform: translateY(0);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    text-decoration: none;
+    width: 2em;  /* Adjust width to be slightly larger than the icon */
+    height: 2em; /* Adjust height to be slightly larger than the icon */
+    border: 1px solid #666; /* Optional: Add a border */
+    border-radius: 4px; /* Optional: Add rounded corners */
+    background-color: inherit;
+    font-size: 1em; /* Icon size */
+    cursor: pointer; /* Pointer cursor on hover */
+    padding: 0;
+}
+
+/* Ensure the icon size fits well */
+.totm-manager button i {
+    font-size: 1em;
+    margin: 0;
+    padding: 0;
+}
+
+/* Add hover effects for better user experience */
+.totm-manager button:has(i):hover {
+    color: #333; /* Change text color on hover */
+    border-color: #333; /* Change border color on hover */
+}
+
+/* Adjust the position when the button is active */
+.totm-manager button:has(i):active {
+    transform: translateY(0);
+}
+
+/* Activate Image icon/button */
+.totm-manager .set-image-button i {
+    border: none;
+    font-size: 1.45em;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    text-decoration: none;
+    background-color: inherit;
+    cursor: pointer; /* Pointer cursor on hover */
+    padding: 0;
+}
+
+/* Style for active image button */
+.totm-manager .set-image-button.active-button i {
+    color: var(--color-border-highlight);
+    transform: translateY(0);
+}
+
+.totm-manager #search-results img {
+    width: 50%;
+    height: auto; /* Maintain aspect ratio */
+    cursor: pointer; /* Change cursor to indicate clickability */
+}
+
+.totm-manager #search-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.totm-manager .add-image-container {
+    display: flex;
+    justify-content: space-between; /* Space between elements */
+    align-items: center;
+    /* border: 1px solid #666; */
+    /* border-radius: 4px; */
+    padding: 5px;
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+}
+
+.totm-manager .add-image-container p {
+    font-size: 16px;
+    font-weight: 600;
+    font-variant: small-caps;
+    color: #666;
+    text-align: left;
+    padding-left: 5px;
+    margin: 0;
+}
+
+.totm-manager .add-image-container button:hover {
+    text-decoration: none;
+}
+
+.totm-manager .add-image-container button::before {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+.totm-manager .add-folder::before {
+    content: "\f07b"; /* FontAwesome folder icon */
+}
+
+.totm-manager .add-image:before {
+    content: "\f055"; /* FontAwesome plus icon */
+}
+
+.totm-manager .add-image-container .prev-image::before {
+    content: "\f060"; /* FontAwesome left arrow icon */
+}
+
+.totm-manager .add-image-container .next-image::before {
+    content: "\f061"; /* FontAwesome right arrow icon */
+}
+
+.totm-manager a.add-folder, a.add-image {
+    color: #666;
+}
+
+.totm-manager a.prev-image, a.next-image, .prev-image, .next-image {
+    color: #666;
+    text-align: left;
+    padding-right: 5px;
+    padding-left: 20px;
+    margin: 0;
+}
+
+.totm-manager .add-folder {
+    padding-left: 5px;
+    text-align: left;
+    display: inline;
+    align-items: center;
+    cursor: pointer;
+    color: #666;
+    text-decoration: none;
+    font-size: 12px;
+    border: none;
+}
+
+.totm-manager .add-image {
+    text-align: left;
+    display: inline;
+    align-items: center;
+    cursor: pointer;
+    color: #666;
+    text-decoration: none;
+    font-size: 12px;
+    border: none;
+}
+
+.totm-manager .add-folder i, .add-image i {
+    margin-right: 5px;
+}
+
+.totm-manager .delete-image {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    text-decoration: none;
+    width: 2em;  /* Adjust width to be slightly larger than the icon */
+    height: 2em; /* Adjust height to be slightly larger than the icon */
+    border: 1px solid #666; /* Optional: Add a border */
+    border-radius: 4px; /* Optional: Add rounded corners */
+    background-color: inherit;
+    font-size: 1em; /* Icon size */
+    cursor: pointer; /* Pointer cursor on hover */
+    margin-left: 5px;
+    padding: 0;
+}
+
+.totm-manager .delete-image i {
+    font-size: 1em; /* Ensure the icon size fits well */
+    margin: 0;
+    padding: 0;
+}
+
+ .totm-manager .delete-all-paths {
+     text-align: right;
+     display: inline-flex;
+     align-items: center;
+     justify-content: center;
+     color: #666;
+     font-size: 12px;
+     text-decoration: none;
+     width: 3em;  /* Adjust width to be slightly larger than the icon */
+     height: 2em; /* Adjust height to be slightly larger than the icon */
+     border: 1px solid #666; /* Optional: Add a border */
+     border-radius: 4px; /* Optional: Add rounded corners */
+     background-color: inherit;
+     font-size: 1em; /* Icon size */
+     cursor: pointer; /* Pointer cursor on hover */
+     padding: 10px;
+ }
+
+.totm-manager .delete-all-paths i {
+    text-align: right;
+    font-size: 1em; /* Ensure the icon size fits well */
+    padding: 0;
+}
+
+.totm-manager .delete-image .delete-all-paths:hover {
+    background-color: #ccc; /* Optional: Change background on hover */
+}
+
+.totm-manager .delete-all-paths::before {
+    content: "\f1f8"; /* FontAwesome trash icon */
+}
+
+.totm-manager .tile-field input[type="text"] {
+    width: 150px;
+}
+
+.totm-manager .tile-field input[type="range"] {
+    width: 100px;
+}
+
+.totm-manager .drag-over {
+    border: 2px dashed #000;
+    background-color: var(--color-hightlight);
+}
+
+.dropdown-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.dropdown-container select {
+    width: 100%;
+}
+
+.hr-dropdown-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-header {
+    margin-top: 20px;  /* Increase the space above the header */
+    margin-bottom: 20px;  /* Increase the space below the header */
+    /* Optional: Add additional styles for better appearance */
+    font-size: 1.5em;
+    color: #333;
+}
+
+#current-effects-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Space between effect items */
+    padding: none;
+
+}
+
+.totm-manager
+select#target-dropdown,
+select#tile-dropdown,
+select#effect-dropdown {
+    flex-grow: 1;
+    min-width: 100px;
+    height: 2em;
+    border: 1px solid var(--color-border-light-tertiary);
+    border-radius: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.effect-item {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+}
+
+.effect-target-type {
+    color: #666;
+    text-decoration: none;
+    width: 2em;  /* Adjust width to be slightly larger than the icon */
+    height: 2em; /* Adjust height to be slightly larger than the icon */
+    border: 1px solid #666; /* Optional: Add a border */
+    font-size: 1em; /* Icon size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    }
+
+.effect-target-name,
+.effect-name {
+    display: inline-block;
+    flex-grow: 1;
+    min-width: 100px;
+    max-width: 150px;
+    height: 2em;
+    margin-right: auto;
+    margin-left: 5px;
+    padding: 5px;
+    border: 1px solid var(--color-border-light-tertiary);
+    border-radius: 3px;
+    background-color: inherit;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.delete-effect {
+    margin-left: auto;
+}
+
+.delete-effect:hover {
+    border-color: #ff1a1a;
+}

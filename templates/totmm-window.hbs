@@ -1,0 +1,33 @@
+<div class="totm-manager">
+  <div class="tabs" data-group="primary-tabs">
+    <a class="item" data-tab="stage" data-group="primary-tabs">
+      <i class="fas fa-masks-theater"></i> Stage
+    </a>
+    <a class="item" data-tab="tiles" data-group="primary-tabs">
+      <i class="fas fa-cubes"></i> Tiles
+    </a>
+    <a class="item" data-tab="effects" data-group="primary-tabs">
+      <i class="fas fa-magic"></i> Effects
+    </a>
+  </div>
+
+<hr style="margin: 10px 0; border-top: 1px solid var(--color-border-light-primary); border-bottom: 1px solid var(--color-border-light-primary);">
+
+  <section class="content">
+    <div class="tab" data-tab="stage" data-group="primary-tabs">
+      {{> header}}
+      {{> stage}}
+      {{> footer}}
+    </div>
+    <div class="tab" data-tab="tiles" data-group="primary-tabs">
+      {{> header}}
+      {{> tiles}}
+      {{> footer}}
+    </div>
+    <div class="tab" data-tab="effects" data-group="primary-tabs">
+      {{> header}}
+      {{> effects}}
+      {{> footer}} 
+    </div>
+  </section>
+</div>

@@ -1,40 +1,13 @@
- <style>
- .active-button {
-     background-color: #4CAF50; /* Green background for active state */
-     color: white; /* White text for better visibility */
- }
+<!-- Tab Navigation -->
+<nav class="tabs" data-group="totm-tabs">
+  <a class="item active" data-tab="tab-1">Images</a>
+  <a class="item" data-tab="tab-2">Tiles</a>
+</nav>
 
- .color-picker {
-     -webkit-appearance: none;
-     -moz-appearance: none;
-     appearance: none;
-     background: transparent;
-     border: none;
-     width: 25px;
-     height: 25px;
-     border-radius: 3px;
-     cursor: pointer;
- }
-
- .color-picker::-webkit-color-swatch-wrapper {
-     padding: 0;
- }
- .color-picker::-webkit-color-swatch {
-     border: none;
- }
-
- #search-results img {
-  width: 50%;
-  height: auto; /* Maintain aspect ratio */
-  cursor: pointer; /* Change cursor to indicate clickability */
-}
-
-
-</style>
-
-
-<form>
-
+<!-- Tab Content -->
+<section class="content">
+  <div id="tab-1" class="tab active" data-tab="tab-1">
+  <form>
     <!-- File management controls with active state indication -->
     <div class="form-group" style="margin-top: 10px;">
         <button type="button" class="btnSpeaker1 {{ifThen (eq currentActiveTag 'speaker1') 'btnSpeaker1 active-button' 'btnSpeaker1'}}">Speaker 1</button>
@@ -42,8 +15,7 @@
         <button type="button" class="btnScene {{ifThen (eq currentActiveTag 'scene') 'btnScene active-button' 'btnScene'}}">Scene</button>
     </div>
 
-    <hr style="margin: 10px 0; border-top: 1px solid var(--color-border-light-primary);
-               border-bottom: 1px solid var(--color-border-light-primary);">
+    <hr style="margin: 10px 0; border-top: 1px solid var(--color-border-light-primary); border-bottom: 1px solid var(--color-border-light-primary);">
 
     <!-- Image navigation controls -->
     <div id="search-container">
@@ -78,8 +50,7 @@
         {{/unless}}
     </div>
 
-    <hr style="margin-top: -10px; border-top: 1px solid var(--color-border-light-primary);
-               border-bottom: 1px solid var(--color-border-light-primary);">
+    <hr style="margin-top: -10px; border-top: 1px solid var(--color-border-light-primary); border-bottom: 1px solid var(--color-border-light-primary);">
 
     <div class="form-group" style="margin-top: 10px;">
         <button type="button" class="add-path">Add Image</button>
@@ -91,7 +62,20 @@
         <button type="button" class="delete-all-paths" style="color: red">Delete All Images</button>
     </div>
     <div class="form-group" style="margin-top: 10px;">
-                <button type="button" class="delete-filter" style="color: #8a6700">Delete Glow Filter</button>
-                <button type="button" class="delete-all-filters" style="color: maroon">Delete All Filters</button>
+        <button type="button" class="delete-filter" style="color: #8a6700">Delete Glow Filter</button>
+        <button type="button" class="delete-all-filters" style="color: maroon">Delete All Filters</button>
     </div>
-</form>
+  </form>
+  </div>
+  
+<div id="tab-2" class="tab" data-tab="tab-2">
+  <!-- New content for the Tiles tab goes here -->
+  <form>
+    <!-- Add your new Tile settings here -->
+    <div class="form-group">
+      <p>Tile settings and controls will be added here.</p>
+    </div>
+  </form>
+</div>
+</section>
+
