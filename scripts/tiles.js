@@ -71,10 +71,8 @@ export async function collectAndSaveTileData(instance, html) {
     let tileName = tileData.name;
 
     if (!tileName || tileName.trim() === '') {
-      // Generate a temporary tileName if it's not provided
-      tileName = `tile-${Date.now()}`;
-      tileData.name = tileName;
-      logMessage(`Generated temporary tileName: ${tileName}`);
+      ui.notifications.error("Please provide a name for all tiles.")
+      throw new Error(`No tile name provided or tile ${tileName} is undefined.`)
     }
 
     // Log the tile name before using it
@@ -92,6 +90,8 @@ export async function collectAndSaveTileData(instance, html) {
       await updateTileProperties(foundTile, tileData);
     } else {
       console.warn(`No tile found with the tileName: ${tileName}`);
+      ui.notifications.warn(`Tile tagged with name: ${tileName} not found on game canvas.`)
+      throw new Error(`No tile tagged with ${tileName} found on game canvas.`)
     }
   }
 }

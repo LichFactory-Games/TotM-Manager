@@ -24,7 +24,7 @@ Here you can see an example of a scene set using three tiles and the TotM Manage
 
 ## How To Use TotM Manager
 
-The manager is designed to work with tagged tiles you create. Tile names that you make in TotMM have to match tiles that have been tagged by Tagger. In the case of the template provided, there are three tiles. 'Speaker1' and 'speaker2' are on the left and 'scene' is to their right, taking up most of the rest of the canvas. There are also "frame" tiles (the images are included in the module compendium). Here is a video showing a simple setup case.
+The manager is designed to work with tagged tiles you create. First you need to create a tile (or tiles) on canvas as you normally would, adding a tagger tag. Then you may open TotMM and create tiles in the tiles tab. Tile names that you make in TotMM have to match tiles that have been tagged by Tagger. **You won't be able to save a tile configuration in TotMM unless you have tiles with matching tags that exist on the game canvas.** In the case of the template provided, there are three tiles. 'Speaker1' and 'speaker2' are on the left and 'scene' is to their right, taking up most of the rest of the canvas. There are also "frame" tiles (the images are included in the module compendium). Here is a video showing a simple setup case.
 
 <img src="../image-assets/totmm-creating-tiles.gif?raw=true" alt="TotM Creating Tiles" width="800">
 

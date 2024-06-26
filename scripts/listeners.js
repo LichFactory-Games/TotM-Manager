@@ -39,8 +39,13 @@ export function activateGeneralListeners(instance, html) {
   // Save all tile data
   html.find('#save-tiles').click(async () => {
     logMessage("Saving data for tile...");
-    await collectAndSaveTileData(instance, html);
-    handleSaveAndRender(instance, html);
+    try {
+      await collectAndSaveTileData(instance, html);
+      handleSaveAndRender(instance, html);
+    } catch (error) {
+      ui.notifications.error("Failed to save tile data. Please try again.");
+      console.error("Error saving tile data:", error);
+    }
   });
 
   // Generate tiles
