@@ -50,17 +50,5 @@
     "scripts/setup.js",
     "scripts/hooks.js",
     "scripts/init.js"
-  ],
-  "packs": [
-    {
-      "name": "totm-tile-template",
-      "label": "TotM Tile Template",
-      "path": "packs/totm-tile-template",
-      "type": "Scene",
-      "ownership": {
-        "PLAYER": "OBSERVER",
-        "ASSISTANT": "OWNER"
-      }
-    }
   ]
 }
