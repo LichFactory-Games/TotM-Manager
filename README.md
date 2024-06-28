@@ -10,11 +10,9 @@ The module allows you to:
 4. Select between tiles via tags (and the [Tagger](https://github.com/fantasycalendar/FoundryVTT-Tagger) module)
 5. Add effects to a tile (via [Token Magic](https://github.com/Feu-Secret/Tokenmagic))
 
-A sample template for use with the TotM Manager is included in a compendium. If you like, you may import the TotM Template from the compendium for your own use. It comes with three tiles, and three "frames" for those image tiles, pretagged and ready for use. But you can also just create your own configuration of tiles and set tags for use with those tiles.
-
 You can also tag lights and sounds to run with particular images, so that when you switch to those images the lighting changes, or sounds are played, or macros run (or all three). All this effectively allow you to change the scenery without changing the Foundry scene.
 
-All tags and image data are stored in the metadata of the scene tiles, so nothing is altered in your actual files. To add the module in Foundry go to the Foundry "Manifest URL" field in the "Install Module" window and paste: https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/latest/module.json. Or you can manually download a release from the [releases](https://github.com/LichFactory-Games/TotM-Manager/releases) tab.
+All tags and image data are stored in the metadata of the tiles, so nothing is altered in your actual files. To add the module in Foundry go to the Foundry "Manifest URL" field in the "Install Module" window and paste: https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/latest/module.json. Or you can manually download a release from the [releases](https://github.com/LichFactory-Games/TotM-Manager/releases) tab.
 
 As mentioned above, the module has three dependencies for proper functioning -- Tagger, Token Magic, and libWrapper. 
 
@@ -24,7 +22,7 @@ Here you can see an example of a scene set using three tiles and the TotM Manage
 
 ## How To Use TotM Manager
 
-The manager is designed to work with tagged tiles you create. First you need to create a tile (or tiles) on canvas as you normally would, adding a tagger tag. Then you may open TotMM and create tiles in the tiles tab. Tile names that you make in TotMM have to match tiles that have been tagged by Tagger. **You won't be able to save a tile configuration in TotMM unless you have tiles with matching tags that exist on the game canvas.** In the case of the template provided, there are three tiles. 'Speaker1' and 'speaker2' are on the left and 'scene' is to their right, taking up most of the rest of the canvas. There are also "frame" tiles (the images are included in the module compendium). Here is a video showing a simple setup case.
+The manager is designed to work with tagged tiles you create. First you need to create a tile (or tiles) on canvas as you normally would, adding a tagger tag. Then you may open TotMM and create tiles in the tiles tab. Tile names that you make in TotMM have to match tiles that have been tagged by Tagger. **You won't be able to save a tile configuration in TotMM unless you have tiles with matching tags that exist on the game canvas.**  Here is a video showing a simple setup case.
 
 <img src="../image-assets/totmm-creating-tiles.gif?raw=true" alt="TotM Creating Tiles" width="800">
 
@@ -58,7 +56,7 @@ Settings right now are limited to keybindings (Ctrl-T for the window; Ctrl-F for
 The following features are ones I would consider adding at some point. 
 
 - [x] Allow fine-grained control over color filter settings 
-- [x] Allow for other tile setups and more than two speakers or one scene
+- [x] Allow for arbitrary tile setups  
 - [x] Search function for images by name or tag. Helpful in cases where many images are connected with a tile. 
 - [ ] Video file support.
 - [x] Support for more TokenMagic FX filters than glow (and possibly adding FXMaster support in addition to Token Magic). 
