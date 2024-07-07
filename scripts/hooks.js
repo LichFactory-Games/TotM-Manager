@@ -1,7 +1,6 @@
 // scripts/hooks.js
-import { NAMESPACE, assignOrderToTiles, findTileById } from "./utilities.js";
+import { assignOrderToTiles } from "./utilities.js";
 import { TotMForm } from "./totmManager.js";
-import { saveTileDataToFlags } from "./tiles-utils.js";
 
 // Define moduleId
 const moduleId = 'totm-manager';
@@ -91,7 +90,7 @@ export function initializeHooks() {
   });
 
   Hooks.on('canvasReady', () => {
-    if (TotMForm._instance) {
+    if (TotMForm._instance && TotMForm._instance.rendered) {
       TotMForm._instance.refreshManagerData(); // Make sure `instance` is correctly referenced
     }
   });

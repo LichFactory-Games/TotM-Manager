@@ -298,9 +298,6 @@ export class TotMForm extends FormApplication {
     // Update active buttons
     await this._updateButtons();
 
-    logMessage("Rendering the instance...");
-    this.render(true);
-
     logMessage("Theatre of the Mind Manager data refresh complete.");
   }
 }
