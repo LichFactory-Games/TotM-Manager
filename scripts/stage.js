@@ -7,6 +7,23 @@ import { controlFeaturesBasedOnTags } from './featureControl.js';
 // Image Actions  //
 ////////////////////
 
+// Function to create fade in and fade out effect for a tile
+async function fadeTile(tileDocument, fadeIn = true, targetAlpha = 1, duration = 2000, increment = 0.01) {
+  if (fadeIn) {
+    // Fade In
+    for (let i = 0; i <= targetAlpha; i += increment) {
+      await tileDocument.update({ alpha: i });
+      await new Promise(resolve => setTimeout(resolve, duration * increment));
+    }
+  } else {
+    // Fade Out
+    for (let i = 1; i >= targetAlpha; i -= increment) {
+      await tileDocument.update({ alpha: i });
+      await new Promise(resolve => setTimeout(resolve, duration * increment));
+    }
+  }
+}
+
 export async function activateImage(instance, image, index) {
   if (!instance.currentTile) {
     console.error("No currently active tile.");
@@ -15,9 +32,10 @@ export async function activateImage(instance, image, index) {
   }
 
   const tile = instance.currentTile;
+  const tileDocument = tile.document;
   const tileId = tile.id;
-  const tileName = await tile.document.getFlag(NAMESPACE, 'tileName');
-  const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+  const tileName = await tileDocument.getFlag(NAMESPACE, 'tileName');
+  const imagePaths = await tileDocument.getFlag(NAMESPACE, 'imagePaths') || [];
 
   if (!tileName) {
     console.error("Tile has no name set.");
@@ -30,7 +48,7 @@ export async function activateImage(instance, image, index) {
   logMessage(`Image paths for tile:`, imagePaths);
 
   // Deactivate effects of the previous image
-  const previousIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
+  const previousIndex = await tileDocument.getFlag(NAMESPACE, 'imgIndex');
   if (previousIndex !== undefined && imagePaths[previousIndex]) {
     const previousImage = imagePaths[previousIndex];
     const previousEffects = previousImage.effects || [];
@@ -38,13 +56,29 @@ export async function activateImage(instance, image, index) {
     logMessage(`Removed effects from previous image index: ${previousIndex}`);
   }
 
+  // Check if the image transition effect is enabled
+  const enableTransition = game.settings.get('totm-manager', 'enableImageTransition');
+  const duration = game.settings.get('totm-manager', 'imageTransitionDuration');
+  const increment = game.settings.get('totm-manager', 'imageTransitionIncrement');
+  const targetAlpha = game.settings.get('totm-manager', 'imageTransitionTargetAlpha');
+
+  if (enableTransition) {
+    // Fade out the tile to partial transparency before updating the image
+    await fadeTile(tileDocument, false, targetAlpha, duration, increment); // Fade out to targetAlpha
+  }
+
   // Update the tile's texture and flag
   logMessage(`Updating tile ID ${tileId} texture to: ${image.img}`);
-  await tile.document.update({ 'texture.src': image.img });
-  await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
+  await tileDocument.update({ 'texture.src': image.img });
+  await tileDocument.setFlag(NAMESPACE, 'imgIndex', index);
+
+  if (enableTransition) {
+    // Fade in the tile to full opacity after updating the image
+    await fadeTile(tileDocument, true, 1, duration, increment); // Fade in to full opacity
+  }
 
   // Apply tile-wide effects
-  const tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
+  const tileEffects = await tileDocument.getFlag(NAMESPACE, 'tileEffects') || [];
   await applyEffectsToTile(tile, tileEffects, true);
   logMessage(`Applied tile-wide effects to tile ID: ${tileId}`);
 
@@ -68,6 +102,7 @@ export async function activateImage(instance, image, index) {
   instance.render();
   logMessage(`Image ${image.displayImg} activated on tile ID: ${tileId}.`);
 }
+
 
 export async function cycleImages(instance, tile, direction) {
   const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];

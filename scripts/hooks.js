@@ -28,13 +28,56 @@ export function initializeHooks() {
     restricted: true
   });
 
+  // Image transition effects
+  game.settings.register(moduleId, 'enableImageTransition', {
+    name: "Enable Image Transition",
+    hint: "Enable or disable transition effects when switching images.",
+    scope: 'world',
+    config: true,
+    type: Boolean,
+    default: false,
+  });
+
+  game.settings.register(moduleId, 'imageTransitionDuration', {
+    name: "Image Transition Duration",
+    hint: "Duration of the image transition effect in milliseconds.",
+    scope: 'world',
+    config: true,
+    type: Number,
+    default: 500,
+  });
+
+  game.settings.register(moduleId, 'imageTransitionIncrement', {
+    name: "Image Transition Increment",
+    hint: "Increment value for the image transition effect.",
+    scope: 'world',
+    config: true,
+    type: Number,
+    default: 0.01,
+  });
+
+  game.settings.register(moduleId, 'imageTransitionTargetAlpha', {
+    name: "Image Transition Target Alpha",
+    hint: "Target alpha value for the image transition effect. 0 is fully transparent, 1 is fully opaque.",
+    scope: 'world',
+    config: true,
+    type: Number,
+    default: 0.5,
+    range: {
+      min: 0,
+      max: 1,
+      step: 0.01
+    }
+  });
+
+
   game.settings.register(moduleId, 'initialTileTag', {
     name: 'Initial Tile Tag',
     hint: 'The tag of the initial tile to be selected when the module loads.',
     scope: 'world',
     config: true,
     type: String,
-    default: 'scene', // You can set a default value here
+    default: 'scene',
     onChange: value => {
       console.log(`Initial Tile Tag setting changed to: ${value}`);
     }
