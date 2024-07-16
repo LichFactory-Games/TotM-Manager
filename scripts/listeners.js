@@ -4,7 +4,7 @@
 
 import { NAMESPACE, logMessage, activateTile, findAndSwitchToTileByTag, updateActiveTileButton } from './utilities.js';
 import { addImageToTile, addImageDirectoryToTile, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
-import { generateTileFields, handleSaveAndRender, handleDeleteAndSave, collectAndSaveTileData, collectAndSaveImageData } from './tiles.js';
+import { generateTileFields, handleSaveAndRender, handleDeleteAndSave, collectAndSaveTileData } from './tiles.js';
 import { loadTileImages, toggleTileVisibility, openTileConfigForControlledTile } from './tiles-utils.js'
 import { updateEffectsUI, onTargetChange, removeEffect } from './effects.js';
 import { ModifyEffectForm } from './modifyEffectForm.js';
@@ -32,15 +32,13 @@ export function activateGeneralListeners(instance, html) {
   // Save all tile image data
   html.find('.save-paths').click(async () =>   {
     logMessage("Saving images for tile...");
-    await collectAndSaveImageData(instance, html);
-    await handleSaveAndRender(instance, html);
+    handleSaveAndRender(instance, html);
   });
 
   // Save all tile data
   html.find('#save-tiles').click(async () => {
     logMessage("Saving data for tile...");
     try {
-      await collectAndSaveTileData(instance, html);
       handleSaveAndRender(instance, html);
     } catch (error) {
       ui.notifications.error("Failed to save tile data. Please try again.");
@@ -106,7 +104,7 @@ export function activateGeneralListeners(instance, html) {
     // Log the retrieved image paths
     console.log('Retrieved image paths:', imagePaths);
 
-    await collectAndSaveImageData(instance, html);
+    await collectAndSaveTileData(instance, html);
 
     // Check if the index is within bounds
     if (index >= 0 && index < imagePaths.length) {
@@ -124,7 +122,7 @@ export function activateGeneralListeners(instance, html) {
 
   // Cycle image buttons
   html.find('.prev-image').click(async () => {
-    await collectAndSaveImageData(instance, html);
+    await collectAndSaveTileData(instance, html);
     await cycleImages(instance, instance.currentTile, 'prev');
     await new Promise(requestAnimationFrame);
     const currentIndex = await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
@@ -133,7 +131,7 @@ export function activateGeneralListeners(instance, html) {
   });
 
   html.find('.next-image').click(async () => {
-    await collectAndSaveImageData(instance, html);
+    await collectAndSaveTileData(instance, html);
     await cycleImages(instance, instance.currentTile, 'next');
     await new Promise(requestAnimationFrame);
     const currentIndex = await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');

@@ -1,11 +1,12 @@
 import { NAMESPACE, logMessage, findTileById } from './utilities.js';
 
 // Helper function to save tile flags
-export async function saveTileDataToFlags(tile, foundTile) {
+export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
   // Log the arguments
   logMessage("Arguments received in saveTileDataToFlags:");
   logMessage("tile:", tile);
   logMessage("foundTile:", foundTile);
+  logMessage("imagePaths:", imagePaths);
 
   // Add validation to check if foundTile is an actual tile object
   if (!tile || !foundTile || !foundTile.document) {
@@ -25,15 +26,6 @@ export async function saveTileDataToFlags(tile, foundTile) {
     tint: tile.tint,
     order: tile.order
   });
-
-}
-
-export async function saveImageDataToFlags(tile, foundTile, imagePaths) {
-  // Log the arguments
-  logMessage("Arguments received in saveImageDataToFlags:");
-  logMessage("tile:", tile);
-  logMessage("foundTile:", foundTile);
-  logMessage("imagePaths:", imagePaths);
 
   if (imagePaths && imagePaths.length > 0) {
     const pathsToSave = imagePaths.map((path, index) => ({
@@ -109,7 +101,6 @@ export async function loadTileImages(instance, tile) {
     // Prepare the image paths for display
     instance.imagePaths = loadedPaths.map(path => {
       let displayPath; // This will hold the filename for display purposes
-
       if (typeof path === 'string') {  // Handle legacy or incorrectly saved paths
         displayPath = path.split('/').pop(); // Extract filename from the full path
         return { img: path, displayImg: displayPath, tags: [] };

@@ -1,6 +1,6 @@
 import { NAMESPACE, updateTileButtons, updateActiveTileButton, logMessage, getFilteredTiles } from './utilities.js';
 import { findAndSwitchToTileByTag } from './utilities.js';
-import { saveTileDataToFlags, clearTileFlags, saveImageDataToFlags }  from './tiles-utils.js';
+import { saveTileDataToFlags, clearTileFlags }  from './tiles-utils.js';
 import { loadTileData, updateTileFields, updateTileProperties } from './tiles-utils.js';
 
 export function generateTileFields(instance, html, options = { replace: false, count: 1 }) {
@@ -83,8 +83,11 @@ export async function collectAndSaveTileData(instance, html) {
 
     if (foundTile) {
       logMessage("Found tile:", foundTile);
+      // Extract image paths specific to this tile
+      const tileImagePaths = collectImagePaths(container);
+
       // Save tile properties under totm-manager flag
-      await saveTileDataToFlags(tileData, foundTile);
+      await saveTileDataToFlags(tileData, foundTile, tileImagePaths);
 
       // Update tile properties on canvas
       await updateTileProperties(foundTile, tileData);
@@ -110,7 +113,7 @@ export async function collectAndSaveImageData(instance, html) {
   const imagePaths = collectImagePaths(container);
 
   // Save image path information to the tile's flags
-  await saveImageDataToFlags(instance.currentTile, foundTile, imagePaths);
+  await saveTileDataToFlags(instance.currentTile, foundTile, imagePaths);
 }
 
 export function collectTileData(container) {
@@ -155,6 +158,9 @@ export function collectImagePaths(container) {
 }
 
 export async function handleSaveAndRender(instance, html) {
+  logMessage("Saving data for tile...");
+  await collectAndSaveTileData(instance, html);
+
   console.log("Loading tile data...");
   await loadTileData(instance);
 
