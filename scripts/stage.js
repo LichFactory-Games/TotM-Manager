@@ -32,10 +32,9 @@ export async function activateImage(instance, image, index) {
   }
 
   const tile = instance.currentTile;
-  const tileDocument = tile.document;
   const tileId = tile.id;
-  const tileName = await tileDocument.getFlag(NAMESPACE, 'tileName');
-  const imagePaths = await tileDocument.getFlag(NAMESPACE, 'imagePaths') || [];
+  const tileName = await tile.document.getFlag(NAMESPACE, 'tileName');
+  const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
 
   if (!tileName) {
     console.error("Tile has no name set.");
@@ -48,7 +47,7 @@ export async function activateImage(instance, image, index) {
   logMessage(`Image paths for tile:`, imagePaths);
 
   // Deactivate effects of the previous image
-  const previousIndex = await tileDocument.getFlag(NAMESPACE, 'imgIndex');
+  const previousIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
   if (previousIndex !== undefined && imagePaths[previousIndex]) {
     const previousImage = imagePaths[previousIndex];
     const previousEffects = previousImage.effects || [];
@@ -64,21 +63,21 @@ export async function activateImage(instance, image, index) {
 
   if (enableTransition) {
     // Fade out the tile to partial transparency before updating the image
-    await fadeTile(tileDocument, false, targetAlpha, duration, increment); // Fade out to targetAlpha
+    await fadeTile(tile.document, false, targetAlpha, duration, increment); // Fade out to targetAlpha
   }
 
   // Update the tile's texture and flag
   logMessage(`Updating tile ID ${tileId} texture to: ${image.img}`);
-  await tileDocument.update({ 'texture.src': image.img });
-  await tileDocument.setFlag(NAMESPACE, 'imgIndex', index);
+  await tile.document.update({ 'texture.src': image.img });
+  await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
 
   if (enableTransition) {
     // Fade in the tile to full opacity after updating the image
-    await fadeTile(tileDocument, true, 1, duration, increment); // Fade in to full opacity
+    await fadeTile(tile.document, true, 1, duration, increment); // Fade in to full opacity
   }
 
   // Apply tile-wide effects
-  const tileEffects = await tileDocument.getFlag(NAMESPACE, 'tileEffects') || [];
+  const tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
   await applyEffectsToTile(tile, tileEffects, true);
   logMessage(`Applied tile-wide effects to tile ID: ${tileId}`);
 

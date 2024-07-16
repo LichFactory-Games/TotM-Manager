@@ -137,21 +137,6 @@ export async function loadTileImages(instance, tile) {
   }
 }
 
-//// Tile Property Updating
-export async function updateTileProperties(foundTile, tileData) {
-  logMessage("Updating tile properties for tile:", foundTile);
-  logMessage("Tile data:", tileData);
-
-  // Update the tile document with the correct properties
-  await foundTile.document.update({
-    'texture.tint': tileData.tint,
-    'alpha': tileData.opacity
-  });
-
-  logMessage(`Updated tile ${tileData.name} with opacity: ${tileData.opacity} and tint: ${tileData.tint}`);
-}
-
-
 //// Tile Updating Functions
 
 export  function updateTileFields(instance) {
@@ -185,6 +170,7 @@ export  function updateTileFields(instance) {
   });
 }
 
+// Toggle tile visibility
 export async function toggleTileVisibility(tileId) {
   const tile = findTileById(tileId)
   if (tile) {
@@ -199,6 +185,22 @@ export async function toggleTileVisibility(tileId) {
     console.error(`Tile with ID ${tileId} not found.`);
   }
 }
+
+// Tile Property Updating
+export async function updateTileProperties(foundTile, tileData) {
+  logMessage("Updating tile properties for tile:", foundTile);
+  logMessage("Tile data:", tileData);
+
+  // Update the tile document with the correct properties
+  await foundTile.document.update({
+    'texture.tint': tileData.tint,
+    'alpha': tileData.opacity
+  });
+
+  logMessage(`Updated tile ${tileData.name} with opacity: ${tileData.opacity} and tint: ${tileData.tint}`);
+}
+
+////
 
 // Function to open the configuration window for the first controlled tile
 export function openTileConfigForControlledTile() {
