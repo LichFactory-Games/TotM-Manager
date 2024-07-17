@@ -46,6 +46,30 @@ export async function activateImage(instance, image, index) {
   logMessage(`Activating image on tile ID: ${tileId}, Name: ${tileName}`);
   logMessage(`Image paths for tile:`, imagePaths);
 
+  // Check if the image transition effect is enabled
+  const enableTransition = game.settings.get('totm-manager', 'enableImageTransition');
+  const duration = game.settings.get('totm-manager', 'imageTransitionDuration');
+  const increment = game.settings.get('totm-manager', 'imageTransitionIncrement');
+  const targetAlpha = game.settings.get('totm-manager', 'imageTransitionTargetAlpha');
+
+  // Check if Token Magic effect is enabled
+  const effectName = game.settings.get('totm-manager', 'imageTransitionEffect');
+  let effectParams = JSON.parse(game.settings.get('totm-manager', 'imageTransitionEffectParams') || '{}');
+
+  if (enableTransition) {
+    if (effectName) {
+      // Use default parameters if none are provided
+      if (Object.keys(effectParams).length === 0) {
+        effectParams = TokenMagic.getPreset(effectName);
+      }
+      logMessage("Applying transition effect:", effectParams);
+      // Apply the Token Magic effect before fading out
+      await TokenMagic.addFiltersOnSelected(effectName, false);
+    }
+    // Fade out the tile to partial transparency before updating the image
+    await fadeTile(tile.document, false, targetAlpha, duration, increment); // Fade out to targetAlpha
+  }
+
   // Deactivate effects of the previous image
   const previousIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
   if (previousIndex !== undefined && imagePaths[previousIndex]) {
@@ -53,17 +77,6 @@ export async function activateImage(instance, image, index) {
     const previousEffects = previousImage.effects || [];
     await removeEffectsFromTile(tile, previousEffects, false);
     logMessage(`Removed effects from previous image index: ${previousIndex}`);
-  }
-
-  // Check if the image transition effect is enabled
-  const enableTransition = game.settings.get('totm-manager', 'enableImageTransition');
-  const duration = game.settings.get('totm-manager', 'imageTransitionDuration');
-  const increment = game.settings.get('totm-manager', 'imageTransitionIncrement');
-  const targetAlpha = game.settings.get('totm-manager', 'imageTransitionTargetAlpha');
-
-  if (enableTransition) {
-    // Fade out the tile to partial transparency before updating the image
-    await fadeTile(tile.document, false, targetAlpha, duration, increment); // Fade out to targetAlpha
   }
 
   // Update the tile's texture and flag
@@ -74,6 +87,10 @@ export async function activateImage(instance, image, index) {
   if (enableTransition) {
     // Fade in the tile to full opacity after updating the image
     await fadeTile(tile.document, true, 1, duration, increment); // Fade in to full opacity
+    if (effectName) {
+      // Remove the Token Magic effect after fading in
+      await TokenMagic.deleteFiltersOnSelected(effectName, false);
+    }
   }
 
   // Apply tile-wide effects
@@ -84,6 +101,7 @@ export async function activateImage(instance, image, index) {
   // Apply image-specific effects
   const currentImage = imagePaths.find(img => img.img === image.img);
   if (currentImage && currentImage.effects) {
+    logMessage("Applying image-specific effects:", currentImage.effects);
     await applyEffectsToTile(tile, currentImage.effects, false);
     logMessage(`Applied image-specific effects to tile ID: ${tileId}`);
   }
