@@ -99,8 +99,8 @@ export async function collectAndSaveTileData(instance, html) {
   }
 }
 
+
 export async function collectAndSaveImageData(instance, html) {
-  // Get the current tile from instance
   const foundTile = instance.currentTile;
   if (!foundTile) {
     console.warn("No current tile found.");
@@ -108,12 +108,47 @@ export async function collectAndSaveImageData(instance, html) {
   } else {
     logMessage("Found tile for image paths:", foundTile);
   }
-  // Collect image paths from the 'stage' tab
-  const container = $('#image-path-list').closest('.form-group');
-  const imagePaths = collectImagePaths(container);
 
-  // Save image path information to the tile's flags
-  await saveTileDataToFlags(instance.currentTile, foundTile, imagePaths);
+  const container = $('#image-path-list').closest('.form-group');
+  const newImagePaths = collectImagePaths(container);
+
+  // Get existing image paths
+  let existingImagePaths = foundTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+
+  newImagePaths.forEach(newImagePath => {
+    const existingImagePath = existingImagePaths.find(img => img.img === newImagePath.img);
+    if (existingImagePath) {
+      // Update tags by replacing existing tags with new tags
+      existingImagePath.tags = newImagePath.tags;
+      existingImagePath.effects = existingImagePath.effects || [];
+    } else {
+      // Add new image path if it doesn't exist
+      existingImagePaths.push(newImagePath);
+    }
+  });
+
+  await foundTile.document.setFlag(NAMESPACE, 'imagePaths', existingImagePaths);
+  logMessage("Updated image paths for tile:", existingImagePaths);
+}
+
+// Collect image paths with tags
+export function collectImagePaths(container) {
+  const pathListItems = container.find('li.form-field');
+  logMessage("Collected path list items:", pathListItems);
+
+  return pathListItems.map((index, pathItem) => {
+    const $pathItem = $(pathItem);
+    const img = $pathItem.find('.path-field').data('img');
+    const tags = $pathItem.find('.tag-field').val().split(',').map(tag => tag.trim());
+
+    // Log each image path object being collected
+    logMessage("Collected image path data:");
+    logMessage("img:", img);
+    logMessage("displayImg:", img.split('/').pop());
+    logMessage("tags:", tags);
+
+    return { img, displayImg: img.split('/').pop(), tags };
+  }).get();
 }
 
 export function collectTileData(container) {
@@ -135,27 +170,7 @@ export function collectTileData(container) {
   }).get();
 }
 
-export function collectImagePaths(container) {
-  // Correctly selecting the list items within the specified container
-  const pathListItems = container.find('li.form-field');
 
-  // Log to verify the selection
-  logMessage("Collected path list items:", pathListItems);
-
-  return pathListItems.map((index, pathItem) => {
-    const $pathItem = $(pathItem);
-    const img = $pathItem.find('.path-field').data('img');
-    const tags = $pathItem.find('.tag-field').val().split(',').map(tag => tag.trim());
-
-    // Log each image path object being collected
-    logMessage("Collected image path data:");
-    logMessage("img:", img);
-    logMessage("displayImg:", img.split('/').pop());
-    logMessage("tags:", tags);
-
-    return { img, displayImg: img.split('/').pop(), tags };
-  }).get();
-}
 
 export async function handleSaveAndRender(instance, html) {
   logMessage("Saving data for tile...");

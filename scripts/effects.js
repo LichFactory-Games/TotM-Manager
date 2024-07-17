@@ -77,7 +77,13 @@ export async function addEffect(instance, targetType, effectName, effectParams, 
       const image = imagePaths.find(img => img.img === imageId);
 
       if (image) {
-        await updateEffectsData(tile, effectParams, true, false, imageId);
+        // Merge new effect parameters with existing data while preserving tags
+        image.effects = image.effects || [];
+        image.effects.push(effectParams);
+        await tile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
+
+        // Reapply the effect
+        await applyEffectsToTile(tile, [effectParams], false, image);
         console.log(`Effect applied to image: ${imageId} on tile: ${tile.id}`);
 
         const currentIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
