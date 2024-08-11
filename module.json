@@ -4,7 +4,7 @@
   "version": "0.8.4",
   "compatibility": {
     "minimum": "10",
-    "verified": "11"
+    "verified": "12"
   },
   "relationships": {
     "requires": [
@@ -22,7 +22,10 @@
       },
       {
         "id": "tokenmagic",
-        "type": "module"
+        "type": "module",
+        "compatibility": {
+          "verified": "0.6.8"
+        }
       }
     ]
   },

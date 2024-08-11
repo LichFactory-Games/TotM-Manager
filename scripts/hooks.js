@@ -154,6 +154,13 @@ export function initializeHooks() {
   // Hook into the getSceneControlButtons event
   Hooks.on("getSceneControlButtons", controls => {
     console.log("TotM Manager: getSceneControlButtons hook called");
+
+    // Ensure the canvas and scene are ready
+    if (!canvas.ready || !game.scenes.active) {
+      console.warn("TotM Manager: Canvas or active scene not yet ready, delay getSceneControlButtons operations.");
+      return;
+    }
+
     let tileControl = controls.find(c => c.name === "tiles");
     if (tileControl) {
       console.log("TotM Manager: Adding button to tile controls");
@@ -194,22 +201,27 @@ export function initializeHooks() {
   });
 
   Hooks.on('canvasReady', () => {
+    // Check if the canvas is ready
+    if (!canvas.ready) {
+      console.warn("TotM Manager: Canvas is not ready, aborting tile operations.");
+      return;
+    }
+
+    // Check if there are any tiles on the canvas
+    const tiles = canvas.tiles?.placeables;
+    if (!tiles || tiles.length === 0) {
+      console.warn("TotM Manager: No tiles found on the canvas, skipping refreshManagerData.");
+      return;
+    }
+
+    // Check if the TotMForm instance is rendered
     if (TotMForm._instance && TotMForm._instance.rendered) {
-      TotMForm._instance.refreshManagerData(); // Make sure `instance` is correctly referenced
+      TotMForm._instance.refreshManagerData(); // Refresh manager data if instance is rendered
     }
   });
 
-  Hooks.on("renderChatLog", (app, html, data) => {
-    console.log("Theatre of the Mind Manager | renderChatLog hook");
-  });
-
-  Hooks.on("renderSidebarTab", (app, html) => {
-    console.log("Theatre of the Mind Manager | renderSidebarTab hook");
-  });
-
-
   Hooks.on('createTile', (tile, options, userId) => {
-  console.log('Tile created, assigning order...');
+    console.log('Tile created, assigning order...');
     assignOrderToTiles();
   });
 
