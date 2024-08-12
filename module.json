@@ -38,7 +38,9 @@
       "name": "LichLife"
     }
   ],
-  "styles": "styles/totmm.css",
+  "styles": [
+    "styles/totmm.css"
+  ],
   "esmodules": [
     "scripts/utilities.js",
     "scripts/tiles-utils.js",
