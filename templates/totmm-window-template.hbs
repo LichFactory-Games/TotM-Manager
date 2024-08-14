@@ -1,18 +1,18 @@
 <!-- Tab Navigation -->
-<nav class="tabs" data-group="totm-tabs">
-  <a class="item active" data-tab="tab-1">Images</a>
-  <a class="item" data-tab="tab-2">Tiles</a>
+<nav class="totm-manager tabs" data-group="totm-tabs">
+  <a class="totm-manager item active" data-tab="tab-1">Images</a>
+  <a class="totm-manager item" data-tab="tab-2">Tiles</a>
 </nav>
 
 <!-- Tab Content -->
-<section class="content">
-  <div id="tab-1" class="tab active" data-tab="tab-1">
+<section class="totm-manager content">
+  <div id="tab-1" class="totm-manager tab active" data-tab="tab-1">
   <form>
     <!-- File management controls with active state indication -->
-    <div class="form-group" style="margin-top: 10px;">
-        <button type="button" class="btnSpeaker1 {{ifThen (eq currentActiveTag 'speaker1') 'btnSpeaker1 active-button' 'btnSpeaker1'}}">Speaker 1</button>
-        <button type="button" class="btnSpeaker2 {{ifThen (eq currentActiveTag 'speaker2') 'btnSpeaker2 active-button' 'btnSpeaker2'}}">Speaker 2</button>
-        <button type="button" class="btnScene {{ifThen (eq currentActiveTag 'scene') 'btnScene active-button' 'btnScene'}}">Scene</button>
+    <div class="totm-manager form-group" style="margin-top: 10px;">
+        <button type="button" class="totm-manager btnSpeaker1 {{ifThen (eq currentActiveTag 'speaker1') 'btnSpeaker1 active-button' 'btnSpeaker1'}}">Speaker 1</button>
+        <button type="button" class="totm-manager btnSpeaker2 {{ifThen (eq currentActiveTag 'speaker2') 'btnSpeaker2 active-button' 'btnSpeaker2'}}">Speaker 2</button>
+        <button type="button" class="totm-manager btnScene {{ifThen (eq currentActiveTag 'scene') 'btnScene active-button' 'btnScene'}}">Scene</button>
     </div>
 
     <hr style="margin: 10px 0; border-top: 1px solid var(--color-border-light-primary); border-bottom: 1px solid var(--color-border-light-primary);">
@@ -22,18 +22,18 @@
       <input type="text" id="image-search-bar" placeholder="Search by name or tag...">
       <div id="search-results"></div>
     </div>
-    <div class="form-group" style="margin-top: 10px;">
-        <button type="button" class="prev-image" style="margin-right: 5px;">Prev Image</button>
-        <button type="button" class="next-image">Next Image</button>
+    <div class="totm-manager form-group" style="margin-top: 10px;">
+        <button type="button" class="totm-manager prev-image" style="margin-right: 5px;">Prev Image</button>
+        <button type="button" class="totm-manager next-image">Next Image</button>
     </div>
 
     <!-- Image list and editing controls -->
-    <div class="form-group" style="overflow-y: auto;">
+    <div class="totm-manager form-group" style="overflow-y: auto;">
         {{#unless isEmpty}}
-        <ul id="image-path-list" class="path-list" style="list-style: none; padding: 0;">
+        <ul id="image-path-list" class="totm-manager path-list" style="list-style: none; padding: 0;">
             {{#each paths as |path index|}}
-            <li class="form-field" draggable="true" data-index="{{index}}" style="display: flex; align-items: center; cursor: grab; margin-bottom: 10px;">
-                <span class="handle" style="cursor: move; margin-right: 5px;">&#9776;</span>
+            <li class="totm-manager form-field" draggable="true" data-index="{{index}}" style="display: flex; align-items: center; cursor: grab; margin-bottom: 10px;">
+                <span class="totm-manager handle" style="cursor: move; margin-right: 5px;">&#9776;</span>
                 <span class="path-field" data-index="{{index}}" data-img="{{path.img}}" style="flex-grow: 1; min-width: 175px; max-width: 350px; margin-right: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 10px; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px; display: inline-block; line-height: 25px; height: 25px; align-items: center;">
                     {{path.displayImg}}
                 </span>
@@ -52,27 +52,27 @@
 
     <hr style="margin-top: -10px; border-top: 1px solid var(--color-border-light-primary); border-bottom: 1px solid var(--color-border-light-primary);">
 
-    <div class="form-group" style="margin-top: 10px;">
-        <button type="button" class="add-path">Add Image</button>
-        <button type="button" class="new-directory">Select Image Directory</button>
+    <div class="totm-manager form-group" style="margin-top: 10px;">
+        <button type="button" class="totm-manager add-path">Add Image</button>
+        <button type="button" class="totm-manager new-directory">Select Image Directory</button>
     </div>
 
-    <div class="form-group" style="margin-top: 10px;">
-        <button type="button" class="save-paths" style="color: green">Save Changes</button>
-        <button type="button" class="delete-all-paths" style="color: red">Delete All Images</button>
+    <div class="totm-manager form-group" style="margin-top: 10px;">
+        <button type="button" class="totm-manager save-paths" style="color: green">Save Changes</button>
+        <button type="button" class="totm-manager delete-all-paths" style="color: red">Delete All Images</button>
     </div>
-    <div class="form-group" style="margin-top: 10px;">
-        <button type="button" class="delete-filter" style="color: #8a6700">Delete Glow Filter</button>
-        <button type="button" class="delete-all-filters" style="color: maroon">Delete All Filters</button>
+    <div class="totm-manager form-group" style="margin-top: 10px;">
+        <button type="button" class="totm-manager delete-filter" style="color: #8a6700">Delete Glow Filter</button>
+        <button type="button" class="totm-manager delete-all-filters" style="color: maroon">Delete All Filters</button>
     </div>
   </form>
   </div>
   
-<div id="tab-2" class="tab" data-tab="tab-2">
+<div id="tab-2" class="totm-manager tab" data-tab="tab-2">
   <!-- New content for the Tiles tab goes here -->
   <form>
     <!-- Add your new Tile settings here -->
-    <div class="form-group">
+    <div class="totm-manager form-group">
       <p>Tile settings and controls will be added here.</p>
     </div>
   </form>

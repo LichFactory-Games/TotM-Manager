@@ -1,7 +1,7 @@
 <!-- Tile Buttons -->
-<div class="stage-buttons-container">
+<div class="totm-manager stage-buttons-container">
   {{#each tiles as |tile|}}
-    <button type="button" class="tile-button {{#if (eq ../currentActiveTag tile.name)}}active-button{{/if}}" data-tile-name="{{tile.name}}" data-tile-id="{{tile.id}}">{{tile.name}}</button>
+    <button type="button" class="totm-manager tile-button {{#if (eq ../currentActiveTag tile.name)}}active-button{{/if}}" data-tile-name="{{tile.name}}" data-tile-id="{{tile.id}}">{{tile.name}}</button>
   {{/each}}
 </div>
 

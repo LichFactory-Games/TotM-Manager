@@ -150,11 +150,11 @@ export  function updateTileFields(instance) {
     tileField.style.marginBottom = '10px';
 
     tileField.innerHTML = `
-      <span class="handle" data-order="${tile.order}" style="cursor: move; margin-right: 5px;">&#9776;</span>
+      <span class="totm-manager handle" data-order="${tile.order}" style="cursor: move; margin-right: 5px;">&#9776;</span>
       <input type="text" name="tile-name-${tile.order}" placeholder="Tile Name" value="${tile.name}" style="margin-right: 10px;">
       <input type="range" name="tile-opacity-${tile.order}" min="0.01" max="1" step="0.01" value="${tile.opacity}" style="margin-right: 10px;">
       <input type="color" name="tile-tint-${tile.order}" value="${tile.tint || '#ffffff'}" style="margin-right: 10px;">
-      <button type="button" class="delete-tile" data-order="${tile.order}"><i class="fas fa-trash"></i></button>
+      <button type="button" class="totm-manager delete-tile" data-order="${tile.order}"><i class="totm-manager fas fa-trash"></i></button>
     `;
 
     tileFieldsContainer.appendChild(tileField);

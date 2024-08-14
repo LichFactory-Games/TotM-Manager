@@ -38,12 +38,12 @@ function generateFields(instance, tileFieldsContainer, count) {
     const order = currentOrder + i; // Ensure unique order
 
     const tileField = $(`
-      <div class="tile-field" data-order="${order}" style="display: flex; align-items: center; margin-bottom: 10px;">
-        <span class="handle" data-order="handle-${order}" style="cursor: move; margin-right: 5px;">&#9776;</span>
+      <div class="totm-manager tile-field" data-order="${order}" style="display: flex; align-items: center; margin-bottom: 10px;">
+        <span class="totm-manager handle" data-order="handle-${order}" style="cursor: move; margin-right: 5px;">&#9776;</span>
         <input type="text" name="tile-name-${order}" placeholder="Tile Name" style="margin-right: 10px;">
         <input type="range" name="tile-opacity-${order}" min="0.01" max="1" step="0.01" value="1" style="margin-right: 10px;">
         <input type="color" name="tile-tint-${order}" value="#ffffff" style="margin-right: 10px;">
-<button type="button" class="delete-tile" data-order="${order}"><i class="fas fa-trash"></i></button>
+<button type="button" class="totm-manager delete-tile" data-order="${order}"><i class="totm-manager fas fa-trash"></i></button>
       </div>
     `);
 

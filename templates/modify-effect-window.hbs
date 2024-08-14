@@ -70,25 +70,25 @@
 
 
 <!-- modules/totm-manager/templates/modify-effect-window.hbs -->
-<form class="form-effect">
-  <div class="form-group">
+<form class="totm-manager form-effect">
+  <div class="totm-manager form-group">
     <!-- <label for="effectParams">Effect Parameters (JSON):</label> -->
     <textarea id="effectParams" name="effectParams" rows="20" cols="50">{{effectParams}}</textarea>
   </div>
-  <div class="form-colors">
+  <div class="totm-manager form-colors">
     <label id="colorLabel" for="colorPicker">Color: </label>
     <input type="color" id="colorPicker" name="colorPicker">
     <label for="numericalColor"></label>
     <input type="text" id="numericalColor" name="numericalColor" readonly>
   </div>
-  <div class="form-values">
+  <div class="totm-manager form-values">
     <label for="animatedColorVal1">Color Var1: </label>
     <input type="text" id="animatedColorVal1" name="animatedColorVal1" readonly>
 
     <label for="animatedColorVal2">Color Var2: </label>
     <input type="text" id="animatedColorVal2" name="animatedColorVal2" readonly>
   </div>
-  <div class="form-buttons">
+  <div class="totm-manager form-buttons">
     <button type="submit">Save</button>
   </div>
 </form>

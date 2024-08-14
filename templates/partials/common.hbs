@@ -2,9 +2,9 @@
 <hr style="margin-top: 10px; border-top: 1px solid var(--color-border-light-primary); border-bottom: 1px solid var(--color-border-light-primary);">
 
 
-<div class="form-group" style="margin-top: 10px; display: flex; align-items: center; height: 3em;">
-        <button type="button" class="delete-all-paths"><i class="fas fa-trash"></i> All</button>
-  <button type="button" class="delete-image"><i class="fas fa-trash"></i></button>
+<div class="totm-manager form-group" style="margin-top: 10px; display: flex; align-items: center; height: 3em;">
+        <button type="button" class="totm-manager delete-all-paths"><i class="totm-manager fas fa-trash"></i> All</button>
+  <button type="button" class="totm-manager delete-image"><i class="totm-manager fas fa-trash"></i></button>
   <select id="delete-image-dropdown" style="margin-left: 10px;">
     {{#each paths}}
     <option value="{{this.img}}" data-img="{{this.img}}">{{this.displayImg}}</option>
@@ -13,16 +13,16 @@
   <img id="delete-image-preview" src="" alt="Image preview" style="height: 3em; object-fit: contain; width: auto; display: none; border: 1px solid #ccc; border-radius: 4px; margin-left: 10px;">
 </div>
 
-<div class="form-group" style="margin-top: 10px; display: flex;">
+<div class="totm-manager form-group" style="margin-top: 10px; display: flex;">
 
 </div>
 
-<div class="form-group" style="margin-top: 10px;">
-  <button type="button" class="hide-reveal-tile">Hide/Reveal Tile</button>
+<div class="totm-manager form-group" style="margin-top: 10px;">
+  <button type="button" class="totm-manager hide-reveal-tile">Hide/Reveal Tile</button>
 </div>
 
-<div class="form-group" style="margin-top: 10px;" display: flex;>
-  <button type="button" class="delete-filter" style="color: #8a6700">Delete Glow Filter</button>
-  <button type="button" class="delete-all-filters" style="color: maroon">Delete All Filters</button>
+<div class="totm-manager form-group" style="margin-top: 10px;" display: flex;>
+  <button type="button" class="totm-manager delete-filter" style="color: #8a6700">Delete Glow Filter</button>
+  <button type="button" class="totm-manager delete-all-filters" style="color: maroon">Delete All Filters</button>
 </div>
 

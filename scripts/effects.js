@@ -354,12 +354,12 @@ function createEffectItem(targetType, targetName, effectName, effectId, tile, im
   const effectItem = document.createElement('div');
   effectItem.classList.add('effect-item');
   effectItem.innerHTML = `
-      <span class="effect-target-type">
-        ${targetType === 'Tile' ? '<i class="fas fa-cubes"></i>' : '<i class="fas fa-image"></i>'}
+      <span class="totm-manager effect-target-type">
+        ${targetType === 'Tile' ? '<i class="totm-manager fas fa-cubes"></i>' : '<i class="totm-manager fas fa-image"></i>'}
       </span>
-      <span class="effect-target-name">${targetType === 'Tile' ? tileName : targetName}</span>
-      <span class="effect-name">${effectName}</span>
-      <button class="remove-effect-button" data-effect-id="${effectId}"><i class="fas fa-trash"></i></button>
+      <span class="totm-manager effect-target-name">${targetType === 'Tile' ? tileName : targetName}</span>
+      <span class="totm-manager effect-name">${effectName}</span>
+      <button class="totm-manager remove-effect-button" data-effect-id="${effectId}"><i class="totm-manager fas fa-trash"></i></button>
     `;
 
   return effectItem;
