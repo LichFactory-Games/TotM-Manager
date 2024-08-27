@@ -27,7 +27,7 @@ async function fadeTile(tileDocument, fadeIn = true, targetAlpha = 1, duration =
 export async function activateImage(instance, image, index) {
   if (!instance.currentTile) {
     console.error("No currently active tile.");
-    ui.notifications.error("Error setting image. No tile is currently active.");
+    ui.notifications.warn("Error setting image. No tile is currently active.");
     return;
   }
 
@@ -38,36 +38,27 @@ export async function activateImage(instance, image, index) {
 
   if (!tileName) {
     console.error("Tile has no name set.");
-    ui.notifications.error("Error setting image. Tile has no name set.");
+    ui.notifications.warn("Error setting image. Tile has no name set.");
     return;
   }
 
-  // Log current tile information
   logMessage(`Activating image on tile ID: ${tileId}, Name: ${tileName}`);
   logMessage(`Image paths for tile:`, imagePaths);
 
-  // Check if the image transition effect is enabled
-  const enableTransition = game.settings.get('totm-manager', 'enableImageTransition');
-  const duration = game.settings.get('totm-manager', 'imageTransitionDuration');
-  const increment = game.settings.get('totm-manager', 'imageTransitionIncrement');
-  const targetAlpha = game.settings.get('totm-manager', 'imageTransitionTargetAlpha');
+  // Retrieve global settings for transition
+  const duration = game.settings.get(NAMESPACE, 'imageTransitionDuration');
+  const increment = game.settings.get(NAMESPACE, 'imageTransitionIncrement');
+  const targetAlpha = game.settings.get(NAMESPACE, 'imageTransitionTargetAlpha');
 
-  // Check if Token Magic effect is enabled
-  const effectName = game.settings.get('totm-manager', 'imageTransitionEffect');
-  let effectParams = JSON.parse(game.settings.get('totm-manager', 'imageTransitionEffectParams') || '{}');
+  // Retrieve transition effects if they exist
+  const transitionEffects = await tile.document.getFlag(NAMESPACE, 'transitionEffects') || [];
 
-  if (enableTransition) {
-    if (effectName) {
-      // Use default parameters if none are provided
-      if (Object.keys(effectParams).length === 0) {
-        effectParams = TokenMagic.getPreset(effectName);
-      }
-      logMessage("Applying transition effect:", effectParams);
-      // Apply the Token Magic effect before fading out
-      await TokenMagic.addFiltersOnSelected(effectName, false);
+  // Apply transition effects before changing the image
+  if (transitionEffects.length > 0) {
+    for (const { effectName, effectParams } of transitionEffects) {
+      logMessage(`Applying transition effect before image change: ${effectName}`, effectParams);
+      await TokenMagic.addFilters(tile, effectParams);
     }
-    // Fade out the tile to partial transparency before updating the image
-    await fadeTile(tile.document, false, targetAlpha, duration, increment); // Fade out to targetAlpha
   }
 
   // Deactivate effects of the previous image
@@ -79,17 +70,17 @@ export async function activateImage(instance, image, index) {
     logMessage(`Removed effects from previous image index: ${previousIndex}`);
   }
 
-  // Update the tile's texture and flag
-  logMessage(`Updating tile ID ${tileId} texture to: ${image.img}`);
+  // Update the tile's texture to the new image with a fade-out and fade-in effect
+  await fadeTile(tile.document, false, targetAlpha, duration, increment); // Fade out to targetAlpha
   await tile.document.update({ 'texture.src': image.img });
   await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
+  await fadeTile(tile.document, true, 1, duration, increment); // Fade in to full opacity
 
-  if (enableTransition) {
-    // Fade in the tile to full opacity after updating the image
-    await fadeTile(tile.document, true, 1, duration, increment); // Fade in to full opacity
-    if (effectName) {
-      // Remove the Token Magic effect after fading in
-      await TokenMagic.deleteFiltersOnSelected(effectName, false);
+  // Remove transition effects after the image change and transition is complete
+  if (transitionEffects.length > 0) {
+    for (const { effectName } of transitionEffects) {
+      logMessage(`Removing transition effect after image change: ${effectName}`);
+      await TokenMagic.deleteFilters(tile, effectName);
     }
   }
 
