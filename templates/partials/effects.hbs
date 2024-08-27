@@ -7,6 +7,7 @@
       <select id="target-dropdown" style="width: 100%;">
         <option value="tile">Tile</option>
         <option value="image">Image</option>
+        <option value="transitions">Transitions</option>
       </select>
     </div>
     <div id="tile-selection" style="flex-grow: 1;">
@@ -28,15 +29,22 @@
   
   <div id="current-effects-container">
     {{#each effects as |effect index|}}
-    <div class="totm-manager effect-item" data-order="{{effect.order}}">
-      <span id="current-target" class="totm-manager effect-target-type" data-index="{{index}}">
-        {{{ifThen (eq effect.targetType 'Tile') '<i class="totm-manager fas fa-cubes"></i>' '<i class="totm-manager fas fa-image"></i>'}}}
-      </span>
-      <span id="current-name" class="totm-manager effect-target-name" data-index="{{index}}">{{effect.targetName}}</span>
-      <span id="current-effect" class="totm-manager effect-name" data-index="{{index}}">{{effect.name}}</span>
-      {{! <button id="modify-effect-button" class="totm-manager effect-button"><i class="totm-manager fas fa-palette"></i></button> }}
-      <button type="button" id="remove-effect-button" class="totm-manager effect-button" data-order="{{effect.order}}"><i class="totm-manager fas fa-trash"></i></button>
-    </div>
+      <div class="totm-manager effect-item" data-order="{{effect.order}}">
+        <span id="current-target" class="totm-manager effect-target-type" data-index="{{index}}">
+          {{#if (eq effect.targetType 'Tile')}}
+            <i class="totm-manager fas fa-cubes"></i>
+          {{else if (eq effect.targetType 'Image')}}
+            <i class="totm-manager fas fa-image"></i>
+          {{else if (eq effect.targetType 'Transitions')}}
+            <i class="totm-manager fas fa-arrows-rotate"></i>
+          {{else}}
+            <i class="totm-manager fas fa-question-circle"></i> <!-- Default icon in case none match -->
+          {{/if}}
+        </span>
+        <span id="current-name" class="totm-manager effect-target-name" data-index="{{index}}">{{effect.targetName}}</span>
+        <span id="current-effect" class="totm-manager effect-name" data-index="{{index}}">{{effect.name}}</span>
+        <button type="button" id="remove-effect-button" class="totm-manager effect-button" data-order="{{effect.order}}"><i class="totm-manager fas fa-trash"></i></button>
+      </div>
     {{/each}}
   </div>
 

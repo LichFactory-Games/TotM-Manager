@@ -355,7 +355,10 @@ function createEffectItem(targetType, targetName, effectName, effectId, tile, im
   effectItem.classList.add('effect-item');
   effectItem.innerHTML = `
       <span class="totm-manager effect-target-type">
-        ${targetType === 'Tile' ? '<i class="totm-manager fas fa-cubes"></i>' : '<i class="totm-manager fas fa-image"></i>'}
+        ${targetType === 'Tile' ? '<i class="totm-manager fas fa-cubes"></i>' :
+          targetType === 'Image' ? '<i class="totm-manager fas fa-image"></i>' :
+          targetType === 'transitions' ? '<i class="totm-manager fas fa-arrows-rotate"></i>' :
+          '<i class="totm-manager fas fa-question-circle"></i>'} <!-- Fallback icon -->
       </span>
       <span class="totm-manager effect-target-name">${targetType === 'Tile' ? tileName : targetName}</span>
       <span class="totm-manager effect-name">${effectName}</span>

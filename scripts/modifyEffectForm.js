@@ -92,7 +92,7 @@ export class ModifyEffectForm extends FormApplication {
       const effectName = this.data.effect;
       const tileId = document.getElementById('tile-dropdown').value;
 
-      if (targetType === 'tile' || targetType === 'image') {
+      if (targetType === 'tile' || targetType === 'image' || targetType === 'transitions') {
         const imageId = targetType === 'image' ? document.getElementById('image-dropdown').value : null;
         await addEffect(instance, targetType, effectName, effectParams, tileId, imageId);
 
