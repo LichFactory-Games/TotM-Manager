@@ -362,11 +362,27 @@ export function activateEffectEventListeners(instance) {
     if (event.target.closest('.effect-item')) {
       const removeButton = event.target.closest('.remove-effect-button');
       const effectItem = removeButton.closest('.effect-item');
-      const targetType = effectItem.querySelector('.effect-target-type i').classList.contains('fa-cubes') ? 'tile' : 'image';
+
+      let targetType;
+      const targetIcon = effectItem.querySelector('.effect-target-type i');
+
+      if (targetIcon.classList.contains('fa-cubes')) {
+        targetType = 'tile';
+      } else if (targetIcon.classList.contains('fa-image')) {
+        targetType = 'image';
+      } else if (targetIcon.classList.contains('fa-arrows-rotate')) { // This is for transitions
+        targetType = 'transitions';
+      } else {
+        console.error("Unknown target type for effect removal.");
+        return;
+      }
+
       const effectName = effectItem.querySelector('.effect-name').textContent;
 
       // Call the removeEffect function with the correct context
       removeEffect(instance, targetType, effectName);
+      updateEffectsUI(instance);
+
     }
   });
 }
