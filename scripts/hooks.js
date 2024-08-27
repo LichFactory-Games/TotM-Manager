@@ -30,16 +30,6 @@ export function initializeHooks() {
   });
   console.log("TotM Manager | Finished registering keybinding for totm manager");
 
-  // Image transition effects
-  game.settings.register(moduleId, 'enableImageTransition', {
-    name: "Enable Image Transition",
-    hint: "Enable or disable transition effects when switching images.",
-    scope: 'world',
-    config: true,
-    type: Boolean,
-    default: false,
-  });
-
   game.settings.register(moduleId, 'imageTransitionDuration', {
     name: "Image Transition Duration",
     hint: "Duration of the image transition effect in milliseconds.",
@@ -69,43 +59,6 @@ export function initializeHooks() {
       min: 0,
       max: 1,
       step: 0.01
-    }
-  });
-
-  // Image transition effects
-  game.settings.register(moduleId, 'imageTransitionEffect', {
-    name: "Image Transition Effect",
-    hint: "Select the Token Magic effect to apply during the image transition.",
-    scope: 'world',
-    config: true,
-    type: String,
-    default: '',
-    choices: () => {
-      const presets = TokenMagic.getPresets();
-      let choices = { '': 'None' };
-
-      if (Array.isArray(presets)) {
-        presets.forEach(preset => {
-          if (preset.name) {
-            choices[preset.name] = preset.name.charAt(0).toUpperCase() + preset.name.slice(1);
-          }
-        });
-      }
-
-      return choices;
-    }
-  });
-
-  game.settings.register(moduleId, 'imageTransitionEffectParams', {
-    name: "Image Transition Effect Parameters",
-    hint: "Parameters for the selected Token Magic effect in JSON format.",
-    scope: 'world',
-    config: true,
-    type: String,
-    default: '{}',
-    onChange: (value) => {
-      // Optional: Handle any change logic if necessary
-      console.log("Image Transition Effect Parameters updated:", value);
     }
   });
 
@@ -175,29 +128,6 @@ export function initializeHooks() {
         button: true
       });
     }
-  });
-
-  Hooks.on('renderSettingsConfig', (app, html, data) => {
-    const effectNameSetting = html.find(`select[name="${moduleId}.imageTransitionEffect"]`);
-    const effectParamsSetting = html.find(`textarea[name="${moduleId}.imageTransitionEffectParams"]`);
-
-    effectNameSetting.on('change', async (event) => {
-      const effectName = event.target.value;
-      let effectParams = {};
-
-      if (effectName) {
-        effectParams = TokenMagic.getPreset(effectName) || {};
-      }
-
-      await game.settings.set(moduleId, 'imageTransitionEffect', effectName);
-      await game.settings.set(moduleId, 'imageTransitionEffectParams', JSON.stringify(effectParams));
-
-      // Update the input field with new parameters
-      effectParamsSetting.val(JSON.stringify(effectParams, null, 2));
-
-      // Re-render settings to reflect changes in parameters
-      app.render();
-    });
   });
 
   Hooks.on('canvasReady', () => {
