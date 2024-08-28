@@ -130,75 +130,113 @@ export async function removeEffect(instance, targetType, effectName) {
   const effectParams = await getEffectParams(effectName);
   if (!effectParams) {
     console.error(`No effect parameters found for effect name: ${effectName}`);
+    logMessage("No effect parameters found for effect name:", effectName);
     return;
   }
 
+  // Ensure effectParams is in array format
   const effectParamsArray = Array.isArray(effectParams) ? effectParams : [effectParams];
+  logMessage(`Removing effect: ${effectName} with parameters:`, effectParamsArray);
 
-  const tile = canvas.tiles.controlled[0];
+  let tile = canvas.tiles.controlled[0];
   if (!tile) {
     console.error("No active tile found to remove effect.");
+    logMessage("No active tile found to remove effect.");
     return;
   }
-  const tileId = tile.id;
+  logMessage("Tile found for removal:", tile);
+
+  let imageId = null;
 
   if (targetType === 'tile') {
+    // Handle tile-wide effects
     let tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects') || [];
+    logMessage("Tile effects before removal:", tileEffects);
+
     tileEffects = tileEffects.filter(effect => effect.filterId !== effectParamsArray[0].filterId);
+    logMessage("Tile effects after removal:", tileEffects);
+
+    // Update the tileEffects flag on the tile document
     await tile.document.setFlag(NAMESPACE, 'tileEffects', tileEffects);
-    console.log(`Effect removed from tile.`);
-  } else if (targetType === 'transitions') {
-    const transitionEffects = await tile.document.getFlag(NAMESPACE, 'transitionEffects') || [];
-    console.log("Current transition effects before removal:", transitionEffects);
+    logMessage("Tile effects flag updated.");
 
-    const updatedEffects = transitionEffects.filter(effect => effect.effectName !== effectName);
-    await tile.document.setFlag(NAMESPACE, 'transitionEffects', updatedEffects);
-
-    console.log("Updated transition effects after removal:", updatedEffects);
-
-    if (updatedEffects.length === 0) {
-      console.log("No transition effects remain on the tile.");
-    } else {
-      console.log(`Transition effect ${effectName} removed from tile ID: ${tileId}`);
-    }
   } else if (targetType === 'image') {
+    // Handle image-specific effects
     const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths');
     if (!imagePaths) {
       console.error("No image paths found on the tile.");
+      logMessage("No image paths found on the tile.");
       return;
     }
+    logMessage("Image paths found on the tile:", imagePaths);
 
-    console.log("Image paths on tile:", imagePaths);
+    // Use imageId for better targeting if necessary, fallback to existing logic
+    imageId = document.querySelector('.effect-item .effect-target-name').textContent || null;
+    logMessage("Image ID for effect removal:", imageId);
 
-    const image = imagePaths.find(img => img.effects && img.effects.some(effect => effect.filterId === effectParamsArray[0].filterId));
-
-    if (!image) {
+    const imageIndex = imagePaths.findIndex(img => img.displayImg === imageId);
+    if (imageIndex === -1) {
       console.error("No image found to remove effect.");
+      logMessage("No image found to remove effect.");
       return;
     }
 
-    console.log("Found image to remove effect from:", image);
+    const image = imagePaths[imageIndex];
+    logMessage("Image found for effect removal:", image);
 
-    // Remove the effect from the image
-    image.effects = image.effects.filter(effect => effect.filterId !== effectParamsArray[0].filterId);
+    // Remove the effect from the nested effects array
+    image.effects = image.effects.map(effectArray => {
+      if (Array.isArray(effectArray)) {
+        return effectArray.filter(effect => effect.filterId !== effectParamsArray[0].filterId);
+      }
+      return effectArray;
+    }).filter(effectArray => effectArray.length > 0);
 
+    logMessage("Image effects after removal:", image.effects);
+
+    // Remove empty effect arrays
     if (image.effects.length === 0) {
       delete image.effects;
     }
 
+    // Update the imagePaths flag on the tile document
+    imagePaths[imageIndex] = image;
     await tile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
+    logMessage("Image paths flag updated.");
+
+  } else if (targetType === 'transitions') {
+    // Handle transition effects
+    const transitionEffects = await tile.document.getFlag(NAMESPACE, 'transitionEffects') || [];
+    logMessage("Transition effects before removal:", transitionEffects);
+
+    const updatedEffects = transitionEffects.filter(effect => effect.effectName !== effectName);
+    await tile.document.setFlag(NAMESPACE, 'transitionEffects', updatedEffects);
+
+    logMessage("Updated transition effects after removal:", updatedEffects);
+
+    if (updatedEffects.length === 0) {
+      logMessage("No transition effects remain on the tile.");
+    } else {
+      logMessage(`Transition effect ${effectName} removed from tile ID: ${tile.id}`);
+    }
   }
 
-  // Remove the effect using TokenMagic
   if (tile) {
+    logMessage("Tile before effect removal using TokenMagic:", tile);
+
+    // Remove effect using TokenMagic
     await removeTokenMagicEffect(tile, effectParamsArray, targetType === 'tile' || targetType === 'transitions');
-    await updateEffectsData(tile, effectParamsArray, false, targetType === 'tile');
+    logMessage("Effect removed using TokenMagic.");
+
+    // Update the tile's effect data
+    await updateEffectsData(tile, effectParamsArray, false, targetType === 'tile', imageId);
+    logMessage("Tile's effect data updated.");
+
+    // Update the UI to reflect changes
+    await updateEffectsUI(instance);
+    logMessage(`Effect ${effectName} removed from ${targetType}.`);
   }
-
-  // Update the UI to reflect the removal
-  updateEffectsUI(instance);
 }
-
 
 ///////////////////////////
 // Token Magic Functions //
