@@ -23,24 +23,38 @@ export class TotMForm extends FormApplication {
 
   // Override the render method to implement the singleton pattern
   static renderSingleton() {
+    console.log("TotM Manager: renderSingleton called");
     if (!this._instance) {
+      console.log("TotM Manager: Creating new instance");
       this._instance = new this();
     }
 
-    if (this._instance.element.is(':visible')) {
-      this._instance.element.hide();
+    // Toggle window
+    if (this._instance._state === Application.RENDER_STATES.RENDERED) {
+      console.log("TotM Manager: Closing window");
+      this._instance.close();
     } else {
-      this._instance.currentTile = canvas.tiles.controlled[0] || this._instance.currentTile; // Ensure current tile is set on reopening
+      console.log("TotM Manager: Opening window");
+      this._instance.currentTile = canvas.tiles.controlled[0] || this._instance.currentTile;
+      console.log("TotM Manager: Current tile set to", this._instance.currentTile?.id);
       this._instance.render(true);
     }
   }
 
-  // Override the close method to hide the window instead of closing it
-  close(options = {}) {
-    console.log("Hiding TotM Manager window");
-    this.element.hide();
-    // Remove the line that sets the rendered state
-    return super.close(options);
+  async close(options={}) {
+    console.log("TotM Manager: Closing window");
+    await super.close(options);
+    // Don't set _instance to null, just update the state
+    this._state = Application.RENDER_STATES.CLOSED;
+    return this;
+  }
+
+  async render(force=false, options={}) {
+    console.log("TotM Manager: Rendering window");
+    if (this._state === Application.RENDER_STATES.CLOSED) {
+      this._state = Application.RENDER_STATES.RENDERING;
+    }
+    return super.render(force, options);
   }
 
   static get defaultOptions() {

@@ -104,18 +104,10 @@ export function initializeHooks() {
     default: 200
   });
 
-  // Hook into the getSceneControlButtons event
-  Hooks.on("getSceneControlButtons", controls => {
-    console.log("TotM Manager: getSceneControlButtons hook called");
-
-    // Ensure the canvas and scene are ready
-    if (!canvas.ready || !game.scenes.active) {
-      console.warn("TotM Manager: Canvas or active scene not yet ready, delay getSceneControlButtons operations.");
-      return;
-    }
-
+  function addTotMButton(controls) {
+    console.log("TotM Manager: Attempting to add button");
     let tileControl = controls.find(c => c.name === "tiles");
-    if (tileControl) {
+    if (tileControl && !tileControl.tools.some(t => t.name === "totmManager")) {
       console.log("TotM Manager: Adding button to tile controls");
       tileControl.tools.push({
         name: "totmManager",
@@ -123,10 +115,25 @@ export function initializeHooks() {
         icon: "fas fa-mask",
         onClick: () => {
           console.log("TotM Manager: Button clicked");
-          TotMForm.renderSingleton(); // Render the singleton instance
+          TotMForm.renderSingleton();
         },
         button: true
       });
+      return true;
+    }
+    return false;
+  }
+
+
+  // Hook into the getSceneControlButtons event
+  Hooks.on("getSceneControlButtons", (controls) => {
+    console.log("TotM Manager: getSceneControlButtons hook called");
+    if (canvas.ready && game.scenes.active) {
+      if (addTotMButton(controls)) {
+        ui.controls.render();
+      }
+    } else {
+      console.warn("TotM Manager: Canvas or active scene not yet ready, delaying button addition.");
     }
   });
 
@@ -144,9 +151,17 @@ export function initializeHooks() {
       return;
     }
 
-    // Check if the TotMForm instance is rendered
-    if (TotMForm._instance && TotMForm._instance.rendered) {
-      TotMForm._instance.refreshManagerData(); // Refresh manager data if instance is rendered
+    if (canvas.ready && game.scenes.active) {
+      if (addTotMButton(ui.controls.controls)) {
+        ui.controls.render();
+      }
+
+      // Refresh the form if it's open
+      if (TotMForm._instance && TotMForm._instance.rendered) {
+        TotMForm._instance.render(true);
+      }
+    } else {
+      console.warn("TotM Manager: Canvas or active scene not ready in canvasReady hook.");
     }
   });
 
