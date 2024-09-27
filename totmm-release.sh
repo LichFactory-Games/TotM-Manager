@@ -2,7 +2,7 @@
 
 # Define variables
 MODULE_JSON="module.json"
-PATH_DIR="/Users/roambot/bin/foundry-modules"
+PATH_DIR="/Users/roambot/bin/foundry-modules/totmm-module/"
 MODULE_DIR="$PATH_DIR/totm-manager"
 RELEASE_DIR="../release"
 MAIN_BRANCH="main"
