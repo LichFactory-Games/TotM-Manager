@@ -57,8 +57,9 @@ export class TotMForm extends FormApplication {
     return super.render(force, options);
   }
 
+
   static get defaultOptions() {
-    return mergeObject(super.defaultOptions, {
+    return foundry.utils.mergeObject(super.defaultOptions, {
       title: "TotM Manager",
       template: "modules/totm-manager/templates/totmm-window.hbs",
       width: 400,

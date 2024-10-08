@@ -4,7 +4,7 @@
   "version": "0.8.65",
   "compatibility": {
     "minimum": "10",
-    "verified": "12"
+    "verified": "12.331"
   },
   "relationships": {
     "requires": [
@@ -18,7 +18,8 @@
       },
       {
         "id": "tagger",
-        "type": "module"
+        "type": "module",
+        "compatibility": {}
       },
       {
         "id": "tokenmagic",
@@ -35,7 +36,8 @@
   "download": "https://github.com/LichFactory-Games/TotM-Manager/releases/download/v0.8.65/TotM-Manager-v0.8.65.zip",
   "authors": [
     {
-      "name": "LichLife"
+      "name": "LichLife",
+      "flags": {}
     }
   ],
   "styles": [
