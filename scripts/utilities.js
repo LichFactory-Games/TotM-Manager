@@ -138,9 +138,8 @@ export async function activateTile(instance, tile) {
 
   // Ensure the parent scene is active
   if (!tile.scene || !tile.scene.active) {
-    console.error("Tile's parent scene is not active or missing:", tile.scene);
-    return;
-  }
+    console.warn("Tile's parent scene is not active or missing:", tile.scene);
+    }
 
   // Log tile properties for debugging
   console.log("Tile properties:", {

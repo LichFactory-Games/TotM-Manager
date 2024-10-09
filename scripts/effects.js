@@ -414,7 +414,7 @@ function createEffectItem(targetType, targetName, effectName, effectId, tile, im
 export async function updateEffectsUI(instance) {
   const tile = canvas.tiles.controlled[0];
   if (!tile) {
-    console.error("No tile provided.");
+    console.warn("No tile provided; skip effects update.");
     return;
   }
 
