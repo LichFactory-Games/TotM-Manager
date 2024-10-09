@@ -1,8 +1,9 @@
 <!-- Tile Buttons -->
 <div class="totm-manager stage-buttons-container">
-  {{#each tiles as |tile|}}
-    <button type="button" class="totm-manager tile-button {{#if (eq ../currentActiveTag tile.name)}}active-button{{/if}}" data-tile-name="{{tile.name}}" data-tile-id="{{tile.id}}">{{tile.name}}</button>
-  {{/each}}
+  <div class="totm-manager button-grid">
+    {{#each tiles as |tile|}}
+      <button type="button" class="totm-manager tile-button {{#if (eq ../currentActiveTag tile.name)}}active-button{{/if}}" data-tile-name="{{tile.name}}" data-tile-id="{{tile.id}}">{{tile.name}}</button>
+    {{/each}}
+  </div>
+  <hr style="margin: 10px 0; border-top: 1px solid var(--color-border-light-primary); border-bottom: 1px solid var(--color-border-light-primary);">
 </div>
-
-<hr style="margin: 10px 0; border-top: 1px solid var(--color-border-light-primary); border-bottom: 1px solid var(--color-border-light-primary);">

@@ -411,8 +411,8 @@ function createEffectItem(targetType, targetName, effectName, effectId, tile, im
 
 ////
 
-export async function updateEffectsUI(instance) {
-  const tile = canvas.tiles.controlled[0];
+export async function updateEffectsUI(instance, tile) {
+
   if (!tile) {
     console.warn("No tile provided; skip effects update.");
     return;

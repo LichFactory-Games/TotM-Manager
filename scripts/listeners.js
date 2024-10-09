@@ -36,6 +36,7 @@ export function activateGeneralListeners(instance, html) {
     if (!instance.currentTile || !instance.currentTile.document) {
       console.warn("No current tile is selected or missing document property.");
       return;
+
     }
 
     // Retrieve the image paths from the tile flags
@@ -341,18 +342,9 @@ export function activateEffectEventListeners(instance) {
         instance.currentTile = tile;
         await loadTileImages(instance, tile);
         // Update the current effects list when a tile is selected
-        updateEffectsUI(tile, instance);
+        updateEffectsUI(instance, tile);
       } else {
         console.error("No tile found with the selected ID.");
-      }
-    }
-  });
-
-  // Event listener for switching to effects tab
-  document.querySelector('.tabs').addEventListener('click', (event) => {
-    if (event.target.dataset.tab === 'effects') {
-      if (instance.currentTile) {
-        updateEffectsUI(tile, instance);
       }
     }
   });
@@ -378,10 +370,13 @@ export function activateEffectEventListeners(instance) {
       }
 
       const effectName = effectItem.querySelector('.effect-name').textContent;
+      const tileId = event.target.value;
+      const tile = canvas.tiles.get(tileId);
 
       // Call the removeEffect function with the correct context
       removeEffect(instance, targetType, effectName);
-      updateEffectsUI(instance);
+      updateEffectsUI(instance, tile);
+      instance.render(true);
 
     }
   });

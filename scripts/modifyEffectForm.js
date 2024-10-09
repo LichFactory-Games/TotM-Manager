@@ -98,7 +98,8 @@ export class ModifyEffectForm extends FormApplication {
 
         // Update current effects list
         const tile = canvas.tiles.get(tileId);
-        await updateEffectsUI(tile); // Ensure this is awaited
+        await updateEffectsUI(instance, tile); // Ensure this is awaited
+        instance.render(true);
       } else {
         console.error("Invalid target type.");
       }

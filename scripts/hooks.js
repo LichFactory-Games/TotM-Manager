@@ -144,10 +144,18 @@ export function initializeHooks() {
       return;
     }
 
+    // Check if TotMForm._instance is initialized
+    if (!TotMForm._instance) {
+      console.warn("TotM Manager: TotMForm instance not initialized.");
+      return;
+    }
+
     // Check if there are any tiles on the canvas
     const tiles = canvas.tiles?.placeables;
     if (!tiles || tiles.length === 0) {
       console.warn("TotM Manager: No tiles found on the canvas, skipping refreshManagerData.");
+      TotMForm._instance.clearTileUI();
+      console.warn("TotM Manager: Clearing TotM Manager UI.");
       return;
     }
 
@@ -155,14 +163,14 @@ export function initializeHooks() {
       if (addTotMButton(ui.controls.controls)) {
         ui.controls.render();
       }
+    }
 
-      // Refresh the form if it's open
-      if (TotMForm._instance && TotMForm._instance.rendered) {
-        TotMForm._instance.render(true);
-      }
+    // Refresh the form if it's open
+    if (TotMForm._instance && TotMForm._instance.rendered) {
+      TotMForm._instance.refreshManagerData();
     } else {
       console.warn("TotM Manager: Canvas or active scene not ready in canvasReady hook.");
-    }
+      }
   });
 
   Hooks.on('createTile', (tile, options, userId) => {

@@ -21,24 +21,38 @@ export class TotMForm extends FormApplication {
   // Add a static property to hold the singleton instance
   static _instance = null;
 
-  // Override the render method to implement the singleton pattern
-  static renderSingleton() {
-    console.log("TotM Manager: renderSingleton called");
+  static getInstance() {
     if (!this._instance) {
-      console.log("TotM Manager: Creating new instance");
       this._instance = new this();
     }
+    return this._instance;
+  }
+
+  static renderSingleton() {
+    console.log("TotM Manager: renderSingleton called");
+    const instance = this.getInstance();
 
     // Toggle window
-    if (this._instance._state === Application.RENDER_STATES.RENDERED) {
+    if (instance._state === Application.RENDER_STATES.RENDERED) {
       console.log("TotM Manager: Closing window");
-      this._instance.close();
+      instance.close();
     } else {
       console.log("TotM Manager: Opening window");
-      this._instance.currentTile = canvas.tiles.controlled[0] || this._instance.currentTile;
-      console.log("TotM Manager: Current tile set to", this._instance.currentTile?.id);
-      this._instance.render(true);
+      instance.updateCurrentTile();
+      instance.refreshManagerData();
+      instance.render(true);
     }
+  }
+
+  updateCurrentTile() {
+    if (!canvas.ready) {
+      console.warn("Canvas is not ready. Deferring tile update.");
+      return;
+    }
+
+    this.currentTile = canvas.tiles.controlled[0] || this.currentTile;
+    // this.currentTile = canvas.tiles.controlled[0] || canvas.tiles.placeables[0] || null;
+    console.log("TotM Manager: Current tile set to", this.currentTile?.id || "None");
   }
 
   async close(options={}) {
@@ -54,6 +68,7 @@ export class TotMForm extends FormApplication {
     if (this._state === Application.RENDER_STATES.CLOSED) {
       this._state = Application.RENDER_STATES.RENDERING;
     }
+
     return super.render(force, options);
   }
 
@@ -130,60 +145,68 @@ export class TotMForm extends FormApplication {
     await this._updateButtons();
   }
 
-  async _initializeTileManager() {
-    logMessage("Initializing Tile Manager...");
-
+  async _loadTileData() {
     logMessage("Loading tile data...");
+
+    if (!canvas.tiles || canvas.tiles.placeables.length === 0) {
+      this.clearTileUI();  // Clear the UI if no tiles are found
+      logMessage("No tiles found on the canvas. Skipping tile data loading.");
+      return false;
+    }
+
     await loadTileData(this);
     logMessage("Tile data loaded:", this.tiles);
 
-    // Retrieve the initial tile tag from settings
     const initialTag = game.settings.get(NAMESPACE, 'initialTileTag');
     logMessage("Initial tile tag retrieved from settings:", initialTag);
 
     let initialTile = null;
-
-    // Check if the initial tag is not null or empty
     if (initialTag) {
-      // Find the tile by tag using Tagger
       initialTile = findAndSwitchToTileByTag(this, initialTag, false);
       logMessage("Tile found with initial tag:", initialTile);
     }
 
-    // Fallback to the first tile with any name flag if no tile found by tag
-    if (!initialTag) {
-      // Ensure there are tiles on the canvas
-      if (canvas.tiles.placeables.length > 0) {
-
-        // Activate the tiles layer
-        canvas.tiles.activate();
-
-        // Select the first tile
-        let firstTile = canvas.tiles.placeables[0];
-        let result = firstTile.control();
-
-        if (result) {
-          const tileName = await firstTile.document.getFlag(NAMESPACE, 'tileName'); // Await if getFlag is async
-          logMessage(`Selected the first tile with ID: ${firstTile.id} and name: ${tileName}`);
-          initialTile = firstTile;
-          logMessage(`Fallback: Set current tile to tilename: ${tileName} and ID ${initialTile.id}`);
-        } else {
-          logMessage("Fallback: No tile found with any name flag.");
-        }
-      } else {
-        logMessage("No tiles found on the canvas.");
-      }
+    if (!initialTile && canvas.tiles.placeables.length > 0) {
+      initialTile = canvas.tiles.placeables[0];
+      const tileName = await initialTile.document.getFlag(NAMESPACE, 'tileName');
+      logMessage(`Fallback: Set current tile to tilename: ${tileName} and ID ${initialTile.id}`);
     }
 
-    // Check and activate the initial tile
     if (initialTile) {
-      logMessage("Activating initial tile:", initialTile);
-      activateTile(this, initialTile);
-      this.currentTile = initialTile; // Set the current tile
-      await loadTileImages(this, initialTile); // Ensure 'initialTile' is passed correctly
-      logMessage('*Load tile images for initial tile.');
+      this.currentTile = initialTile;
+      await loadTileImages(this, initialTile);
+      logMessage('Loaded tile images for initial tile.');
+
+      const imgIndex = await this.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
+      if (imgIndex !== undefined && imgIndex >= 0) {
+        this.currentImageIndex = imgIndex;
+      }
     } else {
       console.warn("No tile found to set as current tile.");
+    }
+
+    logMessage("Tile data loading completed.");
+    return true;
+  }
+
+  async _initializeTileManager() {
+    logMessage("Initializing Tile Manager...");
+
+    // Delegate the tile data loading to _loadTileData
+    const tileDataLoaded = await this._loadTileData();
+    if (!tileDataLoaded) {
+      logMessage("Tile data not loaded. Skipping further tile manager initialization.");
+      return;
+    }
+
+    // Ensure the current tile is set after loading tile data
+    if (this.currentTile) {
+      logMessage("Activating current tile:", this.currentTile);
+      activateTile(this, this.currentTile); // Activate the current tile
+      await loadTileImages(this, this.currentTile); // Load images for the current tile
+      logMessage('*Load tile images for current tile.');
+    } else {
+      console.warn("No tile found to activate.");
     }
 
     // Update buttons & fields
@@ -197,6 +220,7 @@ export class TotMForm extends FormApplication {
     await updateActiveTileButton(this);
     logMessage('*Update active tile button.');
 
+    // Update the active image button if an image index is available
     if (this.currentTile) {
       const imgIndex = await this.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
       if (imgIndex !== undefined && imgIndex >= 0) {
@@ -240,7 +264,7 @@ export class TotMForm extends FormApplication {
       if (!imagePaths) {
         console.warn(`No image paths found for tile ${this.currentTile.id}`);
       }
-      updateEffectsUI(this);
+      updateEffectsUI(this, this.currentTile);
     } else {
       console.warn("No current tile selected.");
     }
@@ -298,21 +322,88 @@ export class TotMForm extends FormApplication {
     logMessage("Refreshing Theatre of the Mind Manager data...");
 
     // Delay initialization until DOM is ready
-    logMessage("Initializing tabs");
+    logMessage("Loading Manager Data.");
     await new Promise(requestAnimationFrame);
-    this._initializeTabs();
-
-    // Initialize tile manager
-    await new Promise(requestAnimationFrame);
-    await this._initializeTileManager();
-
-    // Initialize effects manager
-    await new Promise(requestAnimationFrame);
-    await this._initializeEffectsManager();
-
-    // Update active buttons
-    await this._updateButtons();
+    await this._loadTileData()
 
     logMessage("Theatre of the Mind Manager data refresh complete.");
   }
+
+  async clearTileUI() {
+    logMessage("Clearing relevant tile-related UI elements...");
+
+    // Reset current tile to ensure no lingering tile from previous scenes
+    this.currentTile = null;
+    this.currentImageIndex = null; // Also clear image index if necessary
+
+    // Clear tile fields in the 'Tiles' tab
+    const tileFieldsContainer = document.querySelector('#tile-fields-container');
+    if (tileFieldsContainer) {
+      tileFieldsContainer.innerHTML = '';  // Clear the tile fields container
+    }
+
+    // Clear the image path list in the 'Stage' tab
+    const imagePathList = document.querySelector('#image-path-list');
+    if (imagePathList) {
+      imagePathList.innerHTML = '';  // Clear the image paths list
+    }
+
+    // Clear the stage buttons on **all tabs** (not just the active tab)
+    const stageButtonsContainers = document.querySelectorAll('.totm-manager.stage-buttons-container');
+    stageButtonsContainers.forEach(container => {
+      container.innerHTML = '';  // Clear the buttons on each tab
+    });
+
+    // Clear the search bar input in the 'Stage' tab
+    const imageSearchBar = document.querySelector('#image-search-bar');
+    if (imageSearchBar) {
+      imageSearchBar.value = '';  // Clear the search bar input
+    }
+
+    // Clear the search results in the 'Stage' tab
+    const searchResults = document.querySelector('#search-results');
+    if (searchResults) {
+      searchResults.innerHTML = '';  // Clear search results
+    }
+
+    // Clear the delete image dropdown in the 'Effects' tab
+    const deleteImageDropdown = document.querySelector('#delete-image-dropdown');
+    if (deleteImageDropdown) {
+      deleteImageDropdown.innerHTML = '';  // Clear all options in the delete image drop-down
+    }
+
+    // Clear the tile dropdown for visibility in the 'Effects' tab
+    const tileDropdown = document.querySelector('#tile-dropdown');
+    if (tileDropdown) {
+      tileDropdown.innerHTML = '';  // Clear all options in the tile drop-down
+    }
+
+    // Clear the delete image preview in the 'Effects' tab
+    const deleteImagePreview = document.querySelector('#delete-image-preview');
+    if (deleteImagePreview) {
+      deleteImagePreview.src = '';  // Clear the image source of the delete preview
+      deleteImagePreview.style.display = 'none';  // Hide the image preview
+    }
+
+    // Clear the effect dropdown in the 'Effects' tab
+    const effectDropdown = document.querySelector('#effect-dropdown');
+    if (effectDropdown) {
+      effectDropdown.innerHTML = '';  // Clear the options for effect selection
+    }
+
+    // Clear the current effects container in the 'Effects' tab
+    const currentEffectsContainer = document.querySelector('#current-effects-container');
+    if (currentEffectsContainer) {
+      currentEffectsContainer.innerHTML = '';  // Clear any current effects listed
+    }
+
+    // Optionally, reset any other UI components related to tiles
+    this.currentTile = null;
+    this.currentImageIndex = null;
+
+
+    logMessage("Relevant UI cleared in #totm-manager.");
+  }
+
+
 }

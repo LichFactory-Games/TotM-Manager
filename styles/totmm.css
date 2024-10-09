@@ -27,10 +27,20 @@
     background-color: var(--color-background-hover);
 }
 
-.totm-manager .stage-buttons-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: 5px;
+.totm-manager.stage-buttons-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Align items at the top */
+}
+
+.totm-manager.button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Adjust column size as needed */
+  grid-gap: 10px; /* Space between buttons */
+}
+
+.totm-manager.stage-buttons-container hr {
+  margin-top: auto; /* Push the hr to the bottom */
 }
 
 .totm-manager .tile-button {
