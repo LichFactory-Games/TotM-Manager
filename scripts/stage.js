@@ -28,6 +28,51 @@ async function fadeTile(tileDocument, fadeIn = true, targetAlpha = 1, duration =
   }
 }
 
+async function adjustAspectRatio(tile) {
+  if (!tile || !tile.document) {
+    ui.notifications.error("No tile selected or invalid tile.");
+    return;
+  }
+
+  // Get the image path
+  const imagePath = tile.document.texture.src;
+  if (!imagePath) {
+    ui.notifications.error("Tile does not have an image set.");
+    return;
+  }
+
+  // Load the image to get its natural dimensions
+  const texture = await loadTexture(imagePath);
+  const { width: imgWidth, height: imgHeight } = texture.baseTexture;
+
+  if (imgWidth === 0 || imgHeight === 0) {
+    ui.notifications.error("Failed to load image or invalid image dimensions.");
+    return;
+  }
+
+  // Calculate the aspect ratio of the image
+  const aspectRatio = imgWidth / imgHeight;
+
+  // Get the original tile's dimensions
+  const originalWidth = tile.document.width;
+  const originalHeight = tile.document.height;
+
+  // Calculate the original area of the tile
+  const originalArea = originalWidth * originalHeight;
+
+  // Calculate new dimensions while maintaining the original area
+  const newWidth = Math.sqrt(originalArea * aspectRatio);
+  const newHeight = newWidth / aspectRatio;
+
+  // Update the tile's size to match the image's aspect ratio but retain the original area
+  await tile.document.update({
+    width: newWidth,
+    height: newHeight,
+  });
+
+  console.log(`Tile resized to match image aspect ratio while maintaining size. New dimensions: ${newWidth} x ${newHeight}`);
+}
+
 export async function activateImage(instance, image, index) {
   if (!game.user.isGM) {
     console.log("User is not GM. Skipping activateImage.");
@@ -78,10 +123,22 @@ export async function activateImage(instance, image, index) {
     logMessage(`Removed effects from previous image index: ${previousIndex}`);
   }
 
-  // Update the tile's texture to the new image with a fade-out and fade-in effect
+  // Fade out the tile's current image
   await fadeTile(tile.document, false, targetAlpha, duration, increment); // Fade out to targetAlpha
+
+  // Update the tile's texture to the new image
   await tile.document.update({ 'texture.src': image.img });
   await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
+
+  // Check for the "adjustAR" tag using Tagger and adjust aspect ratio
+  const tileTags = await Tagger.getTags(tile);
+  const shouldAdjustAspectRatio = tileTags.includes('adjustAR');
+  if (shouldAdjustAspectRatio) {
+    // Ensure the aspect ratio is adjusted *after* the image is loaded
+    await adjustAspectRatio(tile);
+  }
+
+  // Fade in the new image
   await fadeTile(tile.document, true, 1, duration, increment); // Fade in to full opacity
 
   // Remove transition effects after the image change and transition is complete
@@ -118,7 +175,6 @@ export async function activateImage(instance, image, index) {
   instance.render();
   logMessage(`Image ${image.displayImg} activated on tile ID: ${tileId}.`);
 }
-
 
 export async function cycleImages(instance, tile, direction) {
   if (!game.user.isGM) {
