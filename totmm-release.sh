@@ -12,6 +12,17 @@ EXCLUDE_FILES=("screenshots" "totmm-release.sh" ".git" ".gitignore" "totmm-relea
 CURRENT_DIR=$(pwd)
 DEV_DIR="/Volumes/airserver/fvtt-dir/Data/modules"
 
+# Foundry API endpoint
+FOUNDRY_API_ENDPOINT="https://api.foundryvtt.com/_api/packages/release_version/"
+
+# Get the Foundry API token from the environment variable
+FOUNDRY_API_TOKEN="$FOUNDRY_API_TOKEN"
+
+# Check if the API token is set
+if [ -z "$FOUNDRY_API_TOKEN" ]; then
+  echo "Error: FOUNDRY_API_TOKEN is not set. Please set it as an environment variable."
+  exit 1
+fi
 
 # Check if jq is installed
 if ! command -v jq &> /dev/null; then
@@ -30,6 +41,11 @@ get_version() {
   jq -r '.version' "$MODULE_JSON"
 }
 
+# Function to get the package ID from module.json
+get_package_id() {
+  jq -r '.id' "$MODULE_JSON"
+}
+
 # Check for development flag
 DEVELOPMENT=false
 if [ "$1" == "--dev" ]; then
@@ -37,19 +53,17 @@ if [ "$1" == "--dev" ]; then
   echo "Development flag detected. Creating unzipped release directory without changing version, committing, or uploading."
 fi
 
-
 if [ "$DEVELOPMENT" = false ]; then
-# Check if on the main branch
-current_branch=$(git branch --show-current)
-if [ "$current_branch" != "$MAIN_BRANCH" ]; then
-  echo "You are not on the $MAIN_BRANCH branch. Please switch to $MAIN_BRANCH and try again."
-  exit 1
-fi
+  # Check if on the main branch
+  current_branch=$(git branch --show-current)
+  if [ "$current_branch" != "$MAIN_BRANCH" ]; then
+    echo "You are not on the $MAIN_BRANCH branch. Please switch to $MAIN_BRANCH and try again."
+    exit 1
+  fi
 
-# Pull the latest changes
-git pull origin "$MAIN_BRANCH"
+  # Pull the latest changes
+  git pull origin "$MAIN_BRANCH"
 fi
-
 
 if [ "$DEVELOPMENT" = false ]; then
   # Get the current version
@@ -135,12 +149,61 @@ if [ "$DEVELOPMENT" = false ]; then
   echo "Release $new_version created successfully as $RELEASE_ZIP."
 
   # Create a GitHub release and upload assets
-  echo "Creating Github release."
+  echo "Creating GitHub release."
   gh release create "v$new_version" "../$RELEASE_ZIP" --title "TotM-Manager-v$new_version" --notes "$release_notes" "$MODULE_JSON"
+
+  # Get the package ID
+  PACKAGE_ID=$(get_package_id)
+
+  # Construct the JSON payload for the API request
+  API_JSON_PAYLOAD=$(jq -n \
+    --arg id "$PACKAGE_ID" \
+    --arg version "$new_version" \
+    --arg manifest "$DOWNLOAD_BASE_URL/v$new_version/module.json" \
+    --arg notes "$REPO_URL/releases/tag/v$new_version" \
+    --arg minFoundryVersion "11" \
+    --arg verifiedFoundryVersion "12.331" \
+    '{
+      id: $id,
+      "dry-run": false,
+      release: {
+        version: $version,
+        manifest: $manifest,
+        notes: $notes,
+        compatibility: {
+          minimum: $minFoundryVersion,
+          verified: $verifiedFoundryVersion
+        }
+      }
+    }'
+  )
+
+  # Make the API call to the Foundry Package Release API
+  echo "Making API call to Foundry Package Release API..."
+
+  API_RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "$FOUNDRY_API_ENDPOINT" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: $FOUNDRY_API_TOKEN" \
+    -d "$API_JSON_PAYLOAD")
+
+  # Separate the response body and HTTP status code
+  API_BODY=$(echo "$API_RESPONSE" | sed '$d')
+  HTTP_STATUS=$(echo "$API_RESPONSE" | tail -n1)
+
+  # Check if the API call was successful
+  if [ "$HTTP_STATUS" -eq 200 ]; then
+    echo "Package release successful."
+    echo "Response: $API_BODY"
+  else
+    echo "Package release failed with status code $HTTP_STATUS."
+    echo "Response: $API_BODY"
+    exit 1
+  fi
+
 else
   echo "Unzipped release directory created at $RELEASE_DIR/totm-manager for development purposes."
 
-   # Check if the DEV_DIR exists
+  # Check if the DEV_DIR exists
   if [ -d "$DEV_DIR" ]; then
     echo "Development directory exists. Moving unzipped release to $DEV_DIR."
     rsync -av --progress "$RELEASE_DIR/totm-manager/" "$DEV_DIR/totm-manager/"
