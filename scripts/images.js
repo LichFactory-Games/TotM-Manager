@@ -3,6 +3,11 @@ import { NAMESPACE, updateActiveTileButton, logMessage } from './utilities.js';
 import { loadTileImages } from './tiles-utils.js';
 
 export async function addImageToTile(instance, tile, imagePath) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping addImageToTile.");
+    return;
+  }
+
   if (!tile) {
     console.error("No active tile selected to add an image.");
     ui.notifications.error("No active tile selected to add an image.");
@@ -24,6 +29,10 @@ export async function addImageToTile(instance, tile, imagePath) {
 }
 
 export async function addImageDirectoryToTile(instance, tile, directoryPath) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping addImageDirectoryToTile.");
+    return;
+  }
   if (!tile) {
     console.error("No active tile selected to add images from directory.");
     ui.notifications.error("No active tile selected to add images from directory.");
@@ -87,10 +96,14 @@ export async function updateActiveImageButton(instance, activeIndex) {
     console.warn("No image button found for index:", imageIndex);
   }
 
-  await updateActiveTileButton(instance);
+  updateActiveTileButton(instance);
 }
 
 export async function reorderPaths(instance, origin, target) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping reorderPaths.");
+    return;
+  }
   const imagePaths = instance.imagePaths;
   if (origin === undefined || target === undefined || origin === target) return;
 
@@ -107,22 +120,30 @@ export async function reorderPaths(instance, origin, target) {
 }
 
 export async function deleteImageByPath(instance, imagePath) {
-    const imagePaths = instance.imagePaths;
-    const index = imagePaths.findIndex(image => image.img === imagePath);
-    if (index !== -1) {
-        imagePaths.splice(index, 1);
-        instance.imagePaths = imagePaths;  // Update the instance's imagePaths
-        console.log("Deleted image:", imagePath);
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping deleteImageByPath.");
+    return;
+  }
+  const imagePaths = instance.imagePaths;
+  const index = imagePaths.findIndex(image => image.img === imagePath);
+  if (index !== -1) {
+    imagePaths.splice(index, 1);
+    instance.imagePaths = imagePaths;  // Update the instance's imagePaths
+    console.log("Deleted image:", imagePath);
 
-        // Save the updated paths to the tile document
-        await instance.currentTile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
+    // Save the updated paths to the tile document
+    await instance.currentTile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
 
-        // Load tile images to update UI
-        await loadTileImages(instance, instance.currentTile);
-    }
+    // Load tile images to update UI
+    await loadTileImages(instance, instance.currentTile);
+  }
 }
 
 export async function deleteAllPaths(instance) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping deleteAllPaths.");
+    return;
+  }
   instance.imagePaths = [];  // Clear the instance's imagePaths
   console.log("Deleted all image paths");
 

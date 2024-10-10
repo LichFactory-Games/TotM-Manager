@@ -9,6 +9,10 @@ import { controlFeaturesBasedOnTags } from './featureControl.js';
 
 // Function to create fade in and fade out effect for a tile
 async function fadeTile(tileDocument, fadeIn = true, targetAlpha = 1, duration = 2000, increment = 0.01) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping fadeTile.");
+    return;
+  }
   if (fadeIn) {
     // Fade In
     for (let i = 0; i <= targetAlpha; i += increment) {
@@ -25,6 +29,10 @@ async function fadeTile(tileDocument, fadeIn = true, targetAlpha = 1, duration =
 }
 
 export async function activateImage(instance, image, index) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping activateImage.");
+    return;
+  }
   if (!instance.currentTile) {
     console.error("No currently active tile.");
     ui.notifications.warn("Error setting image. No tile is currently active.");
@@ -113,6 +121,10 @@ export async function activateImage(instance, image, index) {
 
 
 export async function cycleImages(instance, tile, direction) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping cycleImages.");
+    return;
+  }
   const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
   if (imagePaths.length === 0) {
     ui.notifications.warn("No images to cycle. Please add images.");

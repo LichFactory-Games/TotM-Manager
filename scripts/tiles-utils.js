@@ -2,6 +2,12 @@ import { NAMESPACE, logMessage, findTileById } from './utilities.js';
 
 // Helper function to save tile flags
 export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
+  // Add GM check
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping saveTileDataToFlags.");
+    return;
+  }
+
   // Log the arguments
   logMessage("Arguments received in saveTileDataToFlags:");
   logMessage("tile:", tile);
@@ -50,6 +56,11 @@ export async function saveTileDataToFlags(tile, foundTile, imagePaths) {
 
 // Remove all tile flags
 export async function clearTileFlags(instance) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping clearTileFlags.");
+    return;
+  }
+
   const tiles = canvas.tiles.placeables;
   for (let tile of tiles) {
     await tile.document.unsetFlag(NAMESPACE, 'tileName');
@@ -163,6 +174,11 @@ export  function updateTileFields(instance) {
 
 // Toggle tile visibility
 export async function toggleTileVisibility(tileId) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping toggleTileVisibility.");
+    return;
+  }
+
   const tile = findTileById(tileId)
   if (tile) {
     const isHidden = tile.document.hidden; // Directly check the hidden property
@@ -179,6 +195,11 @@ export async function toggleTileVisibility(tileId) {
 
 // Tile Property Updating
 export async function updateTileProperties(foundTile, tileData) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping updateTileProperties.");
+    return;
+  }
+
   logMessage("Updating tile properties for tile:", foundTile);
   logMessage("Tile data:", tileData);
 
@@ -195,6 +216,11 @@ export async function updateTileProperties(foundTile, tileData) {
 
 // Function to open the configuration window for the first controlled tile
 export function openTileConfigForControlledTile() {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping openTileConfigForControlledTile.");
+    return;
+  }
+
   const controlledTiles = canvas.tiles.controlled;
 
   if (controlledTiles.length === 0) {

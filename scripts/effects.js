@@ -63,6 +63,10 @@ export function onTargetChange(event, instance) {
 ///////////////////////////////////
 
 export async function addEffect(instance, targetType, effectName, effectParams, tileId, imageId) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping addEffect.");
+    return;
+  }
   console.log(`Target Type: ${targetType}`);
   console.log(`Effect Name: ${effectName}`);
   console.log(`Effect Params:`, effectParams);
@@ -124,6 +128,10 @@ export async function addEffect(instance, targetType, effectName, effectParams, 
 ////
 
 export async function removeEffect(instance, targetType, effectName) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping removeEffect.");
+    return;
+  }
   logMessage("removeEffect called with arguments:", { instance, targetType, effectName });
 
   // Retrieve effect parameters based on effect name
@@ -243,6 +251,10 @@ export async function removeEffect(instance, targetType, effectName) {
 
 export async function applyTokenMagicEffect(target, effectParams, isTile = true) {
   if (!await isTokenMagicActive()) return;
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping applyTokenMagicEffect.");
+    return;
+  }
 
   // Ensure effectParams is an array
   const effectParamsArray = Array.isArray(effectParams) ? effectParams : [effectParams];
@@ -272,6 +284,10 @@ export async function applyTokenMagicEffect(target, effectParams, isTile = true)
 ////
 
 export async function removeTokenMagicEffect(target, effectParams, isTile) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping removeTokenMagicEffect.");
+    return;
+  }
   // Log the input arguments
   logMessage("Arguments received:", { target, effectParams, isTile });
 
@@ -328,6 +344,10 @@ export async function removeTokenMagicEffect(target, effectParams, isTile) {
 //////////////////////////////
 
 async function updateEffectsData(target, effectParams, isAdd, isTile = true, imageId = null) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping updateEffectsData.");
+    return;
+  }
   if (!target) {
     console.error("No target provided for updating effects.");
     return;
@@ -485,6 +505,11 @@ export async function updateEffectsUI(instance, tile) {
 ///////////////////////////////
 
 export async function applyEffectsToTile(tile, effects, isTile, image = null) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping applyEffectsToTile.");
+    return;
+  }
+
   logMessage(`Applying effects to ${isTile ? 'tile' : 'image'}: ${tile.id}`, effects);
   for (const effect of effects) {
     try {
@@ -505,6 +530,10 @@ export async function applyEffectsToTile(tile, effects, isTile, image = null) {
 ////
 
 export async function removeEffectsFromTile(tile, effects, isTile, image = null) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping removeEffectsFromTile.");
+    return;
+  }
   logMessage(`Removing effects from ${isTile ? 'tile' : 'image'}: ${tile.id}`, effects);
   for (const effect of effects) {
     try {

@@ -152,28 +152,36 @@ export function initializeHooks() {
 
     // Check if there are any tiles on the canvas
     const tiles = canvas.tiles?.placeables;
-    if (!tiles || tiles.length === 0) {
-      console.warn("TotM Manager: No tiles found on the canvas, skipping refreshManagerData.");
-      TotMForm._instance.clearTileUI();
-      console.warn("TotM Manager: Clearing TotM Manager UI.");
-      return;
-    }
+    // Only GMs should refresh manager data
+    if (game.user.isGM) {
 
-    if (canvas.ready && game.scenes.active) {
-      if (addTotMButton(ui.controls.controls)) {
-        ui.controls.render();
+      if (!tiles || tiles.length === 0) {
+        console.warn("TotM Manager: No tiles found on the canvas, skipping refreshManagerData.");
+        // It's safe to call clearTileUI on all clients if it doesn't modify tiles
+        TotMForm._instance.clearTileUI();
+        console.warn("TotM Manager: Clearing TotM Manager UI.");
+        return;
       }
-    }
 
-    // Refresh the form if it's open
-    if (TotMForm._instance && TotMForm._instance.rendered) {
-      TotMForm._instance.refreshManagerData();
+      if (canvas.ready && game.scenes.active) {
+        if (addTotMButton(ui.controls.controls)) {
+          ui.controls.render();
+        }
+      }
+
+      // Refresh the form if it's open
+      if (TotMForm._instance && TotMForm._instance.rendered) {
+        TotMForm._instance.refreshManagerData();
+      }
     } else {
-      console.warn("TotM Manager: Canvas or active scene not ready in canvasReady hook.");
-      }
+      console.warn("TotM Manager: Non-GM user; skipping refreshManagerData.");
+    }
   });
 
   Hooks.on('createTile', (tile, options, userId) => {
+    // Only GMs should assign order to tiles
+    if (!game.user.isGM) return;
+
     console.log('Tile created, assigning order...');
     assignOrderToTiles();
   });

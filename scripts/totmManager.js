@@ -126,15 +126,17 @@ export class TotMForm extends FormApplication {
     super.activateListeners(html);
     this._initializeTabs();
 
-    activateGeneralListeners(this, html);
-    activatePathManagementListeners(this, html);
-    activateImageSearchBarListeners(this, html);
-    activateImagePreviewListeners(this, html);
-    activateEffectEventListeners(this);
-    // Add event listener for the refresh button
-    html.find('#refresh-manager').click(() => {
-      this.refreshManagerData(); // Make sure `instance` is correctly referenced
-    });
+    if (game.user.isGM) {
+      activateGeneralListeners(this, html);
+      activatePathManagementListeners(this, html);
+      activateImageSearchBarListeners(this, html);
+      activateImagePreviewListeners(this, html);
+      activateEffectEventListeners(this);
+      // Add event listener for the refresh button
+      html.find('#refresh-manager').click(() => {
+        this.refreshManagerData(); // Make sure `instance` is correctly referenced
+      });
+    }
   }
 
   async render(force = false, options = {}) {

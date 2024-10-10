@@ -80,6 +80,10 @@ export class ModifyEffectForm extends FormApplication {
   }
 
   async _updateObject(event, formData) {
+    if (!game.user.isGM) {
+      console.log("User is not GM. Skipping _updateObject.");
+      return;
+    }
     console.log("Form submission data:", formData);
 
     try {

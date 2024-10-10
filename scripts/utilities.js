@@ -3,6 +3,16 @@
 //// Define namespace
 export const NAMESPACE = 'totm-manager';
 
+//// Check Permissions
+function isUserGM() {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Action aborted.");
+    ui.notifications.warn("You do not have permission to perform this action.");
+    return false;
+  }
+  return true;
+}
+
 //// Handlebars
 // Register custom Handlebars helper
 Handlebars.registerHelper('jsonStringify', function (context) {
@@ -229,6 +239,10 @@ export function updateTileButtons(instance) {
 }
 
 export function updateActiveTileButton(instance) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping assignOrderToTiles.");
+    return;
+  }
   logMessage("updateActiveTileButton called");
 
   if (!instance.currentTile || !instance.currentTile.document) {
@@ -269,6 +283,11 @@ export function updateActiveTileButton(instance) {
  * Preserves existing order values.
  */
 export function assignOrderToTiles() {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping assignOrderToTiles.");
+    return;
+  }
+
   // Get all existing orders
   let existingOrders = new Set(canvas.tiles.placeables.map(tile => Number(tile.document.getFlag(NAMESPACE, 'order'))).filter(order => order !== undefined && order !== null));
 

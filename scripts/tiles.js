@@ -61,6 +61,10 @@ function generateFields(instance, tileFieldsContainer, count) {
 
 // Collect data for tile flags and save
 export async function collectAndSaveTileData(instance, html) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping collectAndSaveTileData.");
+    return;
+  }
   logMessage("Saving tile data for tiles...");
 
   const container = html.find('#tile-fields-container');
@@ -101,6 +105,10 @@ export async function collectAndSaveTileData(instance, html) {
 
 
 export async function collectAndSaveImageData(instance, html) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping collectAndSaveImageData.");
+    return;
+  }
   const foundTile = instance.currentTile;
   if (!foundTile) {
     console.warn("No current tile found.");
@@ -173,6 +181,11 @@ export function collectTileData(container) {
 
 
 export async function handleSaveAndRender(instance, html) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping handleSaveAndRender.");
+    return;
+  }
+
   logMessage("Saving data for tile...");
   await collectAndSaveTileData(instance, html);
 
@@ -192,6 +205,10 @@ export async function handleSaveAndRender(instance, html) {
 }
 
 export async function deleteTileData(instance, order, html) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping deleteTileData.");
+    return;
+  }
   if (!instance || !instance.tiles) {
     console.error("Instance or instance.tiles is undefined");
     return;
@@ -240,6 +257,12 @@ export async function deleteTileData(instance, order, html) {
 }
 
 export async function handleDeleteAndSave(instance, order, html) {
+  if (!game.user.isGM) {
+    console.log("User is not GM. Skipping handleDeleteAndSave.");
+    return;
+  }
+
+
   logMessage("Deleting data for tile...");
 
   // Delete the tile field and update internal state

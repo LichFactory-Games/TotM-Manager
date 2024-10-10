@@ -1,6 +1,5 @@
 import { NAMESPACE, logMessage } from './utilities.js';
 
-
 export async function controlFeaturesBasedOnTags(tile, currentIndex) {
   const playlists = game.playlists.contents;
   const scene = game.scenes.active;
@@ -16,14 +15,18 @@ export async function controlFeaturesBasedOnTags(tile, currentIndex) {
 
   // Process each light in the scene
   if (imageTags.includes('totmLight')) {
-    for (let light of scene.lights.contents) {
-      const lightTags = await Tagger.getTags(light);
-      logMessage("Tagger light tags are: ", lightTags);
+    if (game.user.isGM) {
+      for (let light of scene.lights.contents) {
+        const lightTags = await Tagger.getTags(light);
+        logMessage("Tagger light tags are: ", lightTags);
 
-      if (lightTags.includes('totmLight')) {
-        const lightShouldBeOn = imageTags.some(tag => tag !== 'totmLight' && lightTags.includes(tag));
-        await light.update({ hidden: !lightShouldBeOn });
+        if (lightTags.includes('totmLight')) {
+          const lightShouldBeOn = imageTags.some(tag => tag !== 'totmLight' && lightTags.includes(tag));
+          await light.update({ hidden: !lightShouldBeOn });
+        }
       }
+    } else {
+      console.log("Non-GM user; skipping light updates.");
     }
   }
 
@@ -35,16 +38,21 @@ export async function controlFeaturesBasedOnTags(tile, currentIndex) {
         if (playlistId === playlist.id) {
           logMessage("Checking playlist:", playlist.name);
           try {
-            const currentlyPlayingSound = playlist.sounds.find(s => s.playing);
-            if (currentlyPlayingSound) {
-              await playlist.stopSound(currentlyPlayingSound);
-              logMessage("Stopped sound in playlist:", playlist.name);
-            }
+            // Check if the user has permission to control the playlist
+            if (playlist.canUserModify(game.user, "update")) {
+              const currentlyPlayingSound = playlist.sounds.find(s => s.playing);
+              if (currentlyPlayingSound) {
+                await playlist.stopSound(currentlyPlayingSound);
+                logMessage("Stopped sound in playlist:", playlist.name);
+              }
 
-            const soundToPlay = playlist.sounds.find(s => !s.playing);
-            if (soundToPlay) {
-              await playlist.playSound(soundToPlay);
-              logMessage("Playing sound in playlist:", playlist.name);
+              const soundToPlay = playlist.sounds.find(s => !s.playing);
+              if (soundToPlay) {
+                await playlist.playSound(soundToPlay);
+                logMessage("Playing sound in playlist:", playlist.name);
+              }
+            } else {
+              console.log(`User ${game.user.name} lacks permission to control playlist ${playlist.name}`);
             }
           } catch (error) {
             console.error("Error controlling sound in playlist:", playlist.name, error);
@@ -60,16 +68,14 @@ export async function controlFeaturesBasedOnTags(tile, currentIndex) {
       if (tag.startsWith("macro-")) {
         const macroId = tag.substring(6);  // Extract the ID part after 'macro-'
         if (macroId === macro.id) {
-          macro.execute();
+          // Check if the user has permission to execute the macro
+          if (macro.canExecute(game.user)) {
+            macro.execute();
+          } else {
+            console.log(`User ${game.user.name} lacks permission to execute macro ${macro.name}`);
+          }
         }
       }
     }
   }
 }
-
-// // Example usage
-// // Assuming you have a reference to a tile and the current index
-// const tile = canvas.tiles.placeables[0];  // Example: the first tile
-// const currentIndex = 0;  // Example: the first image index
-
-// controlFeaturesBasedOnTags(tile, currentIndex);
