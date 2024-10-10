@@ -11,7 +11,7 @@ export class ModifyEffectForm extends FormApplication {
     }
 
     static get defaultOptions() {
-      return mergeObject(super.defaultOptions, {
+      return foundry.utils.mergeObject(super.defaultOptions, {
         title: "Modify Effect",
         template: "modules/totm-manager/templates/modify-effect-window.hbs",
         width: 350,

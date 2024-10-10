@@ -50,10 +50,30 @@ export class TotMForm extends FormApplication {
       return;
     }
 
-    this.currentTile = canvas.tiles.controlled[0] || this.currentTile;
-    // this.currentTile = canvas.tiles.controlled[0] || canvas.tiles.placeables[0] || null;
+    // Check if there is a controlled tile or fallback to the first available tile
+    const tile = canvas.tiles.controlled[0] || canvas.tiles.placeables[0] || null;
+
+    // Ensure the tile is selected and controlled
+    if (tile && !tile.controlled) {
+      tile.control();  // Control (select) the tile programmatically
+      console.log("TotM Manager: Forcing control of tile", tile.id);
+    }
+
+    this.currentTile = tile;
     console.log("TotM Manager: Current tile set to", this.currentTile?.id || "None");
   }
+
+
+  // updateCurrentTile() {
+  //   if (!canvas.ready) {
+  //     console.warn("Canvas is not ready. Deferring tile update.");
+  //     return;
+  //   }
+
+  //   this.currentTile = canvas.tiles.controlled[0] || this.currentTile;
+  //   // this.currentTile = canvas.tiles.controlled[0] || canvas.tiles.placeables[0] || null;
+  //   console.log("TotM Manager: Current tile set to", this.currentTile?.id || "None");
+  // }
 
   async close(options={}) {
     console.log("TotM Manager: Closing window");
@@ -302,6 +322,11 @@ export class TotMForm extends FormApplication {
       content.style.display = content.getAttribute('data-tab') === tabName ? 'block' : 'none';
     });
 
+    // Ensure the current tile is selected when switching tabs
+    if (tabName === 'tiles') {
+      this.updateCurrentTile();
+    }
+
     this.selectedTarget = tabName;
     this._highlightActiveTab(tabName);
   }
@@ -320,6 +345,9 @@ export class TotMForm extends FormApplication {
   // Refresh manager for scene changes
   async refreshManagerData() {
     logMessage("Refreshing Theatre of the Mind Manager data...");
+
+    // Ensure the current tile is selected when the scene is refreshed
+    this.updateCurrentTile();
 
     // Delay initialization until DOM is ready
     logMessage("Loading Manager Data.");
@@ -396,11 +424,6 @@ export class TotMForm extends FormApplication {
     if (currentEffectsContainer) {
       currentEffectsContainer.innerHTML = '';  // Clear any current effects listed
     }
-
-    // Optionally, reset any other UI components related to tiles
-    this.currentTile = null;
-    this.currentImageIndex = null;
-
 
     logMessage("Relevant UI cleared in #totm-manager.");
   }

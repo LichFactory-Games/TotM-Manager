@@ -391,7 +391,7 @@ export async function isTokenMagicActive() {
 export async function getEffectParams(effectName) {
   let effectParams = null;
 
-  const tile = canvas.tiles.controlled[0];
+  const tile = canvas.tiles.controlled[0] || canvas.tiles.placeables[0]; // Fallback to first placeable tile if none is controlled
   if (!tile) {
     console.error("No active tile found.");
     return []; // Return an empty array

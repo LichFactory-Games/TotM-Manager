@@ -351,10 +351,15 @@ export function activateEffectEventListeners(instance) {
 
   // Event listener for the remove effect button
   document.getElementById('current-effects-container').addEventListener('click', function(event) {
-    if (event.target.closest('.effect-item')) {
-      const removeButton = event.target.closest('.remove-effect-button');
+    const removeButton = event.target.closest('.remove-effect-button');
+    if (removeButton) {
       const effectItem = removeButton.closest('.effect-item');
+      if (!effectItem) {
+        console.error("Effect item not found.");
+        return;
+      }
 
+      // Determine the target type (tile, image, transitions)
       let targetType;
       const targetIcon = effectItem.querySelector('.effect-target-type i');
 
@@ -362,22 +367,32 @@ export function activateEffectEventListeners(instance) {
         targetType = 'tile';
       } else if (targetIcon.classList.contains('fa-image')) {
         targetType = 'image';
-      } else if (targetIcon.classList.contains('fa-arrows-rotate')) { // This is for transitions
+      } else if (targetIcon.classList.contains('fa-arrows-rotate')) {
         targetType = 'transitions';
       } else {
         console.error("Unknown target type for effect removal.");
         return;
       }
 
+      // Retrieve the effect name and ensure tileId is present
       const effectName = effectItem.querySelector('.effect-name').textContent;
-      const tileId = event.target.value;
+
+      const tileId = instance.currentTile?.id || effectItem.getAttribute('data-tile-id');
       const tile = canvas.tiles.get(tileId);
 
-      // Call the removeEffect function with the correct context
-      removeEffect(instance, targetType, effectName);
-      updateEffectsUI(instance, tile);
-      instance.render(true);
+      if (!tile) {
+        console.error("No active tile found.");
+        return;
+      }
 
+      // Call the removeEffect function
+      removeEffect(instance, targetType, effectName).then(() => {
+        // Update the effects UI and re-render
+        updateEffectsUI(instance, tile);
+        instance.render(true);
+      }).catch((error) => {
+        console.error("Failed to remove effect:", error);
+      });
     }
   });
 }

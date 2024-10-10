@@ -117,7 +117,7 @@ export async function addEffect(instance, targetType, effectName, effectParams, 
   }
 
   // Update the UI to reflect the new effect
-  updateEffectsUI(instance);
+  updateEffectsUI(instance, tile);
 }
 
 
@@ -140,7 +140,6 @@ export async function removeEffect(instance, targetType, effectName) {
 
   let tile = canvas.tiles.controlled[0];
   if (!tile) {
-    console.error("No active tile found to remove effect.");
     logMessage("No active tile found to remove effect.");
     return;
   }
@@ -233,7 +232,7 @@ export async function removeEffect(instance, targetType, effectName) {
     logMessage("Tile's effect data updated.");
 
     // Update the UI to reflect changes
-    await updateEffectsUI(instance);
+    await updateEffectsUI(instance, tile);
     logMessage(`Effect ${effectName} removed from ${targetType}.`);
   }
 }
