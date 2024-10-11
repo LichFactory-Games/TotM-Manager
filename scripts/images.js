@@ -2,98 +2,104 @@
 import { NAMESPACE, updateActiveTileButton, logMessage } from './utilities.js';
 import { loadTileImages } from './tiles-utils.js';
 
-export async function addImageToTile(instance, tile, imagePath) {
+export async function addMediaToTile(instance, tile, mediaPath) {
   if (!game.user.isGM) {
-    console.log("User is not GM. Skipping addImageToTile.");
+    console.log("User is not GM. Skipping addMediaToTile.");
     return;
   }
 
   if (!tile) {
-    console.error("No active tile selected to add an image.");
-    ui.notifications.error("No active tile selected to add an image.");
+    console.error("No active tile selected to add media.");
+    ui.notifications.error("No active tile selected to add media.");
     return;
   }
 
-  let imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
-  imagePaths.push({
-    img: imagePath,
-    displayImg: imagePath.split('/').pop(),
-    tags: []
+  let mediaPaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+  mediaPaths.push({
+    img: mediaPath,  // Keep it generic (img can also refer to video path)
+    displayImg: mediaPath.split('/').pop(),
+    tags: [],
+    type: mediaPath.endsWith('.mp4') || mediaPath.endsWith('.webm') ? 'video' : 'image'  // Track type
   });
 
-  await tile.document.setFlag(NAMESPACE, 'imagePaths', imagePaths);
-  instance.imagePaths = imagePaths;  // Update the instance's imagePaths
-  console.log("Image paths updated for tile:", imagePaths);
+  await tile.document.setFlag(NAMESPACE, 'imagePaths', mediaPaths);
+  instance.imagePaths = mediaPaths;  // Update the instance's media paths
+  console.log("Media paths updated for tile:", mediaPaths);
 
   instance.render(true);
 }
 
-export async function addImageDirectoryToTile(instance, tile, directoryPath) {
+export async function addMediaDirectoryToTile(instance, tile, directoryPath) {
   if (!game.user.isGM) {
-    console.log("User is not GM. Skipping addImageDirectoryToTile.");
+    console.log("User is not GM. Skipping addMediaDirectoryToTile.");
     return;
   }
   if (!tile) {
-    console.error("No active tile selected to add images from directory.");
-    ui.notifications.error("No active tile selected to add images from directory.");
+    console.error("No active tile selected to add media from directory.");
+    ui.notifications.error("No active tile selected to add media from directory.");
     return;
   }
 
   let response = await FilePicker.browse("data", directoryPath);
   if (response.target && response.files.length) {
-    const newImagePaths = response.files.filter(file => file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.webp')).map(path => ({
+    const newMediaPaths = response.files.filter(file => {
+      return file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.webp') ||
+        file.endsWith('.mp4') || file.endsWith('.webm');  // Include video file formats
+    }).map(path => ({
       img: path,
       displayImg: path.split('/').pop(),
-      tags: []
+      tags: [],
+      type: path.endsWith('.mp4') || path.endsWith('.webm') ? 'video' : 'image'  // Detect type
     }));
+
     let existingPaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
-    existingPaths = existingPaths.concat(newImagePaths);
+    existingPaths = existingPaths.concat(newMediaPaths);
 
     await tile.document.setFlag(NAMESPACE, 'imagePaths', existingPaths);
-    instance.imagePaths = existingPaths;  // Update the instance's imagePaths
-    console.log("Image paths updated for tile:", existingPaths);
+    instance.imagePaths = existingPaths;  // Update the instance's media paths
+    console.log("Media paths updated for tile:", existingPaths);
 
     instance.render(true);
   } else {
-    ui.notifications.error("No images found in the selected directory.");
+    ui.notifications.error("No media found in the selected directory.");
   }
 }
 
-export async function updateActiveImageButton(instance, activeIndex) {
+export async function updateActiveMediaButton(instance, activeIndex) {
   if (!instance.currentTile || !instance.currentTile.document) {
-    console.warn("Attempted to update image button with no active tile or missing document.");
+    console.warn("Attempted to update media button with no active tile or missing document.");
     return;
   }
 
-  const imagePaths = await instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths');
-  logMessage("Image paths:", imagePaths);
+  const mediaPaths = await instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths');
+  logMessage("Media paths:", mediaPaths);
 
-  if (!imagePaths || imagePaths.length === 0) {
-    console.warn("No image paths available for the current tile:", instance.currentTile.id);
+  if (!mediaPaths || mediaPaths.length === 0) {
+    console.warn("No media paths available for the current tile:", instance.currentTile.id);
     return;
   }
 
-  const imageIndex = activeIndex !== undefined ? activeIndex : await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
-  logMessage("Image index:", imageIndex);
+  const mediaIndex = activeIndex !== undefined ? activeIndex : await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
+  logMessage("Media index:", mediaIndex);
 
-  if (imageIndex === undefined || imageIndex < 0 || imageIndex >= imagePaths.length) {
-    console.warn(`Image index is out of bounds or undefined: ${imageIndex}`);
+  if (mediaIndex === undefined || mediaIndex < 0 || mediaIndex >= mediaPaths.length) {
+    console.warn(`Media index is out of bounds or undefined: ${mediaIndex}`);
     return;
   }
 
-  const imageButtonSelector = `.set-image-button[data-index="${imageIndex}"]`;
-  logMessage("Image button selector:", imageButtonSelector);
+  const mediaButtonSelector = `.set-media-button[data-index="${mediaIndex}"]`;
+  logMessage("Media button selector:", mediaButtonSelector);
 
-  const activeImageButton = instance.element.find(imageButtonSelector);
-  logMessage("Active image button element:", activeImageButton);
+  const activeMediaButton = instance.element.find(mediaButtonSelector);
+  logMessage("Active media button element:", activeMediaButton);
 
-  instance.element.find('.set-image-button').removeClass('active-button');
-  if (activeImageButton.length) {
-    activeImageButton.addClass('active-button');
-    logMessage(`TotM - Active image button found and activated: ${imageButtonSelector}`);
-    logMessage(`TotM - Active image button marked: Index ${imageIndex}`);
+  instance.element.find('.set-media-button').removeClass('active-button');
+  if (activeMediaButton.length) {
+    activeMediaButton.addClass('active-button');
+    logMessage(`TotM - Active media button found and activated: ${mediaButtonSelector}`);
+    logMessage(`TotM - Active media button marked: Index ${mediaIndex}`);
   } else {
-    console.warn("No image button found for index:", imageIndex);
+    console.warn("No media button found for index:", mediaIndex);
   }
 
   updateActiveTileButton(instance);

@@ -1,6 +1,6 @@
 import { NAMESPACE, logMessage } from './utilities.js';
 import { applyEffectsToTile, removeEffectsFromTile } from './effects.js';
-import { updateActiveImageButton } from './images.js';
+import { updateActiveMediaButton } from './images.js';
 import { controlFeaturesBasedOnTags } from './featureControl.js';
 
 ////////////////////
@@ -39,6 +39,20 @@ async function adjustAspectRatio(tile) {
   if (!imagePath) {
     ui.notifications.error("Tile does not have an image set.");
     return;
+  }
+
+  // Check if the file is an image (exclude GIF, MP4, and other non-image formats)
+  const isImage = /\.(png|jpg|jpeg|webp)$/i.test(imagePath);
+  const isGifOrVideo = /\.(gif|mp4|webm)$/i.test(imagePath);
+
+  if (!isImage) {
+    if (isGifOrVideo) {
+      ui.notifications.warn("GIFs and video files are not supported for aspect ratio adjustments.");
+      return;
+    } else {
+      ui.notifications.error("Unsupported file format. Only images are supported.");
+      return;
+    }
   }
 
   // Load the image to get its natural dimensions
@@ -123,28 +137,53 @@ export async function activateImage(instance, image, index) {
     logMessage(`Removed effects from previous image index: ${previousIndex}`);
   }
 
-  // Fade out the tile's current image
-  await fadeTile(tile.document, false, targetAlpha, duration, increment); // Fade out to targetAlpha
+  // File format check (image or video)
+  const isImage = /\.(png|jpg|jpeg|webp)$/i.test(image.img);
+  const isVideo = /\.(mp4|webm)$/i.test(image.img);
 
-  // Update the tile's texture to the new image
-  await tile.document.update({ 'texture.src': image.img });
-  await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
+  if (isVideo) {
+    // Special handling for video files
+    logMessage(`Activating video on tile ID: ${tileId}, Name: ${tileName}`);
 
-  // Check for the "adjustAR" tag using Tagger and adjust aspect ratio
-  const tileTags = await Tagger.getTags(tile);
-  const shouldAdjustAspectRatio = tileTags.includes('adjustAR');
-  if (shouldAdjustAspectRatio) {
-    // Ensure the aspect ratio is adjusted *after* the image is loaded
-    await adjustAspectRatio(tile);
+    // Fade out the tile's current image
+    await fadeTile(tile.document, false, targetAlpha, duration, increment);
+
+    // Update the tile's texture to the new video source
+    await tile.document.update({ 'texture.src': image.img });
+    await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
+
+    // Skip aspect ratio adjustment for videos
+    logMessage("Skipping aspect ratio adjustment for video.");
+
+    // Fade in the new video
+    await fadeTile(tile.document, true, 1, duration, increment);
+  } else if (isImage) {
+    // Fade out the tile's current image
+    await fadeTile(tile.document, false, targetAlpha, duration, increment);
+
+    // Update the tile's texture to the new image
+    await tile.document.update({ 'texture.src': image.img });
+    await tile.document.setFlag(NAMESPACE, 'imgIndex', index);
+
+    // Check for the "adjustAR" tag using Tagger and adjust aspect ratio
+    const tileTags = await Tagger.getTags(tile);
+    const shouldAdjustAspectRatio = tileTags.includes('adjustAR');
+    if (shouldAdjustAspectRatio) {
+      // Ensure the aspect ratio is adjusted *after* the image is loaded
+      await adjustAspectRatio(tile);
+    }
+
+    // Fade in the new image
+    await fadeTile(tile.document, true, 1, duration, increment);
+  } else {
+    ui.notifications.warn("Unsupported file format. Only images and videos are supported.");
+    return;
   }
 
-  // Fade in the new image
-  await fadeTile(tile.document, true, 1, duration, increment); // Fade in to full opacity
-
-  // Remove transition effects after the image change and transition is complete
+  // Remove transition effects after the image/video change and transition is complete
   if (transitionEffects.length > 0) {
     for (const { effectName } of transitionEffects) {
-      logMessage(`Removing transition effect after image change: ${effectName}`);
+      logMessage(`Removing transition effect after media change: ${effectName}`);
       await TokenMagic.deleteFilters(tile, effectName);
     }
   }
@@ -169,7 +208,7 @@ export async function activateImage(instance, image, index) {
   }
 
   // Update active image button
-  await updateActiveImageButton(instance, index);
+  await updateActiveMediaButton(instance, index);
 
   // Render the instance
   instance.render();
@@ -193,7 +232,7 @@ export async function cycleImages(instance, tile, direction) {
     await activateImage(instance, currentImage, currentIndex);
     // Update the instance's current image index and render the instance
     instance.currentImageIndex = currentIndex;
-    await updateActiveImageButton(instance, currentIndex);
+    await updateActiveMediaButton(instance, currentIndex);
   } catch (error) {
     console.error("Failed to cycle images:", error);
     ui.notifications.error("Error cycling images. See console for details.");

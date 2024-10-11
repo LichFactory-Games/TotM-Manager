@@ -3,48 +3,41 @@
 /////////////////////////////
 
 import { NAMESPACE, logMessage, activateTile, findAndSwitchToTileByTag, updateActiveTileButton } from './utilities.js';
-import { addImageToTile, addImageDirectoryToTile, updateActiveImageButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
+import { addMediaToTile, addMediaDirectoryToTile, updateActiveMediaButton, reorderPaths, deleteImageByPath, deleteAllPaths } from './images.js';
 import { generateTileFields, handleSaveAndRender, handleDeleteAndSave, collectAndSaveImageData } from './tiles.js';
 import { loadTileImages, toggleTileVisibility, openTileConfigForControlledTile } from './tiles-utils.js'
 import { updateEffectsUI, onTargetChange, removeEffect } from './effects.js';
 import { ModifyEffectForm } from './modifyEffectForm.js';
 import { performImageSearch, activateImage, cycleImages } from './stage.js';
 
-
 export function activateGeneralListeners(instance, html) {
-  // Add image to tile
+  // Add media (image or video) to tile
   html.find('.add-image').click(() => {
     new FilePicker({
-      type: "image",
+      type: "any",  // Allow both images and videos
       current: "",
-      callback: path => addImageToTile(instance, instance.currentTile, path)
+      callback: path => addMediaToTile(instance, instance.currentTile, path)
     }).browse();
   });
 
-  // Add image folder to tile
+  // Add media folder to tile
   html.find('.add-folder').click(() => {
     new FilePicker({
       type: "folder",
-      callback: folderPath => addImageDirectoryToTile(instance, instance.currentTile, folderPath)
+      callback: folderPath => addMediaDirectoryToTile(instance, instance.currentTile, folderPath)
     }).browse();
   });
 
-  // Save all tile image data
-  html.find('.save-paths').click(async () =>   {
-    logMessage("Saving images for tile...");
-    // Ensure the current tile is defined
+  // Save all tile media data
+  html.find('.save-paths').click(async () => {
+    logMessage("Saving media for tile...");
     if (!instance.currentTile || !instance.currentTile.document) {
       console.warn("No current tile is selected or missing document property.");
       return;
-
     }
 
-    // Retrieve the image paths from the tile flags
-    // Note that without providing the instance saving won't function properly
-    const imagePaths = await instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
-
-    // Log the retrieved image paths
-    console.log('Retrieved image paths:', imagePaths);
+    const mediaPaths = await instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
+    console.log('Retrieved media paths:', mediaPaths);
 
     await collectAndSaveImageData(instance, html);
     handleSaveAndRender(instance, html);
@@ -73,96 +66,75 @@ export function activateGeneralListeners(instance, html) {
     openTileConfigForControlledTile();
   });
 
-  // Event listener for delete button
+  // Delete tile event listener
   html.find('#tile-fields-container').on('click', '.delete-tile', async event => {
-    const order = parseInt($(event.currentTarget).closest('.tile-field').data('order'), 10); // Get the order attribute
+    const order = parseInt($(event.currentTarget).closest('.tile-field').data('order'), 10);
     console.log(`Deleting tile with order: ${order}`);
-    await handleDeleteAndSave(instance, order, html)
-
+    await handleDeleteAndSave(instance, order, html);
   });
 
-  // Update Active Tile
+  // Update active tile
   html.find('.stage-buttons-container').on('click', '.tile-button', async event => {
     const tileName = event.currentTarget.dataset.tileName;
     console.log(`Clicked tile button with Name: ${tileName}`);
 
     await findAndSwitchToTileByTag(instance, tileName);
-    console.log(`Switched to tile: ${tileName}`);
-
     if (instance.currentTile) {
       await loadTileImages(instance, instance.currentTile);
-      console.log(`Loaded images for tile: ${tileName}`);
-
-      // Ensure the DOM is updated before proceeding
       await new Promise(resolve => requestAnimationFrame(resolve));
-
       await updateActiveTileButton(instance);
     } else {
       console.warn(`No tile found with the tileName: ${tileName}`);
     }
   });
 
-  // Activate image
-  html.find('.set-image-button').click(async event => {
+  // Activate media
+  html.find('.set-media-button').click(async event => {
     const index = $(event.currentTarget).data('index');
-    console.log(`Switching to image index: ${index}`);
-
-    // Ensure the current tile is defined
     if (!instance.currentTile || !instance.currentTile.document) {
       console.warn("No current tile is selected or missing document property.");
       return;
     }
 
-    // Retrieve the image paths from the tile flags
-    const imagePaths = await instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
-
-    // Log the retrieved image paths
-    console.log('Retrieved image paths:', imagePaths);
-
+    const mediaPaths = await instance.currentTile.document.getFlag(NAMESPACE, 'imagePaths') || [];
     await collectAndSaveImageData(instance, html);
 
-    // Check if the index is within bounds
-    if (index >= 0 && index < imagePaths.length) {
-      await activateImage(instance, imagePaths[index], index);
-      console.log(`Active image set to index ${index}`);
+    if (index >= 0 && index < mediaPaths.length) {
+      await activateImage(instance, mediaPaths[index], index);
     } else {
-      console.warn(`Index ${index} out of bounds for image paths. Image paths length: ${imagePaths.length}`);
+      console.warn(`Index ${index} out of bounds for media paths.`);
       return;
     }
 
     await new Promise(requestAnimationFrame);
-    await updateActiveImageButton(instance, index); // Pass the index here
+    await updateActiveMediaButton(instance, index);
     await updateActiveTileButton(instance);
   });
 
-  // Cycle image buttons
+  // Cycle media buttons
   html.find('.prev-image').click(async () => {
     await collectAndSaveImageData(instance, html);
     await cycleImages(instance, instance.currentTile, 'prev');
-    await new Promise(requestAnimationFrame);
     const currentIndex = await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
-    await updateActiveImageButton(instance, currentIndex); // Pass the currentIndex here
+    await updateActiveMediaButton(instance, currentIndex);
     await updateActiveTileButton(instance);
   });
 
   html.find('.next-image').click(async () => {
     await collectAndSaveImageData(instance, html);
     await cycleImages(instance, instance.currentTile, 'next');
-    await new Promise(requestAnimationFrame);
     const currentIndex = await instance.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
-    await updateActiveImageButton(instance, currentIndex); // Pass the currentIndex here
+    await updateActiveMediaButton(instance, currentIndex);
     await updateActiveTileButton(instance);
   });
 
+  // Hide/reveal tile
   html.find('.hide-reveal-tile').click(async () => {
     const tileDropdown = document.getElementById('tile-dropdown');
     if (tileDropdown) {
       const selectedTileId = tileDropdown.value;
       if (selectedTileId) {
         await toggleTileVisibility(selectedTileId);
-        // await new Promise(requestAnimationFrame);
-        // await updateActiveImageButton(instance, currentIndex);
-        // await updateActiveTileButton(instance);
       } else {
         console.warn("No tile selected for visibility toggle.");
       }
@@ -271,7 +243,7 @@ export function activateImagePreviewListeners(instance, html) {
   const imagePathList = html.find("#image-path-list");
 
   imagePathList.on("mouseover", ".path-field", event => {
-    const img = $(event.currentTarget).next('img');
+    const filePath = $(event.currentTarget).data('img'); // Get the file path from the data attribute
     const previewImageSize = game.settings.get('totm-manager', 'previewImageSize'); // Get the user-defined preview image size
 
     // Get the position of the hovered item and the width of the viewport
@@ -292,34 +264,51 @@ export function activateImagePreviewListeners(instance, html) {
     // Calculate the required space for the preview image to appear on the right
     const spaceOnRight = viewportWidth - (itemOffset.left + itemWidth);
 
-    // Determine if the image should appear on the right or left
-    if (spaceOnRight < previewImageSize || (totmWindowOffset.left + totmWindowWidth + previewImageSize > viewportWidth)) {
-      // Not enough space on the right, place the image on the left
-      img.css({
-        display: 'block',
-        width: `${previewImageSize}px`,
-        height: 'auto',
-        top: '0', // Align to the top of the viewport
-        left: 'auto', // Align to the left of the viewport
-        right: '100%'
-      });
-    } else {
-      // Enough space on the right, place the image on the right
-      img.css({
-        display: 'block',
-        width: `${previewImageSize}px`,
-        height: 'auto',
-        top: '0', // Align to the top of the viewport
-        left: '100%',
-        right: 'auto' // Align to the right of the viewport
+    // Determine if the preview should appear on the right or left
+    let previewElement;
 
-      });
+    if (filePath.endsWith('.mp4') || filePath.endsWith('.webm')) {
+      // Create a video element for video files
+      previewElement = $('<video controls autoplay muted></video>') // Autoplay and mute by default
+        .attr('src', filePath)
+        .css({
+          display: 'block',
+          width: `${previewImageSize}px`,
+          height: 'auto',
+          position: 'absolute', // Position it absolutely
+          top: '0', // Align to the top of the viewport
+          left: spaceOnRight < previewImageSize || (totmWindowOffset.left + totmWindowWidth + previewImageSize > viewportWidth)
+            ? 'auto' // If there's not enough space on the right, align it to the left
+            : '100%', // Otherwise, align it to the right
+          right: spaceOnRight < previewImageSize || (totmWindowOffset.left + totmWindowWidth + previewImageSize > viewportWidth)
+            ? '100%' // Align to the left
+            : 'auto' // Align to the right
+        });
+    } else {
+      // Otherwise, create an image element for other image types
+      previewElement = $('<img />').attr('src', filePath)
+        .css({
+          display: 'block',
+          width: `${previewImageSize}px`,
+          height: 'auto',
+          position: 'absolute', // Position it absolutely
+          top: '0', // Align to the top of the viewport
+          left: spaceOnRight < previewImageSize || (totmWindowOffset.left + totmWindowWidth + previewImageSize > viewportWidth)
+            ? 'auto' // If there's not enough space on the right, align it to the left
+            : '100%', // Otherwise, align it to the right
+          right: spaceOnRight < previewImageSize || (totmWindowOffset.left + totmWindowWidth + previewImageSize > viewportWidth)
+            ? '100%' // Align to the left
+            : 'auto' // Align to the right
+        });
     }
+
+    // Append the preview element after the current path field
+    $(event.currentTarget).after(previewElement);
   });
 
   imagePathList.on("mouseout", ".path-field", event => {
-    const img = $(event.currentTarget).next('img');
-    img.hide();
+    // Remove the preview when the mouse moves out
+    $(event.currentTarget).next('img, video').remove(); // Remove the next image or video
   });
 }
 

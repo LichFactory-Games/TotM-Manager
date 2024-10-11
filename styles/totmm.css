@@ -94,7 +94,7 @@
     transform: translateY(0);
 }
 
-.totm-manager .set-image-button i {
+.totm-manager .set-media-button i {
     border: none;
     font-size: 1.45em;
     align-items: center;
@@ -106,7 +106,7 @@
     padding: 0;
 }
 
-.totm-manager .set-image-button.active-button i {
+.totm-manager .set-media-button.active-button i {
     color: var(--color-border-highlight);
     transform: translateY(0);
 }

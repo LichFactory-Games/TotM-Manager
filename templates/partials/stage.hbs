@@ -2,7 +2,7 @@
 <div class="totm-manager add-image-container">
   <div class="totm-manager form-group" style=
     "display: flex; align-items: center;">
-    <p style="margin-right: 12px;">Images</p>
+    <p style="margin-right: 12px;">Media</p>
     <a class="totm-manager add-image" style="margin-right: 12px;"><i class="totm-manager fas fa-plus"></i>Add</a>
     <button type="button" class="totm-manager add-image" style="display: none;"></button>
     <a class="totm-manager add-folder" style="margin-right: 12px;"><i class="totm-manager fas fa-folder"></i>Folder</a>
@@ -35,8 +35,8 @@
         <img id="preview-img-{{index}}" src="{{path.img}}" style="display: none; position: absolute; right: 100%; width: auto; max-width: 300px; height: auto;" alt="Image preview">
         
         <input type="text" id="tags-input-{{index}}" name="tags{{index}}" value="{{path.tags}}" placeholder="Enter tags, comma-separated" class="tag-field" style="flex-grow: 1; min-width: 100px; max-width: none; margin-right: 10px; padding: 0 10px; height: 25px; line-height: 25px; display: inline-block; border: 1px solid var(--color-border-light-tertiary); border-radius: 3px;">
-        <a class="totm-manager set-image-button" style="margin-right: 12px;" data-index="{{index}}"><i class="totm-manager fas fa-circle-play"></i></a>
-        <button type="button" class="totm-manager set-image-button" style="display: none;"></button>
+        <a class="totm-manager set-media-button" style="margin-right: 12px;" data-index="{{index}}"><i class="totm-manager fas fa-circle-play"></i></a>
+        <button type="button" class="totm-manager set-media-button" style="display: none;"></button>
       </li>
       {{/each}}
     </ul>

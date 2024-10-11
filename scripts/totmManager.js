@@ -2,7 +2,7 @@
 import { NAMESPACE, logMessage, getElementByIdOrWarn, updateTileButtons, findAndSwitchToTileByTag, activateTile, updateActiveTileButton, populateEffectsDropdown } from './utilities.js';
 import { loadTileData, loadTileImages, updateTileFields, openTileConfigForControlledTile } from './tiles-utils.js'
 import { activateGeneralListeners, activatePathManagementListeners, activateImageSearchBarListeners, activateImagePreviewListeners, activateEffectEventListeners } from './listeners.js';
-import { updateActiveImageButton } from './images.js'
+import { updateActiveMediaButton } from './images.js'
 import { updateEffectsUI, onTargetChange } from './effects.js';
 
 
@@ -247,7 +247,7 @@ export class TotMForm extends FormApplication {
       const imgIndex = await this.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
       if (imgIndex !== undefined && imgIndex >= 0) {
         this.currentImageIndex = imgIndex;
-        await updateActiveImageButton(this, imgIndex);
+        await updateActiveMediaButton(this, imgIndex);
         logMessage('*Update active image button.');
       }
     }
@@ -301,7 +301,7 @@ export class TotMForm extends FormApplication {
       const imgIndex = await this.currentTile.document.getFlag(NAMESPACE, 'imgIndex');
       if (imgIndex !== undefined && imgIndex >= 0) {
         this.currentImageIndex = imgIndex;
-        await updateActiveImageButton(this, imgIndex);
+        await updateActiveMediaButton(this, imgIndex);
       }
     }
   }

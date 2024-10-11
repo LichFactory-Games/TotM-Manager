@@ -410,23 +410,25 @@ export async function isTokenMagicActive() {
 export async function getEffectParams(effectName) {
   let effectParams = null;
 
-  const tile = canvas.tiles.controlled[0] || canvas.tiles.placeables[0]; // Fallback to first placeable tile if none is controlled
+  // Explicit check for controlled tiles or fallback to first placeable tile
+  const tile = canvas.tiles.controlled.length ? canvas.tiles.controlled[0] : canvas.tiles.placeables[0];
   if (!tile) {
-    console.error("No active tile found.");
-    return []; // Return an empty array
+    console.error("No controlled or placeable tile found.");
+    return []; // Return an empty array early
   }
 
+  // Retrieve flags, ensure proper default values if undefined
   const imgIndex = await tile.document.getFlag(NAMESPACE, 'imgIndex');
   const imagePaths = await tile.document.getFlag(NAMESPACE, 'imagePaths') || [];
 
+  // First: Attempt to retrieve effect from imagePaths based on imgIndex
   if (imgIndex !== undefined && imagePaths[imgIndex]) {
     const currentImage = imagePaths[imgIndex];
-    const effect = (currentImage.effects || []).flat();
-    if (effect.length > 0) {
-      effectParams = effect.find(e => e.filterId === effectName || e.tmFilterId === effectName);
-    }
+    const effects = (currentImage.effects || []).flat(); // Flatten if effects array exists
+    effectParams = effects.find(e => e.filterId === effectName || e.tmFilterId === effectName);
   }
 
+  // Second: If no effect found in imagePaths, check tileEffects flag
   if (!effectParams) {
     const tileEffects = await tile.document.getFlag(NAMESPACE, 'tileEffects');
     if (tileEffects) {
@@ -434,13 +436,15 @@ export async function getEffectParams(effectName) {
     }
   }
 
+  // Third: Fallback to TokenMagic preset if no effect found in flags
   if (!effectParams) {
     effectParams = TokenMagic.getPreset(effectName);
     if (!effectParams) {
-      console.error(`No effect parameters found for effect: ${effectName}`);
-      return []; // Return an empty array
+      console.error(`Effect parameters not found for effect: ${effectName}`);
+      return []; // Return an empty array early
     }
   }
 
+  // Ensure returning an array
   return Array.isArray(effectParams) ? effectParams : [effectParams];
 }
