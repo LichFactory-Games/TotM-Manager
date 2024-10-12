@@ -1,7 +1,7 @@
 {
   "id": "totm-manager",
   "title": "TotM Manager",
-  "version": "0.8.7",
+  "version": "0.9.1",
   "compatibility": {
     "minimum": "10",
     "verified": "12.331"
@@ -33,7 +33,7 @@
   "description": "A module to manage visual and thematic elements for theatre of the mind style play in Foundry VTT.",
   "url": "https://github.com/LichFactory-Games/TotM-Manager",
   "manifest": "https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/main/module.json",
-  "download": "https://github.com/LichFactory-Games/TotM-Manager/releases/download/v0.8.7/TotM-Manager-v0.8.7.zip",
+  "download": "https://github.com/LichFactory-Games/TotM-Manager/releases/download/v0.9.1/TotM-Manager-v0.9.1.zip",
   "authors": [
     {
       "name": "LichLife",
