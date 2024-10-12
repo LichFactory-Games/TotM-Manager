@@ -440,7 +440,7 @@ export async function getEffectParams(effectName) {
   if (!effectParams) {
     effectParams = TokenMagic.getPreset(effectName);
     if (!effectParams) {
-      console.error(`Effect parameters not found for effect: ${effectName}`);
+      console.warn(`Effect parameters not found for effect: ${effectName}`);
       return []; // Return an empty array early
     }
   }
