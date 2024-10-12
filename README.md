@@ -4,7 +4,7 @@ TotM Manager is designed to help you, the GM, manage visual and thematic element
 
 The module allows you to:
 
-1. Add individual images or directories of images to a tile
+1. Add individual media; i.e. images, videos, or directories of images, etc., to a tile
 2. Preview and switch between images on a tile
 3. Link specific light configurations, playlists, or macros to specific images or tiles
 4. Select between tiles via tags (and the [Tagger](https://github.com/fantasycalendar/FoundryVTT-Tagger) module)
@@ -12,7 +12,9 @@ The module allows you to:
 
 You can also tag lights and sounds to run with particular images, so that when you switch to those images the lighting changes, or sounds are played, or macros run (or all three). All this effectively allow you to change the scenery without changing the Foundry scene.
 
-    All tags and image data are stored in the metadata of the tiles, so nothing is altered in your actual files. To add the module in Foundry go to the Foundry "Manifest URL" field in the "Install Module" window and paste: https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/main/module.json. Or you can manually download a release from the [releases](https://github.com/LichFactory-Games/TotM-Manager/releases) tab.
+Finally, you can tag tiles that you want to change in aspect ratio to match images via the `adjustAR` tag. When doing so any change in image on the tile will result in a change in the tile aspect ratio to match the image. NOTE: this is primarily for images, video aspect ratio change is not reliable. 
+
+    All tags and media data are stored in the metadata of the tiles, so nothing is altered in your actual files. To add the module in Foundry go to the Foundry "Manifest URL" field in the "Install Module" window and paste: https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/main/module.json. Or you can manually download a release from the [releases](https://github.com/LichFactory-Games/TotM-Manager/releases) tab.
 
 As mentioned above, the module has three dependencies for proper functioning -- Tagger, Token Magic, and libWrapper. 
 
@@ -58,11 +60,11 @@ The following features are ones I would consider adding at some point.
 - [x] Allow fine-grained control over color filter settings 
 - [x] Allow for arbitrary tile setups  
 - [x] Search function for images by name or tag. Helpful in cases where many images are connected with a tile. 
-- [ ] Video file support.
+- [x] Video file support.
 - [x] Support for more TokenMagic FX filters than glow (and possibly adding FXMaster support in addition to Token Magic). 
 - [ ] Ability to target and edit a text drawing for labeling of the scene/NPCs.
 - [ ] Finer controls for mass adding or deleting images (e.g. ability to select "Avatar" images from a Tokenizer folder and exclude all "Token" images).
-- [ ] Remove as many hard-coded variable names as possible & make them user definable
+- [x] Remove as many hard-coded variable names as possible & make them user definable
   - [X] Make keybinding for opening manager configurable.
   - [x] Allow different tags than 'scene', 'speaker1', 'speaker2', etc. 
   - [X] Allow preview image size to be user determined
