@@ -244,28 +244,27 @@ export function updateActiveTileButton(instance) {
     return;
   }
   logMessage("updateActiveTileButton called");
-
   if (!instance.currentTile || !instance.currentTile.document) {
     console.warn("No currently active tile or missing document property.");
     return;
   }
-
   const tileName = instance.currentTile.document.getFlag(NAMESPACE, 'tileName');
-
   if (!tileName) {
     console.warn("Current tile does not have a tileName flag.");
     return;
   }
-
-  logMessage(`Current tile ID: ${instance.currentTile.id}, Tile name: ${tileName}`);
+  logMessage(`Current tile ID: ${instance.currentTile.id}, Tile name: "${tileName}"`);
 
   // Remove the active class from all tile buttons
-  $('.tile-button').removeClass('active-button');
+  $('.totm-manager.tile-button').removeClass('active-button');
   logMessage("Removed active class from all tile buttons");
 
   // Select the button corresponding to the current tile
-  const selector = `.tile-button[data-tile-name="${tileName}"]`;
+  const selector = `.totm-manager.tile-button[data-tile-name="${tileName}"]`;
   logMessage("Selecting button with selector: ", selector);
+
+  logMessage(`All totm-manager tile buttons: ${$('.totm-manager.tile-button').length}`);
+  logMessage(`Buttons matching selector: ${$(selector).length}`);
 
   const $activeButton = $(selector);
   if (!$activeButton.length) {
