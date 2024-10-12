@@ -278,7 +278,7 @@ export async function applyTokenMagicEffect(target, effectParams, isTile = true)
   }
 
   // Update the effects flag on the target
-  await updateEffectsData(target, effectParams, true, isTile, isTile ? null : target.img);
+  await updateEffectsData(target, effectParamsArray, true, isTile, isTile ? null : target.img);
 }
 
 ////
@@ -353,24 +353,32 @@ async function updateEffectsData(target, effectParams, isAdd, isTile = true, ima
     return;
   }
 
+  // Ensure effectParams is always an array
+  const effectParamsArray = Array.isArray(effectParams) ? effectParams : [effectParams];
+
+  if (effectParamsArray.length === 0) {
+    console.error("effectParams is empty");
+    return;
+  }
+
   const flag = isTile ? 'tileEffects' : 'imagePaths';
   let effects = await target.document.getFlag(NAMESPACE, flag) || (isTile ? [] : []);
-
   console.log("Current effects before update:", JSON.stringify(effects));
 
   if (isTile) {
-    effects = modifyEffectsArray(effects, effectParams, isAdd);
+    console.log("effectParams in updateEffectsData:", JSON.stringify(effectParamsArray));
+    effects = modifyEffectsArray(effects, effectParamsArray, isAdd);
   } else {
-    effects = modifyImageEffectsArray(effects, imageId, effectParams, isAdd);
+    effects = modifyImageEffectsArray(effects, imageId, effectParamsArray, isAdd);
   }
 
   await target.document.setFlag(NAMESPACE, flag, effects);
-
   const updatedEffects = await target.document.getFlag(NAMESPACE, flag);
   console.log("Updated effects:", JSON.stringify(updatedEffects));
 }
 
 function modifyEffectsArray(effects, effectParams, isAdd) {
+  console.log("effectParams received in modifyEffectsArray:", JSON.stringify(effectParams));
   if (isAdd) {
     const existingEffectIndex = effects.findIndex(effect => effect.filterId === effectParams[0].filterId);
     if (existingEffectIndex !== -1) {
