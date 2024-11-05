@@ -14,7 +14,7 @@ You can also tag lights and sounds to run with particular images, so that when y
 
 Finally, you can tag tiles that you want to change in aspect ratio to match images via the `adjustAR` tag. When doing so any change in image on the tile will result in a change in the tile aspect ratio to match the image. NOTE: this is primarily for images, video aspect ratio change is not reliable. 
 
-    All tags and media data are stored in the metadata of the tiles, so nothing is altered in your actual files. To add the module in Foundry go to the Foundry "Manifest URL" field in the "Install Module" window and paste: https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/main/module.json. Or you can manually download a release from the [releases](https://github.com/LichFactory-Games/TotM-Manager/releases) tab.
+All tags and media data are stored in the metadata of the tiles, so nothing is altered in your actual files. To add the module in Foundry go to the Foundry "Manifest URL" field in the "Install Module" window and paste: https://raw.githubusercontent.com/LichFactory-Games/TotM-Manager/main/module.json. Or you can manually download a release from the [releases](https://github.com/LichFactory-Games/TotM-Manager/releases) tab.
 
 As mentioned above, the module has three dependencies for proper functioning -- Tagger, Token Magic, and libWrapper. 
 
