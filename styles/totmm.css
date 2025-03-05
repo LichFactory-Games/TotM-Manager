@@ -169,11 +169,15 @@
     content: "\f061";
 }
 
-.totm-manager a.add-folder, a.add-image {
+.totm-manager a.add-folder,
+.totm-manager a.add-image {
     color: #666;
 }
 
-.totm-manager a.prev-image, a.next-image, .prev-image, .next-image {
+.totm-manager a.prev-image,
+.totm-manager a.next-image,
+.totm-manager .prev-image,
+.totm-manager .next-image {
     color: #666;
     text-align: left;
     padding-right: 5px;
@@ -204,7 +208,8 @@
     border: none;
 }
 
-.totm-manager .add-folder i, .add-image i {
+.totm-manager .add-folder i,
+.totm-manager .add-image i {
     margin-right: 5px;
 }
 
@@ -307,8 +312,8 @@
 }
 
 .totm-manager select#target-dropdown,
-select#tile-dropdown,
-select#effect-dropdown {
+.totm-manager select#tile-dropdown,
+.totm-manager select#effect-dropdown {
     flex-grow: 1;
     min-width: 100px;
     height: 2em;
@@ -341,7 +346,7 @@ select#effect-dropdown {
 }
 
 .totm-manager .effect-target-name,
-.effect-name {
+.totm-manager .effect-name {
     display: inline-block;
     flex-grow: 1;
     min-width: 100px;
