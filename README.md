@@ -18,6 +18,23 @@ All tags and media data are stored in the metadata of the tiles, so nothing is a
 
 As mentioned above, the module has three dependencies for proper functioning -- Tagger, Token Magic, and libWrapper. 
 
+## Compatibility
+
+**Current Version:** 0.10.0
+
+**Foundry VTT Compatibility:**
+- **Minimum Version:** 10
+- **Verified Version:** 13
+- **Legacy Support:** Compatible with Foundry v12 and earlier
+
+**Recent Updates:**
+- **v0.10.0**: Full Foundry VTT v13 compatibility
+  - Updated template loading system for v13 API changes
+  - Fixed scene control button registration for v13's object-based structure
+  - Resolved macro execution compatibility issues
+  - Enhanced TokenMagic integration with fallback support
+  - Maintained backward compatibility with v12
+
 Here you can see an example of a scene set using three tiles and the TotM Manager.
 
 <img src="../image-assets/totmm-overview.gif?raw=true" alt="TotM Overview" width="800">
