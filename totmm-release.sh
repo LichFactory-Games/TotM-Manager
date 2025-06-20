@@ -161,8 +161,8 @@ if [ "$DEVELOPMENT" = false ]; then
     --arg version "$new_version" \
     --arg manifest "$DOWNLOAD_BASE_URL/v$new_version/module.json" \
     --arg notes "$REPO_URL/releases/tag/v$new_version" \
-    --arg minFoundryVersion "11" \
-    --arg verifiedFoundryVersion "12.331" \
+    --arg minFoundryVersion "10" \
+    --arg verifiedFoundryVersion "13" \
     '{
       id: $id,
       "dry-run": false,
