@@ -2,37 +2,41 @@
 import { NAMESPACE } from './utilities.js';
 
 export async function setupModule() {
-    console.log("Theatre of the Mind Manager | Setup module");
+    console.log("Theatre of the Mind Manager | Setup module - registering templates");
 
+    // Define all templates that need to be loaded
     const templates = [
         "modules/totm-manager/templates/totmm-window.hbs",
         "modules/totm-manager/templates/partials/header.hbs",
-        "modules/totm-manager/templates/partials/stage.hbs",
+        "modules/totm-manager/templates/partials/stage.hbs", 
         "modules/totm-manager/templates/partials/tiles.hbs",
         "modules/totm-manager/templates/partials/effects.hbs",
         "modules/totm-manager/templates/partials/footer.hbs"
     ];
 
     try {
-        // Load all templates
-        await loadTemplates(templates);
+        // Load all templates using the v13 API
+        await foundry.applications.handlebars.loadTemplates(templates);
 
-        // Explicitly register partials
-        const [header, stage, tiles, effects, footer] = await Promise.all([
-            getTemplate("modules/totm-manager/templates/partials/header.hbs"),
-            getTemplate("modules/totm-manager/templates/partials/stage.hbs"),
-            getTemplate("modules/totm-manager/templates/partials/tiles.hbs"),
-            getTemplate("modules/totm-manager/templates/partials/effects.hbs"),
-            getTemplate("modules/totm-manager/templates/partials/footer.hbs")
-        ]);
+        // Register partials for v13 compatibility
+        const partialPaths = [
+            ["header", "modules/totm-manager/templates/partials/header.hbs"],
+            ["stage", "modules/totm-manager/templates/partials/stage.hbs"],
+            ["tiles", "modules/totm-manager/templates/partials/tiles.hbs"],
+            ["effects", "modules/totm-manager/templates/partials/effects.hbs"],
+            ["footer", "modules/totm-manager/templates/partials/footer.hbs"]
+        ];
 
-        Handlebars.registerPartial('header', header);
-        Handlebars.registerPartial('stage', stage);
-        Handlebars.registerPartial('tiles', tiles);
-        Handlebars.registerPartial('effects', effects);
-        Handlebars.registerPartial('footer', footer);
+        for (const [name, path] of partialPaths) {
+            try {
+                const template = await foundry.applications.handlebars.getTemplate(path);
+                Handlebars.registerPartial(name, template);
+            } catch (error) {
+                console.error(`Failed to register partial ${name}:`, error);
+            }
+        }
 
-        console.log('Templates loaded successfully.');
+        console.log('Templates loaded successfully');
     } catch (error) {
         console.error('Error loading templates:', error);
     }

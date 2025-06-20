@@ -69,7 +69,8 @@ export async function controlFeaturesBasedOnTags(tile, currentIndex) {
         const macroId = tag.substring(6);  // Extract the ID part after 'macro-'
         if (macroId === macro.id) {
           // Check if the user has permission to execute the macro
-          if (macro.canExecute(game.user)) {
+          // In v13, canExecute was removed. Check ownership instead.
+          if (macro.canUserModify(game.user, "limited")) {
             macro.execute();
           } else {
             console.log(`User ${game.user.name} lacks permission to execute macro ${macro.name}`);

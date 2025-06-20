@@ -6,9 +6,7 @@ import { TotMForm } from "./totmManager.js";
 const moduleId = 'totm-manager';
 
 export function initializeHooks() {
-
   // Register keybinding from settings
-  console.log("TotM Manager | Registering keybinding for totm manager");
   game.keybindings.register(moduleId, 'openManager', {
     name: 'Open/Close TotM Manager',
     hint: 'Toggles the Theatre of the Mind Manager window.',
@@ -28,7 +26,6 @@ export function initializeHooks() {
     },
     restricted: true
   });
-  console.log("TotM Manager | Finished registering keybinding for totm manager");
 
   game.settings.register(moduleId, 'imageTransitionDuration', {
     name: "Image Transition Duration",
@@ -105,21 +102,54 @@ export function initializeHooks() {
   });
 
   function addTotMButton(controls) {
-    console.log("TotM Manager: Attempting to add button");
-    let tileControl = controls.find(c => c.name === "tiles");
-    if (tileControl && !tileControl.tools.some(t => t.name === "totmManager")) {
-      console.log("TotM Manager: Adding button to tile controls");
-      tileControl.tools.push({
-        name: "totmManager",
-        title: "Theatre of the Mind Manager",
-        icon: "fas fa-mask",
-        onClick: () => {
-          console.log("TotM Manager: Button clicked");
-          TotMForm.renderSingleton();
-        },
-        button: true
-      });
-      return true;
+    // In v13, controls is an object, not an array
+    let tileControl;
+    if (Array.isArray(controls)) {
+      // Legacy v12 format - array
+      tileControl = controls.find(c => c.name === "tiles");
+    } else if (typeof controls === 'object' && controls !== null) {
+      // v13 format - object
+      tileControl = controls.tiles;
+    } else {
+      return false;
+    }
+    
+    if (tileControl) {
+      // In v13, tools is an object, not an array
+      if (!tileControl.tools) {
+        tileControl.tools = {};
+      }
+      
+      // Handle both array (v12) and object (v13) formats
+      let hasExisting;
+      if (Array.isArray(tileControl.tools)) {
+        // Legacy v12 format - tools is an array
+        hasExisting = tileControl.tools.some(t => (t.name === "totmManager" || t.tool === "totmManager"));
+      } else {
+        // v13 format - tools is an object
+        hasExisting = "totmManager" in tileControl.tools;
+      }
+      
+      if (!hasExisting) {
+        const buttonConfig = {
+          name: "totmManager",
+          title: "Theatre of the Mind Manager",
+          icon: "fas fa-mask",
+          onClick: () => {
+            TotMForm.renderSingleton();
+          },
+          button: true
+        };
+        
+        if (Array.isArray(tileControl.tools)) {
+          // Add to array (v12)
+          tileControl.tools.push(buttonConfig);
+        } else {
+          // Add to object (v13)
+          tileControl.tools.totmManager = buttonConfig;
+        }
+        return true;
+      }
     }
     return false;
   }
@@ -127,63 +157,28 @@ export function initializeHooks() {
 
   // Hook into the getSceneControlButtons event
   Hooks.on("getSceneControlButtons", (controls) => {
-    console.log("TotM Manager: getSceneControlButtons hook called");
     if (canvas.ready && game.scenes.active) {
       if (addTotMButton(controls)) {
         ui.controls.render();
       }
-    } else {
-      console.warn("TotM Manager: Canvas or active scene not yet ready, delaying button addition.");
     }
   });
 
   Hooks.on('canvasReady', () => {
-    // Check if the canvas is ready
-    if (!canvas.ready) {
-      console.warn("TotM Manager: Canvas is not ready, aborting tile operations.");
-      return;
-    }
-
-    // Check if TotMForm._instance is initialized
-    if (!TotMForm._instance) {
-      console.warn("TotM Manager: TotMForm instance not initialized.");
-      return;
-    }
-
-    // Check if there are any tiles on the canvas
-    const tiles = canvas.tiles?.placeables;
-    // Only GMs should refresh manager data
-    if (game.user.isGM) {
-
-      if (!tiles || tiles.length === 0) {
-        console.warn("TotM Manager: No tiles found on the canvas, skipping refreshManagerData.");
-        // It's safe to call clearTileUI on all clients if it doesn't modify tiles
-        TotMForm._instance.clearTileUI();
-        console.warn("TotM Manager: Clearing TotM Manager UI.");
-        return;
-      }
-
-      if (canvas.ready && game.scenes.active) {
-        if (addTotMButton(ui.controls.controls)) {
-          ui.controls.render();
-        }
-      }
-
+    if (canvas.ready && game.user.isGM) {
+      assignOrderToTiles();
+      
       // Refresh the form if it's open
       if (TotMForm._instance && TotMForm._instance.rendered) {
         TotMForm._instance.refreshManagerData();
       }
-    } else {
-      console.warn("TotM Manager: Non-GM user; skipping refreshManagerData.");
     }
   });
 
   Hooks.on('createTile', (tile, options, userId) => {
-    // Only GMs should assign order to tiles
-    if (!game.user.isGM) return;
-
-    console.log('Tile created, assigning order...');
-    assignOrderToTiles();
+    if (game.user.isGM) {
+      assignOrderToTiles();
+    }
   });
 
 }

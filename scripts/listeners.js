@@ -13,7 +13,8 @@ import { performImageSearch, activateImage, cycleImages } from './stage.js';
 export function activateGeneralListeners(instance, html) {
   // Add media (image or video) to tile
   html.find('.add-image').click(() => {
-    new FilePicker({
+    const FilePickerClass = foundry.applications?.apps?.FilePicker?.implementation || FilePicker;
+    new FilePickerClass({
       type: "any",  // Allow both images and videos
       current: "",
       callback: path => addMediaToTile(instance, instance.currentTile, path)
@@ -22,7 +23,8 @@ export function activateGeneralListeners(instance, html) {
 
   // Add media folder to tile
   html.find('.add-folder').click(() => {
-    new FilePicker({
+    const FilePickerClass = foundry.applications?.apps?.FilePicker?.implementation || FilePicker;
+    new FilePickerClass({
       type: "folder",
       callback: folderPath => addMediaDirectoryToTile(instance, instance.currentTile, folderPath)
     }).browse();

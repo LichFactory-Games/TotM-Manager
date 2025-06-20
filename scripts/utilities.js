@@ -126,7 +126,8 @@ export async function activateTile(instance, tile) {
   }
 
   // Check if tile is a valid Foundry Tile object
-  if (!(tile instanceof Tile)) {
+  const TileClass = foundry.canvas?.placeables?.Tile || Tile;
+  if (!(tile instanceof TileClass)) {
     console.error("Invalid tile object passed:", tile);
     return;
   }
@@ -318,7 +319,62 @@ export function getTileFlag(tile, flagName, defaultValue = []) {
 ////////////////////////
 
 export async function populateEffectsDropdown() {
-  const presets = TokenMagic.getPresets();
+  // Check if TokenMagic is available
+  if (!game.modules.get("tokenmagic")?.active) {
+    console.warn("TokenMagic module is not active.");
+    return;
+  }
+
+  let presets = [];
+  
+  // Try different methods to get presets based on TokenMagic version
+  try {
+    // First check if we can access presets directly without calling a method
+    if (typeof TokenMagic !== 'undefined') {
+      // Try to get built-in presets first (safer)
+      if (TokenMagic.presets) {
+        presets = TokenMagic.presets;
+      } else if (TokenMagic._presets) {
+        presets = TokenMagic._presets;
+      } else if (TokenMagic.getPresets && typeof TokenMagic.getPresets === 'function') {
+        // Only try to call getPresets if we're sure it won't throw
+        try {
+          // Check if the required setting exists first
+          if (game.settings.settings.has("tokenmagic.presets")) {
+            presets = TokenMagic.getPresets();
+          }
+        } catch (e) {
+          // Silently fail if getPresets throws
+          console.log("TokenMagic.getPresets() not available in this version");
+        }
+      }
+    }
+    
+    // If no presets yet, try the module API
+    if ((!presets || presets.length === 0)) {
+      const tmModule = game.modules.get("tokenmagic");
+      if (tmModule?.api?.getPresets) {
+        presets = tmModule.api.getPresets();
+      } else if (tmModule?.instance?.getPresets) {
+        presets = tmModule.instance.getPresets();
+      }
+    }
+    
+    // As a last resort, try to get some default presets
+    if ((!presets || presets.length === 0) && typeof TokenMagic !== 'undefined') {
+      // Create some basic presets if none exist
+      presets = [
+        { name: "glow", label: "Glow" },
+        { name: "outline", label: "Outline" },
+        { name: "shadow", label: "Shadow" }
+      ];
+    }
+  } catch (error) {
+    console.warn("Failed to retrieve TokenMagic presets:", error);
+    // Don't return here, continue with empty presets
+    presets = [];
+  }
+
   logMessage("TokenMagic presets: ", presets);
 
   if (!presets || presets.length === 0) {

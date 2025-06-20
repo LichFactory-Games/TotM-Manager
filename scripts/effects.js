@@ -2,6 +2,27 @@ import { NAMESPACE, logMessage, isTokenMagicActive, getTileFlag } from './utilit
 import { getEffectParams, getElementByIdOrWarn } from './utilities.js';
 import { populateTileDropdown, populateImageDropdown } from './utilities.js';
 
+// Safe wrapper for TokenMagic API calls
+async function safeTokenMagicCall(method, ...args) {
+  if (!game.modules.get("tokenmagic")?.active) {
+    console.warn("TokenMagic module is not active.");
+    return;
+  }
+  
+  try {
+    if (typeof TokenMagic !== 'undefined' && TokenMagic[method]) {
+      return await TokenMagic[method](...args);
+    } else {
+      const tmModule = game.modules.get("tokenmagic");
+      if (tmModule.api && tmModule.api[method]) {
+        return await tmModule.api[method](...args);
+      }
+    }
+  } catch (error) {
+    console.warn(`TokenMagic ${method} call failed:`, error);
+  }
+}
+
 
 ///////////////////////////////////
 // Watch dropdown target changes //
@@ -87,7 +108,7 @@ export async function addEffect(instance, targetType, effectName, effectParams, 
     const existingEffects = await tile.document.getFlag(NAMESPACE, 'transitionEffects') || [];
     if (existingEffects.length > 0) {
       for (const { effectName: existingEffectName } of existingEffects) {
-        await TokenMagic.deleteFilters(tile, existingEffectName);
+        await safeTokenMagicCall('deleteFilters', tile, existingEffectName);
       }
     }
 
@@ -271,7 +292,7 @@ export async function applyTokenMagicEffect(target, effectParams, isTile = true)
     console.log("Effect Parameters:", effectParamsArray);
 
     // Apply the effect to the target
-    await TokenMagic.addFilters(target, effectParamsArray);
+    await safeTokenMagicCall('addFilters', target, effectParamsArray);
     console.log(`Effect applied to ${isTile ? 'tile' : 'image'} ${target.id || target.displayImg}`);
   } catch (error) {
     console.error("Error applying TokenMagic effect:", error);
@@ -311,7 +332,7 @@ export async function removeTokenMagicEffect(target, effectParams, isTile) {
     // Check if the TokenMagic module is active
     if (game.modules.get('tokenmagic')?.active) {
       // Remove the filter using TokenMagic
-      TokenMagic.deleteFilters(target, filterId);
+      await safeTokenMagicCall('deleteFilters', target, filterId);
       logMessage(`Effect removed from ${isTile ? 'tile' : 'image'}`);
     } else {
       logMessage("TokenMagic module is not active.");

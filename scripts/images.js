@@ -40,7 +40,8 @@ export async function addMediaDirectoryToTile(instance, tile, directoryPath) {
     return;
   }
 
-  let response = await FilePicker.browse("data", directoryPath);
+  const FilePickerClass = foundry.applications?.apps?.FilePicker?.implementation || FilePicker;
+  let response = await FilePickerClass.browse("data", directoryPath);
   if (response.target && response.files.length) {
     const newMediaPaths = response.files.filter(file => {
       return file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.webp') ||
